@@ -4,7 +4,9 @@ import SwiftUI
 
 public struct KeyboardEditor: View {
     @State private var text = "xxxx"
-    @FocusState var focused: Bool
+    @FocusState private var focused: Bool
+    
+    public init() {}
     
     public var body: some View {
         TextEditor(text: $text)
