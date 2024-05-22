@@ -2,11 +2,11 @@
 // https://docs.swift.org/swift-book
 import SwiftUI
 
-struct KeyboardEditor: View {
+public struct KeyboardEditor: View {
     @State private var text = "xxxx"
     @FocusState var focused: Bool
     
-    var body: some View {
+    public var body: some View {
         TextEditor(text: $text)
             .focused($focused)
             .toolbar {
