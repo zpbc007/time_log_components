@@ -20,9 +20,7 @@ public struct KeyboardEditor: View {
                 Rectangle()
                     .fill(Color.black.opacity(0.0001))
                     .onTapGesture {
-                        withAnimation {
-                            visible = false
-                        }
+                        visible = false
                     }
                     .ignoresSafeArea()
                 
@@ -68,9 +66,7 @@ struct ToolbarContent: View {
                 Spacer()
                 
                 Button {
-                    withAnimation {
-                        visible = false
-                    }
+                    visible = false
                 } label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                 }
