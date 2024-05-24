@@ -30,7 +30,7 @@ struct ToolbarContent: View {
     @FocusState private var focusedField: Field?
     
     var body: some View {
-        Form {
+        VStack {
             TextField("标题", text: $title)
                 .focused($focusedField, equals: .title)
             
@@ -54,6 +54,9 @@ struct ToolbarContent: View {
                 }
             }
         }
+        .padding()
+        .background(.gray, in: RoundedRectangle(cornerRadius: 10))
+        
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
                 focusedField = .title
@@ -95,5 +98,9 @@ extension View {
 //}
 
 #Preview {
-    ToolbarContent(title: .constant("title"), desc: .constant("desc"))
+    VStack {
+        Spacer()
+        
+        ToolbarContent(title: .constant("title"), desc: .constant("desc"))
+    }
 }
