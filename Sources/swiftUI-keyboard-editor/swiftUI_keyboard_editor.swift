@@ -32,6 +32,7 @@ public struct KeyboardEditor: View {
                     visible: $visible
                 )
             }
+            .transition(.slide)
         } else {
             EmptyView()
         }
