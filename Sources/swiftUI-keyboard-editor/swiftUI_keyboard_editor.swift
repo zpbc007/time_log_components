@@ -18,22 +18,23 @@ public struct KeyboardEditor: View {
         if visible {
             ZStack(alignment: .bottom) {
                 Rectangle()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.black.opacity(0.0001))
                     .onTapGesture {
-                        visible = false
+                        withAnimation {
+                            visible = false
+                        }
                     }
+                    .ignoresSafeArea()
                 
                 ToolbarContent(
                     title: $title,
                     desc: $desc,
                     visible: $visible
                 )
-//                .transition(.asymmetric(insertion: .slide, removal: .slide))
             }
         } else {
             EmptyView()
         }
-//        .KeyboardAwarePadding()
     }
 }
 
@@ -67,7 +68,9 @@ struct ToolbarContent: View {
                 Spacer()
                 
                 Button {
-                    visible = false
+                    withAnimation {
+                        visible = false
+                    }
                 } label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                 }
@@ -80,37 +83,11 @@ struct ToolbarContent: View {
         }
         .onChange(of: visible) { oldValue, newValue in
             if !visible {
-                focusedField = nil
+                withAnimation {
+                    focusedField = nil
+                }
             }
         }
-    }
-}
-
-struct KeyboardAwareModifier: ViewModifier {
-    @State private var keyboardHeight: CGFloat = 0
-
-    private var keyboardHeightPublisher: AnyPublisher<CGFloat, Never> {
-        Publishers.Merge(
-            NotificationCenter.default
-                .publisher(for: UIResponder.keyboardWillShowNotification)
-                .compactMap { $0.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue }
-                .map { $0.cgRectValue.height },
-            NotificationCenter.default
-                .publisher(for: UIResponder.keyboardWillHideNotification)
-                .map { _ in CGFloat(0) }
-       ).eraseToAnyPublisher()
-    }
-
-    func body(content: Content) -> some View {
-        content
-            .padding(.bottom, keyboardHeight)
-            .onReceive(keyboardHeightPublisher) { self.keyboardHeight = $0 }
-    }
-}
-
-extension View {
-    func KeyboardAwarePadding() -> some View {
-        ModifiedContent(content: self, modifier: KeyboardAwareModifier())
     }
 }
 
