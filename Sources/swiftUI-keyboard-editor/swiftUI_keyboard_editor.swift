@@ -4,17 +4,28 @@ import SwiftUI
 import Combine
 
 public struct KeyboardEditor: View {
+    @Binding var visible: Bool
     @State private var editorText = "editor text"
     @State private var title = ""
     @State private var desc = ""
     
-    public init() {}
+    public init(visible: Binding<Bool>) {
+        self._visible = visible
+    }
     
     public var body: some View {
-        VStack {
-            Spacer()
-            
-            ToolbarContent(title: $title, desc: $desc)
+        if visible {
+            VStack {
+                Spacer()
+                
+                ToolbarContent(
+                    title: $title,
+                    desc: $desc,
+                    visible: $visible
+                )
+            }
+        } else {
+            EmptyView()
         }
 //        .KeyboardAwarePadding()
     }
@@ -27,6 +38,7 @@ struct ToolbarContent: View {
     }
     @Binding var title: String
     @Binding var desc: String
+    @Binding var visible: Bool
     @FocusState private var focusedField: Field?
     
     var body: some View {
@@ -49,6 +61,7 @@ struct ToolbarContent: View {
                 
                 Button {
                     focusedField = nil
+                    visible = false
                 } label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                 }
@@ -56,11 +69,8 @@ struct ToolbarContent: View {
         }
         .padding()
         .background(.gray, in: RoundedRectangle(cornerRadius: 10))
-        
         .onAppear() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                focusedField = .title
-            }
+            focusedField = .title
         }
     }
 }
@@ -101,6 +111,6 @@ extension View {
     VStack {
         Spacer()
         
-        ToolbarContent(title: .constant("title"), desc: .constant("desc"))
+        ToolbarContent(title: .constant("title"), desc: .constant("desc"), visible: .constant(true))
     }
 }
