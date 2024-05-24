@@ -20,9 +20,7 @@ public struct KeyboardEditor: View {
                 Rectangle()
                     .fill(Color.white.opacity(0.1))
                     .onTapGesture {
-                        withAnimation {
-                            visible = false
-                        }
+                        visible = false
                     }
                 
                 ToolbarContent(
@@ -30,7 +28,7 @@ public struct KeyboardEditor: View {
                     desc: $desc,
                     visible: $visible
                 )
-                .transition(.asymmetric(insertion: .slide, removal: .slide))
+//                .transition(.asymmetric(insertion: .slide, removal: .slide))
             }
         } else {
             EmptyView()
@@ -69,9 +67,7 @@ struct ToolbarContent: View {
                 Spacer()
                 
                 Button {
-                    withAnimation{
-                        visible = false
-                    }
+                    visible = false
                 } label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                 }
