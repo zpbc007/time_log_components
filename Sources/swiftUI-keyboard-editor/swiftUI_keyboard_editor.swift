@@ -3,6 +3,7 @@
 import SwiftUI
 import Combine
 
+@available(iOS 17.0, *)
 public struct KeyboardEditor: View {
     @Binding var visible: Bool
     @State private var editorText = "editor text"
@@ -38,6 +39,7 @@ public struct KeyboardEditor: View {
     }
 }
 
+@available(iOS 17.0, *)
 struct ToolbarContent: View {
     enum Field: Hashable {
         case title
@@ -68,7 +70,6 @@ struct ToolbarContent: View {
                 
                 Button {
                     withAnimation{
-                        focusedField = nil
                         visible = false
                     }
                 } label: {
@@ -80,6 +81,11 @@ struct ToolbarContent: View {
         .background(.gray, in: .rect(topLeadingRadius: 10, topTrailingRadius: 10))
         .onAppear() {
             focusedField = .title
+        }
+        .onChange(of: visible) { oldValue, newValue in
+            if !visible {
+                focusedField = nil
+            }
         }
     }
 }
@@ -113,6 +119,7 @@ extension View {
 }
 
 #Preview {
+    @available(iOS 17.0, *)
     struct TestView: View {
         @State private var showAdd: Bool = false
         
@@ -146,13 +153,9 @@ extension View {
         }
     }
     
-    return TestView()
+    if #available(iOS 17.0, *) {
+        return TestView()
+    } else {
+        return EmptyView()
+    }
 }
-
-//#Preview {
-//    VStack {
-//        Spacer()
-//        
-//        ToolbarContent(title: .constant("title"), desc: .constant("desc"), visible: .constant(true))
-//    }
-//}
