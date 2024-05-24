@@ -23,6 +23,8 @@ public struct KeyboardEditor: View {
                     desc: $desc,
                     visible: $visible
                 )
+            }.onTapGesture {
+                visible = false
             }
         } else {
             EmptyView()
@@ -68,7 +70,7 @@ struct ToolbarContent: View {
             }
         }
         .padding()
-        .background(.gray, in: RoundedRectangle(cornerRadius: 10))
+        .background(.gray, in: .rect(topLeadingRadius: 10, topTrailingRadius: 10))
         .onAppear() {
             focusedField = .title
         }
