@@ -83,8 +83,10 @@ struct ToolbarContent: View {
         }
         .onChange(of: visible) { oldValue, newValue in
             if !visible {
-                withAnimation {
-                    focusedField = nil
+                focusedField = nil
+            } else {
+                if focusedField == nil {
+                    focusedField = .title
                 }
             }
         }
