@@ -15,16 +15,21 @@ public struct KeyboardEditor: View {
     
     public var body: some View {
         if visible {
-            VStack {
-                Spacer()
+            ZStack(alignment: .bottom) {
+                Rectangle()
+                    .fill(Color.white.opacity(0.1))
+                    .onTapGesture {
+                        withAnimation {
+                            visible = false
+                        }
+                    }
                 
                 ToolbarContent(
                     title: $title,
                     desc: $desc,
                     visible: $visible
                 )
-            }.onTapGesture {
-                visible = false
+                .transition(.asymmetric(insertion: .slide, removal: .slide))
             }
         } else {
             EmptyView()
@@ -62,8 +67,10 @@ struct ToolbarContent: View {
                 Spacer()
                 
                 Button {
-                    focusedField = nil
-                    visible = false
+                    withAnimation{
+                        focusedField = nil
+                        visible = false
+                    }
                 } label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                 }
@@ -105,14 +112,47 @@ extension View {
     }
 }
 
-//#Preview {
-//    KeyboardEditor()
-//}
-
 #Preview {
-    VStack {
-        Spacer()
+    struct TestView: View {
+        @State private var showAdd: Bool = false
         
-        ToolbarContent(title: .constant("title"), desc: .constant("desc"), visible: .constant(true))
+        var body: some View {
+            ZStack {
+                List {
+                    ForEach(1..<100) {item in
+                        Text("item: \(item)")
+                    }
+                }.overlay(alignment: .bottomTrailing) {
+                    Button {
+                        showAdd = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .padding()
+                            .foregroundStyle(.primary)
+                            .font(.title2)
+                            .bold()
+                            .background(
+                                Circle()
+                                    .fill(.gray)
+                            )
+                            .padding(.horizontal)
+                    }
+                }
+                
+                if showAdd {
+                    KeyboardEditor(visible: $showAdd)
+                }
+            }
+        }
     }
+    
+    return TestView()
 }
+
+//#Preview {
+//    VStack {
+//        Spacer()
+//        
+//        ToolbarContent(title: .constant("title"), desc: .constant("desc"), visible: .constant(true))
+//    }
+//}
