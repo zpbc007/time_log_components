@@ -3,15 +3,31 @@
 import SwiftUI
 import Combine
 
-@available(iOS 17.0, *)
-public struct KeyboardEditor: View {
+public struct KeyboardEditor<ActionView: View>: View {
+    let titlePlaceholder: String
+    let descPlaceholder: String
+    let bgColor: Color
+    @Binding var title: String
+    @Binding var desc: String
     @Binding var visible: Bool
-    @State private var editorText = "editor text"
-    @State private var title = ""
-    @State private var desc = ""
+    let action: () -> ActionView
     
-    public init(visible: Binding<Bool>) {
+    public init(
+        titlePlaceholder: String,
+        descPlaceholder: String,
+        bgColor: Color,
+        title: Binding<String>,
+        desc: Binding<String>,
+        visible: Binding<Bool>,
+        action: @escaping () -> ActionView
+    ) {
+        self.titlePlaceholder = titlePlaceholder
+        self.descPlaceholder = descPlaceholder
+        self.bgColor = bgColor
+        self._title = title
+        self._desc = desc
         self._visible = visible
+        self.action = action
     }
     
     public var body: some View {
@@ -25,9 +41,12 @@ public struct KeyboardEditor: View {
                     .ignoresSafeArea()
                 
                 ToolbarContent(
+                    titlePlaceholder: titlePlaceholder,
+                    descPlaceholder: descPlaceholder,
+                    bgColor: bgColor,
                     title: $title,
                     desc: $desc,
-                    visible: $visible
+                    action: action
                 )
             }
         } else {
@@ -36,62 +55,10 @@ public struct KeyboardEditor: View {
     }
 }
 
-@available(iOS 17.0, *)
-struct ToolbarContent: View {
-    enum Field: Hashable {
-        case title
-        case desc
-    }
-    @Binding var title: String
-    @Binding var desc: String
-    @Binding var visible: Bool
-    @FocusState private var focusedField: Field?
-    
-    var body: some View {
-        VStack {
-            TextField("标题", text: $title)
-                .focused($focusedField, equals: .title)
-            
-            TextField("描述", text: $desc, axis: .vertical)
-                .lineLimit(5...10)
-                .focused($focusedField, equals: .desc)
-                        
-            HStack {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "tag")
-                }
-                
-                Spacer()
-                
-                Button {
-                    visible = false
-                } label: {
-                    Image(systemName: "keyboard.chevron.compact.down")
-                }
-            }
-        }
-        .padding()
-        .background(.gray, in: .rect(topLeadingRadius: 10, topTrailingRadius: 10))
-        .onAppear() {
-            focusedField = .title
-        }
-        .onChange(of: visible) { oldValue, newValue in
-            if !visible {
-                focusedField = nil
-            } else {
-                if focusedField == nil {
-                    focusedField = .title
-                }
-            }
-        }
-    }
-}
-
 #Preview {
-    @available(iOS 17.0, *)
     struct TestView: View {
+        @State private var title = ""
+        @State private var desc = ""
         @State private var showAdd: Bool = false
         
         var body: some View {
@@ -118,15 +85,36 @@ struct ToolbarContent: View {
                 }
                 
                 if showAdd {
-                    KeyboardEditor(visible: $showAdd)
+                    KeyboardEditor(
+                        titlePlaceholder: "任务名称",
+                        descPlaceholder: "任务描述",
+                        bgColor: .white,
+                        title: $title,
+                        desc: $desc,
+                        visible: $showAdd
+                    ) {
+                        HStack {
+                            Menu {
+                                ForEach(1..<100) { item in
+                                    Button("tag-\(item)") {}
+                                }
+                            } label: {
+                                Image(systemName: "tag")
+                            }
+                            
+                            Spacer()
+                                                        
+                            Button {
+                                
+                            } label: {
+                                Image(systemName: "arrow.up.circle")
+                            }
+                        }
+                    }
                 }
             }
         }
     }
     
-    if #available(iOS 17.0, *) {
-        return TestView()
-    } else {
-        return EmptyView()
-    }
+    return TestView()
 }

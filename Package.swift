@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "swiftUI-keyboard-editor",
     platforms: [
-        .iOS(.v16),
+        .iOS(.v17),
         .macOS(.v10_15),
     ],
     products: [
