@@ -15,11 +15,26 @@ let package = Package(
             name: "TimeLogComponents",
             targets: ["TimeLogComponents"]),
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/pointfreeco/swift-identified-collections",
+            from: "1.0.0"
+        ),
+        .package(
+            url: "https://github.com/dkk/WrappingHStack",
+            from: "2.2.11"
+        )
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "TimeLogComponents"),
+            name: "TimeLogComponents",
+            dependencies: [
+                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
+                .product(name: "WrappingHStack", package: "WrappingHStack")
+            ]
+        ),
         .testTarget(
             name: "TimeLogComponentsTests",
             dependencies: ["TimeLogComponents"]),

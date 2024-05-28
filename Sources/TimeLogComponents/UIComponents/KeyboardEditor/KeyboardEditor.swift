@@ -9,8 +9,8 @@ public struct KeyboardEditor<ActionView: View>: View {
     let bgColor: Color
     @Binding var title: String
     @Binding var desc: String
-    @Binding var visible: Bool
     let action: () -> ActionView
+    let dismiss: () -> Void
     
     public init(
         titlePlaceholder: String,
@@ -18,7 +18,7 @@ public struct KeyboardEditor<ActionView: View>: View {
         bgColor: Color,
         title: Binding<String>,
         desc: Binding<String>,
-        visible: Binding<Bool>,
+        dismiss: @escaping () -> Void,
         action: @escaping () -> ActionView
     ) {
         self.titlePlaceholder = titlePlaceholder
@@ -26,31 +26,25 @@ public struct KeyboardEditor<ActionView: View>: View {
         self.bgColor = bgColor
         self._title = title
         self._desc = desc
-        self._visible = visible
+        self.dismiss = dismiss
         self.action = action
     }
     
     public var body: some View {
-        if visible {
-            ZStack(alignment: .bottom) {
-                Rectangle()
-                    .fill(Color.black.opacity(0.0001))
-                    .onTapGesture {
-                        visible = false
-                    }
-                    .ignoresSafeArea()
-                
-                ContentView(
-                    titlePlaceholder: titlePlaceholder,
-                    descPlaceholder: descPlaceholder,
-                    bgColor: bgColor,
-                    title: $title,
-                    desc: $desc,
-                    action: action
-                )
-            }
-        } else {
-            EmptyView()
+        ZStack(alignment: .bottom) {
+            Rectangle()
+                .fill(Color.black.opacity(0.0001))
+                .onTapGesture(perform: dismiss)
+                .ignoresSafeArea()
+            
+            ContentView(
+                titlePlaceholder: titlePlaceholder,
+                descPlaceholder: descPlaceholder,
+                bgColor: bgColor,
+                title: $title,
+                desc: $desc,
+                action: action
+            )
         }
     }
 }
@@ -91,7 +85,9 @@ public struct KeyboardEditor<ActionView: View>: View {
                         bgColor: .white,
                         title: $title,
                         desc: $desc,
-                        visible: $showAdd
+                        dismiss: {
+                            showAdd = false
+                        }
                     ) {
                         HStack {
                             Menu {
