@@ -1,5 +1,5 @@
 import XCTest
-@testable import swiftUI_keyboard_editor
+@testable import TimeLogComponents
 
 final class swiftUI_keyboard_editorTests: XCTestCase {
     func testExample() throws {
