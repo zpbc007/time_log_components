@@ -13,6 +13,11 @@ public struct TaskAddEditor: View {
     public struct SelectableItem: Equatable, Identifiable {
         public let id: String
         public let name: String
+        
+        public init(id: String, name: String) {
+            self.id = id
+            self.name = name
+        }
     }
     public typealias TagInfo = SelectableItem
     public typealias CheckListInfo = SelectableItem
@@ -230,8 +235,6 @@ public struct TaskAddEditor: View {
             }
         }
     }
-    
-    
     
     return PlaygroundView()
 }
