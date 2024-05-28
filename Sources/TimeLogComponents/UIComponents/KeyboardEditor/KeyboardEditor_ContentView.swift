@@ -7,38 +7,40 @@
 
 import SwiftUI
 
-// 键盘上侧的弹窗内容
-struct ToolbarContent<ActionView: View>: View {
-    enum Field: Hashable {
-        case title
-        case desc
-    }
-    let titlePlaceholder: String
-    let descPlaceholder: String
-    let bgColor: Color
-    @Binding var title: String
-    @Binding var desc: String
-    let action: () -> ActionView
-    
-    @FocusState private var focusedField: Field?
-    
-    var body: some View {
-        VStack {
-            TextField(titlePlaceholder, text: $title)
-                .focused($focusedField, equals: .title)
-                .font(.title3)
-            
-            TextField(descPlaceholder, text: $desc, axis: .vertical)
-                .lineLimit(2...10)
-                .focused($focusedField, equals: .desc)
-                .font(.callout)
-            
-            action()
+extension KeyboardEditor {
+    // 键盘上侧的弹窗内容
+    struct ContentView: View {
+        enum Field: Hashable {
+            case title
+            case desc
         }
-        .padding()
-        .background(bgColor, in: .rect(topLeadingRadius: 10, topTrailingRadius: 10))
-        .onAppear() {
-            focusedField = .title
+        let titlePlaceholder: String
+        let descPlaceholder: String
+        let bgColor: Color
+        @Binding var title: String
+        @Binding var desc: String
+        let action: () -> ActionView
+        
+        @FocusState private var focusedField: Field?
+        
+        var body: some View {
+            VStack {
+                TextField(titlePlaceholder, text: $title)
+                    .focused($focusedField, equals: .title)
+                    .font(.title3)
+                
+                TextField(descPlaceholder, text: $desc, axis: .vertical)
+                    .lineLimit(2...10)
+                    .focused($focusedField, equals: .desc)
+                    .font(.callout)
+                
+                action()
+            }
+            .padding()
+            .background(bgColor, in: .rect(topLeadingRadius: 10, topTrailingRadius: 10))
+            .onAppear() {
+                focusedField = .title
+            }
         }
     }
 }
@@ -53,7 +55,7 @@ struct ToolbarContent<ActionView: View>: View {
             ZStack(alignment: .bottom) {
                 Color.black
                 
-                ToolbarContent(
+                KeyboardEditor.ContentView(
                     titlePlaceholder: "任务名称",
                     descPlaceholder: "任务描述",
                     bgColor: .white,

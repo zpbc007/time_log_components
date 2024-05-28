@@ -40,7 +40,7 @@ public struct KeyboardEditor<ActionView: View>: View {
                     }
                     .ignoresSafeArea()
                 
-                ToolbarContent(
+                ContentView(
                     titlePlaceholder: titlePlaceholder,
                     descPlaceholder: descPlaceholder,
                     bgColor: bgColor,
