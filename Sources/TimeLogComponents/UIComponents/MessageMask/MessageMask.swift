@@ -43,9 +43,7 @@ public class MessageMaskDataProvider: ObservableObject {
     
     // 展示实际内容
     @Published public var status: Status = .showWelcome
-    
-    
-    
+        
     // 完成前期准备后调用
     public func finishPrepare() {
         status = .dismiss
