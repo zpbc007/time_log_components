@@ -17,6 +17,14 @@ public struct CommonTreeNode<Value: Equatable & Identifiable>: Identifiable, Equ
     
     public var children: IdentifiedArrayOf<CommonTreeNode<Value>>? = nil
     
+    public init(
+        value: Value,
+        children: IdentifiedArrayOf<CommonTreeNode<Value>>? = nil
+    ) {
+        self.value = value
+        self.children = children
+    }
+    
     public mutating func insert(_ node: CommonTreeNode<Value>) {
         if self.children != nil {
             self.children?.append(node)
