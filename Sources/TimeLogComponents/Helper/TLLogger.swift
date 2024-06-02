@@ -11,6 +11,10 @@ import CocoaLumberjackSwiftSupport
 public struct TLLogger {
     let context: String
     
+    public init(context: String) {
+        self.context = context
+    }
+    
     func debug(_ message: String) {
         self.log(message, flag: .debug)
     }
