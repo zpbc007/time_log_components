@@ -83,7 +83,7 @@ extension TLLogger {
             let logText = logMessage.message
             
             
-            return "ZP_TL [\(timestamp)] \(logFlag) \(logText)"
+            return "ZP_TL \(logFlag) [\(timestamp)] \(logText)"
         }
     }
     
