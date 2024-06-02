@@ -15,19 +15,19 @@ public struct TLLogger {
         self.context = context
     }
     
-    func debug(_ message: String) {
+    public func debug(_ message: String) {
         self.log(message, flag: .debug)
     }
     
-    func info(_ message: String) {
+    public func info(_ message: String) {
         self.log(message, flag: .info)
     }
     
-    func warning(_ message: String) {
+    public func warning(_ message: String) {
         self.log(message, flag: .warning)
     }
     
-    func error(_ message: String) {
+    public func error(_ message: String) {
         self.log(message, flag: .error)
     }
     
