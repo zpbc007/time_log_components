@@ -41,17 +41,20 @@ public class MessageMaskDataProvider: ObservableObject {
         }
     }
     
+    private let logger = TLLogger(context: String(describing: MessageMaskDataProvider.self))
     // 展示实际内容
     @Published public var status: Status = .showWelcome
         
     // 完成前期准备后调用
     public func finishPrepare() {
         status = .dismiss
+        logger.info("finishPrepare called")
     }
     
     // 出错后调用
     public func onError(error: ErrorInfo) {
         status = .error(error)
+        logger.info("onError called")
     }
 }
 

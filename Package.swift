@@ -23,6 +23,10 @@ let package = Package(
         .package(
             url: "https://github.com/dkk/WrappingHStack",
             from: "2.2.11"
+        ),
+        .package(
+            url: "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
+            from: "3.8.5"
         )
     ],
     targets: [
@@ -32,7 +36,9 @@ let package = Package(
             name: "TimeLogComponents",
             dependencies: [
                 .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
-                .product(name: "WrappingHStack", package: "WrappingHStack")
+                .product(name: "WrappingHStack", package: "WrappingHStack"),
+                .product(name: "CocoaLumberjack", package: "CocoaLumberjack"),
+                .product(name: "CocoaLumberjackSwift", package: "CocoaLumberjack")
             ]
         ),
         .testTarget(
