@@ -115,6 +115,12 @@ public struct MessageMask<Content: View>: View {
                     removal: .slide
                 ))
             }
+            
+            VStack {
+                Spacer()
+                
+                Text(String(describing: dataProvider.status))
+            }
         }
         .ignoresSafeArea()
     }
