@@ -120,7 +120,7 @@ public struct MessageMask<Content: View>: View {
                 Spacer()
                 
                 Text(String(describing: dataProvider.status))
-            }
+            }.zIndex(4)
         }
         .ignoresSafeArea()
     }
