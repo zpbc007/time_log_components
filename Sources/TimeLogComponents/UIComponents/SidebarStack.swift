@@ -14,7 +14,10 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
     let sidebarWidth: CGFloat
     // 最小移动百分比
     let sidebarToggleMinWidth: CGFloat
+    // sidebar 是否展示
     @Binding var showSidebar: Bool
+    // 拖拽响应区是否展示
+    @Binding var showSidebarDragArea: Bool
     
     // 滑动偏移量
     @GestureState private var offset: CGFloat = 0
@@ -23,6 +26,7 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
         sidebarWidthPercent: CGFloat = 0.8,
         sidebarToggleMinWidthPercent: CGFloat = 0.5,
         showSidebar: Binding<Bool>,
+        showSidebarDragArea: Binding<Bool>,
         @ViewBuilder sidebar: () -> SidebarContent,
         @ViewBuilder content: () -> Content
     ) {
@@ -31,6 +35,7 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
         self.sidebarWidth = screenWidth * sidebarWidthPercent
         self.sidebarToggleMinWidth = screenWidth * sidebarToggleMinWidthPercent * sidebarWidthPercent
         self._showSidebar = showSidebar
+        self._showSidebarDragArea = showSidebarDragArea
         sidebarContent = sidebar()
         mainContent = content()
     }
@@ -70,7 +75,7 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
                                         })
                                         .exclusively(before: dragGesture)
                                 )
-                        } else {
+                        } else if showSidebarDragArea {
                             HStack {
                                 Color.white
                                     .opacity(0)
@@ -92,10 +97,12 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
 #Preview {
     struct SideBarStack_Playground: View {
         @State var showSidebar = false
+        @State var showSidebarDragArea = true
         
         var body: some View {
             SideBarStack(
-                showSidebar: $showSidebar
+                showSidebar: $showSidebar,
+                showSidebarDragArea: $showSidebarDragArea
             ) {
                 ZStack {
                     Color.blue
@@ -121,6 +128,10 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
                     List {
                         Button("Toggle sidebar") {
                             showSidebar.toggle()
+                        }
+                        
+                        Button("Toggle SidebarDragArea, current: \(String(describing: showSidebarDragArea))") {
+                            showSidebarDragArea.toggle()
                         }
                         
                         ForEach(1..<50) { item in
