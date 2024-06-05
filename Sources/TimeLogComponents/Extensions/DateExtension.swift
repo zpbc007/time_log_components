@@ -46,4 +46,25 @@ extension Date {
     public var todayStartPoint: Date {
         Calendar.current.startOfDay(for: self)
     }
+    
+    public func isSame(day: Date, _ components: Set<Calendar.Component> = [.year, .month, .day]) -> Bool {
+        let calendar = Calendar.current
+        let todayComponents = calendar.dateComponents(components, from: self)
+        let dateComponents = calendar.dateComponents(components, from: day)
+        
+        for comp in components {
+            guard
+                let todayValue = todayComponents.value(for: comp),
+                    let dateValue = dateComponents.value(for: comp)
+            else {
+                return false
+            }
+        
+            if todayValue != dateValue {
+                return false
+            }
+        }
+        
+        return true
+    }
 }

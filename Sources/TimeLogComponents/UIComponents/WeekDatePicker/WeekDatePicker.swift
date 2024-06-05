@@ -29,7 +29,7 @@ public struct WeekDatePicker: View {
         Calendar.current.date(
             byAdding: .day,
             value: page * 7,
-            to: Date.now.todayStartPoint.weekFirstDay(calendar: .current)
+            to: Date.now.weekFirstDay(calendar: .current)
         )!
     }
     
@@ -78,6 +78,15 @@ public struct WeekDatePicker: View {
             let newPage = calculateDatePage(newValue)
             if newPage != page {
                 page = newPage
+            }
+        }.onChange(of: page) { oldValue, newValue in
+            let newPageDate = calculatePageFirstDate(newValue)
+            // 在同一个周
+            if date.isSame(day: newPageDate, [.year, .month, .weekOfYear]) {
+                return
+            }
+            if newPageDate != date {
+                date = newPageDate
             }
         }
     }
