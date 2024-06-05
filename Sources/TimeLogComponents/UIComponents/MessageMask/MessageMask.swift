@@ -46,6 +46,7 @@ public class MessageMaskDataProvider: ObservableObject {
     @Published public var status: Status = .showWelcome
         
     // 完成前期准备后调用
+    @MainActor
     public func finishPrepare() {
         status = .dismiss
         logger.info("finishPrepare called")
