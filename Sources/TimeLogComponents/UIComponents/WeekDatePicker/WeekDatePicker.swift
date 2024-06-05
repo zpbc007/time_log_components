@@ -6,43 +6,56 @@
 //
 
 import SwiftUI
+import Foundation
 
 public struct WeekDatePicker: View {
     let indicatorColor: Color
     let showIndicatorDays: Set<Date>
     
     @Binding var date: Date
-    @Binding var page: Int
+    @State private var page: Int = 0
     
     public init(
         indicatorColor: Color,
         showIndicatorDays: Set<Date>,
-        date: Binding<Date>,
-        page: Binding<Int>
+        date: Binding<Date>
     ) {
         self.indicatorColor = indicatorColor
         self.showIndicatorDays = showIndicatorDays
         self._date = date
-        self._page = page
     }
     
-    private func calculatePageDate(_ page: Int) -> Date {
+    private func calculatePageFirstDate(_ page: Int) -> Date {
         Calendar.current.date(
             byAdding: .day,
             value: page * 7,
-            to: Date.now.todayStartPoint
+            to: Date.now.todayStartPoint.weekFirstDay(calendar: .current)
         )!
     }
     
+    private func calculateDatePage(_ date: Date) -> Int {
+        let components = Calendar.current.dateComponents(
+            [.day],
+            from: date,
+            to: .now.weekFirstDay(calendar: .current)
+        )
+        
+        guard let days = components.day else {
+            return 0
+        }
+        
+        return -Int((Double(days) / Double(7)).rounded(.up))
+    }
+    
     private func calculatePageDays(_ page: Int) -> [WeekView.DateInfo] {
-        let pageDate = calculatePageDate(page)
+        let pageDate = calculatePageFirstDate(page)
         
         return pageDate.weekDays().map { date in
-                .init(
-                    day: date,
-                    disabled: date > .now,
-                    bottomColor: showIndicatorDays.contains(date) ? indicatorColor : nil
-                )
+            .init(
+                day: date,
+                disabled: date > .now,
+                bottomColor: showIndicatorDays.contains(date) ? indicatorColor : nil
+            )
         }
     }
     
@@ -60,6 +73,11 @@ public struct WeekDatePicker: View {
                     )
                 }
             }
+        }.onChange(of: date) { oldValue, newValue in
+            let newPage = calculateDatePage(newValue)
+            if newPage != page {
+                page = newPage
+            }
         }
     }
 }
@@ -67,21 +85,12 @@ public struct WeekDatePicker: View {
 #Preview {
     struct Playground: View {
         @State var date = Calendar.current.startOfDay(for: Date.now)
-        @State var page = 0
         
         var dateString: String {
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .short
             
             return dateFormatter.string(from: date)
-        }
-        
-        func calculatePageDate(_ page: Int) -> Date {
-            Calendar.current.date(
-                byAdding: .day,
-                value: page * 7,
-                to: Date.now.todayStartPoint
-            )!
         }
         
         var showIndicatorDays: Set<Date> {
@@ -103,15 +112,13 @@ public struct WeekDatePicker: View {
                     Spacer()
                     Button("Today") {
                         date = Calendar.current.startOfDay(for: Date.now)
-                        page = 0
                     }
                 }
                 
                 WeekDatePicker(
                     indicatorColor: .green,
                     showIndicatorDays: showIndicatorDays,
-                    date: $date,
-                    page: $page
+                    date: $date
                 ).frame(height: 80, alignment: .top)
                 
                 HStack {
@@ -119,15 +126,6 @@ public struct WeekDatePicker: View {
                 }
                 
                 Spacer()
-            }
-            .onChange(of: page) { _, newValue in
-                // 回到当天
-                if (page == 0
-                    && self.date == Date.now.todayStartPoint
-                ) {
-                    return
-                }
-                self.date = calculatePageDate(newValue)
             }
         }
     }
