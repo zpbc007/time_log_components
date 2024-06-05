@@ -8,7 +8,7 @@
 import SwiftUI
 
 public class MessageMaskDataProvider: ObservableObject {
-    public struct ErrorInfo {
+    public struct ErrorInfo: Equatable {
         public let title: String
         public let msg: String
         
@@ -17,7 +17,7 @@ public class MessageMaskDataProvider: ObservableObject {
             self.msg = msg
         }
     }
-    public enum Status {
+    public enum Status: Equatable {
         case showWelcome
         case dismiss
         case error(ErrorInfo)
@@ -41,7 +41,7 @@ public class MessageMaskDataProvider: ObservableObject {
         }
     }
     
-    private let logger = TLLogger(context: String(describing: MessageMaskDataProvider.self))
+    let logger = TLLogger(context: String(describing: MessageMaskDataProvider.self))
     // 展示实际内容
     @Published public var status: Status = .showWelcome
         
@@ -117,6 +117,9 @@ public struct MessageMask<Content: View>: View {
                 ))
             }
         }
+        .onChange(of: dataProvider.status, { oldValue, newValue in
+            dataProvider.logger.info("status change, old: \(oldValue), new: \(newValue)")
+        })
         .ignoresSafeArea()
     }
 }
