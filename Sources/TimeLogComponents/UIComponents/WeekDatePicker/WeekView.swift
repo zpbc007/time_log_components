@@ -41,11 +41,10 @@ extension WeekDatePicker {
                             }
                             
                             Text(weekDay.day.toString(format: "d"))
-                                .font(.system(size: 16))
-                                .monospaced()
+//                                .font(.system(size: 16))
+//                                .monospaced()
                                 .frame(maxWidth: .infinity)
                                 .foregroundColor(getDateFontColor(info: weekDay))
-                                .padding(.horizontal)
                         }
                         
                         Circle()
