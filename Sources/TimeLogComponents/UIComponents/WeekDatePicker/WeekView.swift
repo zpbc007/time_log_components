@@ -31,18 +31,11 @@ extension WeekDatePicker {
                             .frame(maxWidth:.infinity)
                         
                         ZStack {
-                            HStack{
-                                Spacer()
-                                    .frame(width: 5)
-                                Circle()
-                                    .foregroundColor(weekDay.day == date ? .accentColor : .clear)
-                                Spacer()
-                                    .frame(width: 5)
-                            }
+                            Circle()
+                                .padding(.horizontal, 3)
+                                .foregroundColor(weekDay.day == date ? .accentColor : .clear)
                             
                             Text(weekDay.day.toString(format: "d"))
-//                                .font(.system(size: 16))
-//                                .monospaced()
                                 .frame(maxWidth: .infinity)
                                 .foregroundColor(getDateFontColor(info: weekDay))
                         }
