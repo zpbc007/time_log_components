@@ -14,15 +14,21 @@ struct InfiniteTab<Content: View>: View {
     @State private var offset: CGFloat = .zero
 
     private let width: CGFloat
+    private let minPage: Int?
+    private let maxPage: Int?
     private let animationDuration: CGFloat = 0.25
     let content: (_ page: Int) -> Content
     
     init(
         width: CGFloat = 390,
+        minPage: Int? = nil,
+        maxPage: Int? = nil,
         page: Binding<Int>,
         @ViewBuilder content: @escaping (_ page: Int) -> Content
     ) {
         self.width = width
+        self.minPage = minPage
+        self.maxPage = maxPage
         self._currentPage = page
         self.content = content
     }
@@ -31,11 +37,42 @@ struct InfiniteTab<Content: View>: View {
         DragGesture(minimumDistance: 0)
             .updating($translation) { value, state, _ in
                 let translation = min(width, max(-width, value.translation.width))
+                
+                // 不能再向右滑动了
+                if let minPage, currentPage == minPage {
+                    guard translation < 0 else {
+                        return
+                    }
+                }
+                
+                // 不能再向左滑动了
+                if let maxPage, currentPage == maxPage {
+                    guard translation > 0 else {
+                        return
+                    }
+                }
+                
                 state = translation
             }
             .onEnded { value in
-                offset = min(width, max(-width, value.translation.width))
+                let translation = min(width, max(-width, value.translation.width))
+                
+                // 不能再向右滑动了
+                if let minPage, currentPage == minPage {
+                    guard translation < 0 else {
+                        return
+                    }
+                }
+                // 不能再向左滑动了
+                if let maxPage, currentPage == maxPage {
+                    guard translation > 0 else {
+                        return
+                    }
+                }
+                
+                offset = translation
                 let predictEndOffset = value.predictedEndTranslation.width
+                
                 withAnimation(.easeOut(duration: animationDuration)) {
                     if offset < -width / 2 || predictEndOffset < -width {
                         offset = -width
@@ -45,6 +82,7 @@ struct InfiniteTab<Content: View>: View {
                         offset = 0
                     }
                 }
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
                     if offset < 0 {
                         currentPage += 1
@@ -112,15 +150,15 @@ struct InfiniteTab<Content: View>: View {
             GeometryReader { geometry in
                 InfiniteTab(
                     width: geometry.size.width,
+                    minPage: -1,
+                    maxPage: 0,
                     page: $page
                 ) { page in
                     VStack {
-//                        WeekView(
-//                            date: $selected.animation(.easeOut),
-//                            weekDays: calculatePageDate(page).weekDays()
-//                        )
                         Text("xxx")
                     }
+                    .frame(width: 390, height: 100)
+                    .background(.yellow.opacity(0.5))
                 }
             }.onChange(of: page) { _, newValue in
                 self.selected = calculatePageDate(newValue)

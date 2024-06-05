@@ -63,6 +63,7 @@ public struct WeekDatePicker: View {
         GeometryReader { geometry in
             InfiniteTab(
                 width: geometry.size.width,
+                maxPage: 0, // 不能选择未来的时间
                 page: $page
             ) { page in
                 VStack {
