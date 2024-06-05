@@ -35,7 +35,6 @@ extension WeekDatePicker {
                                 Spacer()
                                     .frame(width: 5)
                                 Circle()
-                                    .frame(width: 30)
                                     .foregroundColor(weekDay.day == date ? .accentColor : .clear)
                                 Spacer()
                                     .frame(width: 5)
@@ -46,6 +45,7 @@ extension WeekDatePicker {
                                 .monospaced()
                                 .frame(maxWidth: .infinity)
                                 .foregroundColor(getDateFontColor(info: weekDay))
+                                .padding(.horizontal)
                         }
                         
                         Circle()
