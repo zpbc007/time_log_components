@@ -17,7 +17,7 @@ public struct TimeLine: View {
         public let comment: String?
         public let showEndTime: Bool
         
-        init(
+        public init(
             id: String,
             startTime: Date,
             endTime: Date? = nil,
