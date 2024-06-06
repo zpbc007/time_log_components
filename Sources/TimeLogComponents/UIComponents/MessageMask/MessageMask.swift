@@ -44,6 +44,10 @@ public class MessageMaskDataProvider: ObservableObject {
     let logger = TLLogger(context: String(describing: MessageMaskDataProvider.self))
     // 展示实际内容
     @Published public var status: Status = .showWelcome
+    
+    init() {
+        self.logger.info("init MessageMaskDataProvider")
+    }
         
     // 完成前期准备后调用
     @MainActor
