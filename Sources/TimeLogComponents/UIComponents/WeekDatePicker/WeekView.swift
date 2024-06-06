@@ -22,7 +22,7 @@ extension WeekDatePicker {
         @Binding var date: Date
         
         var body: some View {
-            HStack(spacing: 0) {
+            HStack {
                 ForEach(days) { weekDay in
                     VStack {
                         Text(weekDay.day.toString(format: "EEE"))
@@ -32,7 +32,7 @@ extension WeekDatePicker {
                         
                         ZStack {
                             Circle()
-                                .padding(.horizontal, 3)
+                                .padding(.horizontal, 5)
                                 .foregroundColor(weekDay.day == date ? .accentColor : .clear)
                             
                             Text(weekDay.day.toString(format: "d"))

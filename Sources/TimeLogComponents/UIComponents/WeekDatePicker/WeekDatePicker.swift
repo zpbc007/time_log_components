@@ -124,8 +124,7 @@ public struct WeekDatePicker: View {
                     Button("Today") {
                         date = Calendar.current.startOfDay(for: Date.now)
                     }
-                }.padding(.horizontal)
-                
+                }.padding(.horizontal)                
                 
                 WeekDatePicker(
                     indicatorColor: .green,
