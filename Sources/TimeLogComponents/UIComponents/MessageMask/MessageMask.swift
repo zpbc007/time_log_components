@@ -117,7 +117,7 @@ public struct MessageMask<Content: View>: View {
                 ))
             }
         }
-        .onChange(of: dataProvider.status, { oldValue, newValue in
+        .onChange(of: dataProvider.status, initial: true, { oldValue, newValue in
             dataProvider.logger.info("status change, old: \(oldValue), new: \(newValue)")
         })
         .ignoresSafeArea()
