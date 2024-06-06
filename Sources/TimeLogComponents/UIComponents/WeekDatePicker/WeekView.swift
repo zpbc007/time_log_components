@@ -22,7 +22,7 @@ extension WeekDatePicker {
         @Binding var date: Date
         
         var body: some View {
-            HStack {
+            HStack(spacing: 0) {
                 ForEach(days) { weekDay in
                     VStack {
                         Text(weekDay.day.toString(format: "EEE"))
@@ -52,7 +52,6 @@ extension WeekDatePicker {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .padding()
         }
         
         private func getDateFontColor(info: DateInfo) -> Color {

@@ -87,6 +87,7 @@ public struct WeekDatePicker: View {
                 date = newPageDate
             }
         }
+//        .background(.red.opacity(0.3))
     }
 }
 
@@ -117,21 +118,24 @@ public struct WeekDatePicker: View {
             VStack {
                 HStack {
                     Text("SelectedDay: \(dateString)")
+                        .font(.title)
+                        .bold()
                     Spacer()
                     Button("Today") {
                         date = Calendar.current.startOfDay(for: Date.now)
                     }
-                }
+                }.padding(.horizontal)
+                
                 
                 WeekDatePicker(
                     indicatorColor: .green,
                     showIndicatorDays: showIndicatorDays,
                     date: $date
-                ).frame(height: 120)
+                ).frame(height: 90)
                 
                 HStack {
                     Text("Content")
-                }
+                }.background(.green)
                 
                 Spacer()
             }
