@@ -32,6 +32,10 @@ public struct TodayOverview: View {
     
     public var body: some View {
         VStack {
+            ProgressView(value: recordSeconds, total: 24 * 60 * 60)
+                .tint(.green)
+                .scaleEffect(x: 1, y: 4, anchor: .center)
+            
             HStack {
                 Text("已记录")
                 Text(recordTime, format: .number)
@@ -45,12 +49,9 @@ public struct TodayOverview: View {
                 }
                 
                 Spacer()
-            }.font(.caption)
-            
-            
-            ProgressView(value: recordSeconds, total: 24 * 60 * 60)
-                .tint(.green)
-                .scaleEffect(x: 1, y: 4, anchor: .center)
+            }
+            .padding(.top, 10)
+            .font(.caption)
         }
     }
 }
