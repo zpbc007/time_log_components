@@ -66,13 +66,11 @@ public struct WeekDatePicker: View {
                 maxPage: 0, // 不能选择未来的时间
                 page: $page
             ) { page in
-                VStack {
-                    WeekView(
-                        today: .now.todayStartPoint,
-                        days: calculatePageDays(page),
-                        date: $date.animation(.easeOut)
-                    )
-                }
+                WeekView(
+                    today: .now.todayStartPoint,
+                    days: calculatePageDays(page),
+                    date: $date.animation(.easeOut)
+                )
             }
         }.onChange(of: date) { oldValue, newValue in
             let newPage = calculateDatePage(newValue)
@@ -129,7 +127,7 @@ public struct WeekDatePicker: View {
                     indicatorColor: .green,
                     showIndicatorDays: showIndicatorDays,
                     date: $date
-                ).frame(height: 80, alignment: .top)
+                ).frame(height: 120)
                 
                 HStack {
                     Text("Content")
