@@ -22,7 +22,7 @@ extension WeekDatePicker {
         @Binding var date: Date
         
         var body: some View {
-            HStack {
+            HStack(alignment: .top) {
                 ForEach(days) { weekDay in
                     VStack {
                         Text(weekDay.day.toString(format: "EEE"))
@@ -40,10 +40,13 @@ extension WeekDatePicker {
                                 .foregroundColor(getDateFontColor(info: weekDay))
                         }
                         
-                        Circle()
-                            .frame(width: 8)
-                            .offset(y: -4)
-                            .foregroundColor(weekDay.bottomColor ?? .clear)
+                        if let bottomColor = weekDay.bottomColor {
+                            Circle()
+                                .frame(width: 8)
+                                .offset(y: -4)
+                                .foregroundColor(bottomColor)
+                        }
+                        
                     }.onTapGesture {
                         if !weekDay.disabled {
                             date = weekDay.day
