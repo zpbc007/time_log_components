@@ -20,24 +20,40 @@ public struct TaskLogList: View {
     }
     
     public var body: some View {
-        List {
-            ForEach(rows) { taskLogState in
-                if let timeLineState = taskLogState.timeLineState {
-                    TimeLine(timeLineState)
-                        .listRowSeparator(.hidden)
-                        .onTapGesture {
-                            onCellTapped(timeLineState)
-                        }
+        if rows.isEmpty {
+            VStack {
+                Spacer()
+                
+                HStack(alignment: .center) {
+                    Spacer()
+                    
+                    Text("无记录数据")
+                        
+                    Spacer()
                 }
                 
-                if let dashedLineState = taskLogState.dashedLineState {
-                    VDashedLine.WithDate(date: dashedLineState.date)
-                        .listRowSeparator(.hidden)
+                Spacer()
+            }
+        } else {
+            List {
+                ForEach(rows) { taskLogState in
+                    if let timeLineState = taskLogState.timeLineState {
+                        TimeLine(timeLineState)
+                            .listRowSeparator(.hidden)
+                            .onTapGesture {
+                                onCellTapped(timeLineState)
+                            }
+                    }
+                    
+                    if let dashedLineState = taskLogState.dashedLineState {
+                        VDashedLine.WithDate(date: dashedLineState.date)
+                            .listRowSeparator(.hidden)
+                    }
                 }
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
     }
 }
 
@@ -91,7 +107,7 @@ extension TaskLogList {
     }
 }
 
-#Preview {
+#Preview("正常") {
     TaskLogList(rows: [
         .DashedLine(.init(.now)),
         .TimeLine(.init(
@@ -108,6 +124,12 @@ extension TaskLogList {
             color: .blue
         ))
     ]) { cell in
+        print("cell tapped: \(cell.id)")
+    }
+}
+
+#Preview("无数据") {
+    TaskLogList(rows: []) { cell in
         print("cell tapped: \(cell.id)")
     }
 }
