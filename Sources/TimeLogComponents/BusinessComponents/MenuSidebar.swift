@@ -169,6 +169,11 @@ extension MenuSidebar {
         public struct IconConfig: Equatable {
             let name: String
             let color: Color?
+            
+            public init(name: String, color: Color? = nil) {
+                self.name = name
+                self.color = color
+            }
         }
         
         public enum Mode: Equatable {
