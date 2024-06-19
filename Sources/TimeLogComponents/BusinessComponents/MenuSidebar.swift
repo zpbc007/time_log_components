@@ -53,12 +53,12 @@ public struct MenuSidebar: View {
                 List {
                     OutlineGroup(menus.sidebarMenus, children: \.children) { item in
                         if item.value.mode == .readonly {
-                            menuCellContent(item)
+                            MenuCellContent(item)
                                 .contentShape(Rectangle())
                         }
                         
                         if item.value.mode == .selectable {
-                            menuCellContent(item)
+                            MenuCellContent(item)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     self.selection = item.value
@@ -71,7 +71,7 @@ public struct MenuSidebar: View {
                         }
                         
                         if item.value.mode == .editable  {
-                            menuCellContent(item)
+                            MenuCellContent(item)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     self.selection = item.value
@@ -142,24 +142,33 @@ public struct MenuSidebar: View {
             }
         }
     }
-    
-    @ViewBuilder
-    private func menuCellContent(_ item: TreeMenuValue) -> some View {
-        HStack(spacing: 0) {
-            if let icon = item.value.icon {
-                if let color = icon.color {
-                    Image(systemName: icon.name)
-                        .foregroundStyle(color)
+}
+
+extension MenuSidebar {
+    struct MenuCellContent: View {
+        let menu: TreeMenuValue
+        
+        init(_ menu: TreeMenuValue) {
+            self.menu = menu
+        }
+        
+        var body: some View {
+            HStack(spacing: 0) {
+                if let icon = menu.value.icon {
+                    if let color = icon.color {
+                        Image(systemName: icon.name)
+                            .foregroundStyle(color)
+                    } else {
+                        Image(systemName: icon.name)
+                    }
+                    
+                    Text(" " + menu.value.text)
                 } else {
-                    Image(systemName: icon.name)
+                    Text(menu.value.text)
                 }
                 
-                Text(" " + item.value.text)
-            } else {
-                Text(item.value.text)
+                Spacer()
             }
-            
-            Spacer()
         }
     }
 }
