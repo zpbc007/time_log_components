@@ -13,7 +13,7 @@ public struct TimerPage: View {
         // 计时中
         case counting(_ startDate: Date)
         
-        var startDate: Date? {
+        public var startDate: Date? {
             switch self {
             case .counting(let startDate):
                 return startDate
@@ -22,7 +22,7 @@ public struct TimerPage: View {
             }
         }
         
-        var inCounting: Bool {
+        public var inCounting: Bool {
             switch self {
             case .counting:
                 return true
