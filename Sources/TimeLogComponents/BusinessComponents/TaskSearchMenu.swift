@@ -8,7 +8,7 @@
 import SwiftUI
 import IdentifiedCollections
 
-public struct TaskFilter: View {
+public struct TaskSearchMenu: View {
     let menus: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>
     @Binding var selection: MenuSidebar.SidebarMenuValue?
     
@@ -51,14 +51,14 @@ public struct TaskFilter: View {
     }
 }
 
-extension TaskFilter {
+extension TaskSearchMenu {
     struct Sheet:View {
         let menus: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>
         @Binding var selection: MenuSidebar.SidebarMenuValue?
         @Environment(\.dismiss) private var dismiss
         
         var body: some View {
-            TaskFilter(menus: menus, selection: $selection)
+            TaskSearchMenu(menus: menus, selection: $selection)
                 .onChange(of: selection) { oldValue, newValue in
                     dismiss()
                 }
@@ -108,7 +108,7 @@ extension TaskFilter {
                 }
                 .sheet(isPresented: $showMenu, content: {
                     NavigationStack {
-                        TaskFilter.Sheet(menus: menus, selection: $selection)
+                        TaskSearchMenu.Sheet(menus: menus, selection: $selection)
                     }
                 })
             }
