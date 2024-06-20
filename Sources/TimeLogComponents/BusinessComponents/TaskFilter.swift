@@ -58,14 +58,12 @@ extension TaskFilter {
         @Environment(\.dismiss) private var dismiss
         
         var body: some View {
-            NavigationStack {
-                TaskFilter(menus: menus, selection: $selection)
-                    .onChange(of: selection) { oldValue, newValue in
-                        dismiss()
-                    }
-                    .navigationTitle("任务列表")
-                    .dismissBtn()
-            }
+            TaskFilter(menus: menus, selection: $selection)
+                .onChange(of: selection) { oldValue, newValue in
+                    dismiss()
+                }
+                .navigationTitle("任务列表")
+                .dismissBtn()
         }
     }
 }
@@ -109,7 +107,9 @@ extension TaskFilter {
                     showMenu.toggle()
                 }
                 .sheet(isPresented: $showMenu, content: {
-                    TaskFilter.Sheet(menus: menus, selection: $selection)
+                    NavigationStack {
+                        TaskFilter.Sheet(menus: menus, selection: $selection)
+                    }
                 })
             }
         }
