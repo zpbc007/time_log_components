@@ -35,7 +35,7 @@ public struct TimerPage: View {
     @Binding var status: Status
     @State private var elapsedTime = 0.0
     @State private var timer: Timer? = nil
-    let taskName: String
+    let taskName: String?
     let fontColor: Color
     let buttonBgColor: Color
     let onTaskNameTapped: () -> Void
@@ -44,7 +44,7 @@ public struct TimerPage: View {
         status: Binding<Status>,
         fontColor: Color,
         buttonBgColor: Color,
-        taskName: String,
+        taskName: String?,
         onTaskNameTapped: @escaping () -> Void
     ) {
         self._status = status
@@ -57,7 +57,7 @@ public struct TimerPage: View {
     public var body: some View {
         VStack {
             HStack {
-                Text(taskName)
+                Text(taskName ?? "选择任务")
                 
                 Image(systemName: "chevron.right")
                     .foregroundStyle(.secondary)
@@ -147,3 +147,13 @@ public struct TimerPage: View {
     return TimerPagePlayground()
 }
 
+#Preview("empty task name") {
+    TimerPage(
+        status: .constant(.idle),
+        fontColor: .white,
+        buttonBgColor: .blue,
+        taskName: nil
+    ) {
+        
+    }
+}
