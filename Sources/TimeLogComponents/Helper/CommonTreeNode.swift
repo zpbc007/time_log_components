@@ -104,6 +104,29 @@ extension CommonTreeNode {
         return targetRoot.children ?? []
     }
     
+    public static func filter(
+        tree: IdentifiedArrayOf<CommonTreeNode>,
+        _ filter: (Value) -> Bool
+    ) -> IdentifiedArrayOf<CommonTreeNode> {
+        tree.reduce(into: .init()) { partialResult, treeNode in
+            let newChildren = treeNode.children?.filter({ node in
+                filter(node.value)
+            })
+            let includeParent = filter(treeNode.value)
+            
+            guard let newChildren, !newChildren.isEmpty else {
+                // 只有父级被选中
+                if includeParent {
+                    partialResult.append(.init(value: treeNode.value))
+                }
+                return
+            }
+            
+            // 子任务被选中，父任务也被选中
+            partialResult.append(.init(value: treeNode.value, children: newChildren))
+        }
+    }
+    
     static private func transform<TargetValue: Equatable & Identifiable>(
         root: CommonTreeNode,
         _ transformer: (Value) -> TargetValue

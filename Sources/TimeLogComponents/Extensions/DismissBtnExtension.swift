@@ -7,19 +7,27 @@
 
 import SwiftUI
 
-struct DismissModifier: ViewModifier {
+public struct DismissModifier: ViewModifier {
+    public enum CancelText: String {
+        case cancel = "取消"
+        case back = "返回"
+    }
+    
     @Environment(\.dismiss) private var dismiss
+    let cancelText: CancelText
     let showDismissBtn: Bool
     
-    init() {
+    public init() {
         self.showDismissBtn = true
+        self.cancelText = .back
     }
     
-    init(showDismissBtn: Bool) {
+    public init(showDismissBtn: Bool, cancelText: CancelText) {
         self.showDismissBtn = showDismissBtn
+        self.cancelText = cancelText
     }
     
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if showDismissBtn {
             content
                 .toolbar {
@@ -27,9 +35,11 @@ struct DismissModifier: ViewModifier {
                         Button {
                             dismiss()
                         } label: {
-                            Label("返回", systemImage: "chevron.left")
-                                .labelStyle(.titleAndIcon)
-                                .bold()
+                            HStack {
+                                Image(systemName: "chevron.left")
+                                Text("返回")
+                                Spacer()
+                            }
                         }
                     }
                 }
@@ -40,19 +50,17 @@ struct DismissModifier: ViewModifier {
 }
 
 extension View {
-    public func dismissBtn(show: Bool = true) -> some View {
-        modifier(DismissModifier(showDismissBtn: show))
+    public func dismissBtn(show: Bool = true, cancelText: DismissModifier.CancelText = .back) -> some View {
+        modifier(DismissModifier(showDismissBtn: show, cancelText: cancelText))
     }
 }
 
 #Preview("show") {
     NavigationStack {
         NavigationLink {
-            NavigationStack {
-                Text("xxx")
-                    .dismissBtn()
-            }
-            
+            Text("xxx")
+                .navigationBarBackButtonHidden()
+                .dismissBtn()
         } label: {
             Text("tap me")
         }
@@ -62,11 +70,8 @@ extension View {
 #Preview("hide") {
     NavigationStack {
         NavigationLink {
-            NavigationStack {
-                Text("xxx")
-                    .dismissBtn(show: false)
-            }
-            
+            Text("xxx")
+                .dismissBtn(show: false)
         } label: {
             Text("tap me")
         }

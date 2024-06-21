@@ -45,7 +45,7 @@ public struct TaskSearchMenu: View {
     
     @ViewBuilder
     private func cellContent(_ item: MenuSidebar.TreeMenuValue) -> some View {
-        MenuSidebar.MenuCellContent(item)
+        MenuSidebar.MenuCellContent(item.value)
             .contentShape(Rectangle())
             
     }

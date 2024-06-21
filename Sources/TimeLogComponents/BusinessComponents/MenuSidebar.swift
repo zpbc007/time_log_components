@@ -53,12 +53,12 @@ public struct MenuSidebar: View {
                 List {
                     OutlineGroup(menus.sidebarMenus, children: \.children) { item in
                         if item.value.mode == .readonly {
-                            MenuCellContent(item)
+                            MenuCellContent(item.value)
                                 .contentShape(Rectangle())
                         }
                         
                         if item.value.mode == .selectable {
-                            MenuCellContent(item)
+                            MenuCellContent(item.value)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     self.selection = item.value
@@ -71,7 +71,7 @@ public struct MenuSidebar: View {
                         }
                         
                         if item.value.mode == .editable  {
-                            MenuCellContent(item)
+                            MenuCellContent(item.value)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     self.selection = item.value
@@ -146,15 +146,17 @@ public struct MenuSidebar: View {
 
 extension MenuSidebar {
     struct MenuCellContent: View {
-        let menu: TreeMenuValue
+        let menu: SidebarMenuValue
+        let addSpacer: Bool
         
-        init(_ menu: TreeMenuValue) {
+        init(_ menu: SidebarMenuValue, addSpacer: Bool = true) {
             self.menu = menu
+            self.addSpacer = addSpacer
         }
         
         var body: some View {
             HStack(spacing: 0) {
-                if let icon = menu.value.icon {
+                if let icon = menu.icon {
                     if let color = icon.color {
                         Image(systemName: icon.name)
                             .foregroundStyle(color)
@@ -162,12 +164,14 @@ extension MenuSidebar {
                         Image(systemName: icon.name)
                     }
                     
-                    Text(" " + menu.value.text)
+                    Text(" " + menu.text)
                 } else {
-                    Text(menu.value.text)
+                    Text(menu.text)
                 }
                 
-                Spacer()
+                if addSpacer {
+                    Spacer()
+                }
             }
         }
     }
