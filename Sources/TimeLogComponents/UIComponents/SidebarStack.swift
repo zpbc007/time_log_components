@@ -122,7 +122,8 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
                         
                         Text("Bottom")
                     }
-                }
+                    .padding(.top)
+                }.ignoresSafeArea()
             } content: {
                 NavigationStack {
                     List {
