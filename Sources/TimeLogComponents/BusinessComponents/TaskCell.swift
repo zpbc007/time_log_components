@@ -7,8 +7,14 @@
 
 import SwiftUI
 
-public struct TaskCell: View {
-    enum Mode {
+public struct TaskCell: View, Equatable {
+    public static func == (lhs: TaskCell, rhs: TaskCell) -> Bool {
+        lhs.name == rhs.name
+        && lhs.mode == rhs.mode
+        && lhs.finished == rhs.finished
+    }
+    
+    enum Mode: Equatable {
         case readonly
         case edit
         
