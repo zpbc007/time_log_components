@@ -53,7 +53,7 @@ public struct TaskTreeView: View {
     
     public init(
         taskTree: IdentifiedArrayOf<TaskInTree>,
-        recordingTaskId: String,
+        recordingTaskId: String?,
         startButtonColor: Color,
         stopButtonColor: Color,
         onTaskTapped: @escaping (String) -> Void,
