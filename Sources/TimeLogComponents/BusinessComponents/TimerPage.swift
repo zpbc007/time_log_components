@@ -65,9 +65,12 @@ public struct TimerPage: View {
             HStack {
                 Text(taskName ?? "选择任务")
                 
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
+                if !status.inCounting {
+                    // 非记录中状态展示
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
             }
             .padding(.bottom)
             .onTapGesture(perform: onTaskNameTapped)
