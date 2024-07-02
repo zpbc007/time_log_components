@@ -27,6 +27,10 @@ let package = Package(
         .package(
             url: "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
             from: "3.8.5"
+        ),
+        .package(
+            url: "https://github.com/elai950/AlertToast",
+            from: "1.3.9"
         )
     ],
     targets: [
@@ -38,7 +42,8 @@ let package = Package(
                 .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
                 .product(name: "WrappingHStack", package: "WrappingHStack"),
                 .product(name: "CocoaLumberjack", package: "CocoaLumberjack"),
-                .product(name: "CocoaLumberjackSwift", package: "CocoaLumberjack")
+                .product(name: "CocoaLumberjackSwift", package: "CocoaLumberjack"),
+                .product(name: "AlertToast", package: "AlertToast")
             ]
         ),
         .testTarget(

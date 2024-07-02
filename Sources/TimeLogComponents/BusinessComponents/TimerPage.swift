@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 public struct TimerPage: View {
     public enum Status: Equatable {
@@ -35,21 +36,26 @@ public struct TimerPage: View {
     @Binding var status: Status
     @State private var elapsedTime = 0.0
     @State private var timer: Timer? = nil
+    @State private var showCanNotStartMsg = false
+    
     let taskName: String?
     let fontColor: Color
     let buttonBgColor: Color
+    let alertColor: Color
     let onTaskNameTapped: () -> Void
     
     public init(
         status: Binding<Status>,
         fontColor: Color,
         buttonBgColor: Color,
+        alertColor: Color,
         taskName: String?,
         onTaskNameTapped: @escaping () -> Void
     ) {
         self._status = status
         self.fontColor = fontColor
         self.buttonBgColor = buttonBgColor
+        self.alertColor = alertColor
         self.taskName = taskName
         self.onTaskNameTapped = onTaskNameTapped
     }
@@ -103,13 +109,28 @@ public struct TimerPage: View {
             }
             .padding()
         }
+        .toast(isPresenting: $showCanNotStartMsg) {
+            AlertToast(
+                type: .error(alertColor),
+                title: "请先选择任务"
+            )
+        }
     }
     
     private func startTimer() {
+        guard let taskName, !taskName.isEmpty else {
+            showCanNotStartMsg = true
+            return
+        }
+        
         status = .counting(.now)
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { _ in
-            elapsedTime += 1
-        })
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 1.0,
+            repeats: true,
+            block: { _ in
+                elapsedTime += 1
+            }
+        )
     }
     
     private func stopTimer() {
@@ -129,6 +150,7 @@ public struct TimerPage: View {
                 status: $status,
                 fontColor: .white,
                 buttonBgColor: .blue,
+                alertColor: .red,
                 taskName: "task1-1"
             ) {
                 
@@ -152,6 +174,7 @@ public struct TimerPage: View {
         status: .constant(.idle),
         fontColor: .white,
         buttonBgColor: .blue,
+        alertColor: .red,
         taskName: nil
     ) {
         
