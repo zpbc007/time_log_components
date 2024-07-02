@@ -112,11 +112,25 @@ public struct TimerPage: View {
             }
             .padding()
         }
-        .toast(isPresenting: $showCanNotStartMsg) {
-            AlertToast(
-                type: .error(alertColor),
-                title: "请先选择任务"
-            )
+        .toast(
+            $showCanNotStartMsg,
+            state: .init(message: "请先选择任务", type: .error(alertColor))
+        )
+        .onChange(of: status, initial: true) { oldValue, newValue in
+            if status.inCounting {
+                elapsedTime = Date.now.timeIntervalSince(status.startDate!)
+                timer = Timer.scheduledTimer(
+                    withTimeInterval: 1.0,
+                    repeats: true,
+                    block: { _ in
+                        elapsedTime += 1
+                    }
+                )
+            } else {
+                timer?.invalidate()
+                timer = nil
+                elapsedTime = 0
+            }
         }
     }
     
@@ -127,20 +141,10 @@ public struct TimerPage: View {
         }
         
         status = .counting(.now)
-        timer = Timer.scheduledTimer(
-            withTimeInterval: 1.0,
-            repeats: true,
-            block: { _ in
-                elapsedTime += 1
-            }
-        )
     }
     
     private func stopTimer() {
         status = .idle
-        timer?.invalidate()
-        timer = nil
-        elapsedTime = 0
     }
 }
 
@@ -182,4 +186,32 @@ public struct TimerPage: View {
     ) {
         
     }
+}
+
+#Preview("restore state") {
+    struct TimerPagePlayground: View {
+        @State private var status: TimerPage.Status = .counting(.now.addingTimeInterval(-60))
+        
+        var body: some View {
+            TimerPage(
+                status: $status,
+                fontColor: .white,
+                buttonBgColor: .blue,
+                alertColor: .red,
+                taskName: "task1-1"
+            ) {
+                
+            }.onChange(of: status) { oldValue, newValue in
+                if let startDate = oldValue.startDate, newValue == .idle {
+                    print("finish record, startDate: \(startDate)")
+                }
+                
+                if newValue.inCounting {
+                    print("start record")
+                }
+            }
+        }
+    }
+        
+    return TimerPagePlayground()
 }
