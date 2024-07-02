@@ -16,7 +16,6 @@ public struct TaskSelector: View {
     @Binding var selectedMenu: MenuSidebar.SidebarMenuValue?
     @Binding var searchText: String
     
-    @Environment(\.dismiss) var dismiss
     @State private var showTaskSearchMenu = false
     
     private var filteredTasks: IdentifiedArrayOf<TreeTaskValue> {
@@ -75,7 +74,6 @@ public struct TaskSelector: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedTask = item.value
-                                dismiss()
                             }
                         }
                     }
