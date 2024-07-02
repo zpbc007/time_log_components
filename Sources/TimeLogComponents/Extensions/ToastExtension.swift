@@ -27,6 +27,21 @@ extension View {
             )
         }
     }
+    
+    public func toast(_ state: Binding<ToastState?>) -> some View {
+        self.toast(isPresenting: .init(get: {
+            state.wrappedValue != nil
+        }, set: { visible in
+            if !visible {
+                state.wrappedValue = nil
+            }
+        })) {
+            AlertToast(
+                type: state.wrappedValue?.type ?? .regular,
+                title: state.wrappedValue?.message
+            )
+        }
+    }
 }
 
 #Preview {
@@ -44,6 +59,26 @@ extension View {
             }
             .ignoresSafeArea()
             .toast($showToast, state: toastState)
+        }
+    }
+    
+    return Playground()
+}
+
+#Preview("Binding State") {
+    struct Playground: View {
+        @State private var toastState: ToastState? = nil
+        
+        var body: some View {
+            ZStack {
+                Color.gray
+                
+                Button("toggle") {
+                    toastState = .init(message: "测试内容 \(Date.now)", type: .error(.red))
+                }
+            }
+            .ignoresSafeArea()
+            .toast($toastState)
         }
     }
     
