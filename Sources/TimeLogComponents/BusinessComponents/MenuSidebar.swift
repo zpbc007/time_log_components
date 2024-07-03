@@ -224,7 +224,7 @@ extension MenuSidebar {
         public let labelSystemImage: String
         public let type: MenuType
         
-        init(
+        public init(
             id: String,
             labelText: String,
             labelSystemImage: String,
