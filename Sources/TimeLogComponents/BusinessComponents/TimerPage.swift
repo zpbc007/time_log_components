@@ -117,6 +117,11 @@ public struct TimerPage: View {
             state: .init(message: "请先选择任务", type: .error(alertColor))
         )
         .onChange(of: status, initial: true) { oldValue, newValue in
+            // reset
+            timer?.invalidate()
+            timer = nil
+            elapsedTime = 0
+            
             if status.inCounting {
                 elapsedTime = Date.now.timeIntervalSince(status.startDate!)
                 timer = Timer.scheduledTimer(
@@ -126,10 +131,6 @@ public struct TimerPage: View {
                         elapsedTime += 1
                     }
                 )
-            } else {
-                timer?.invalidate()
-                timer = nil
-                elapsedTime = 0
             }
         }
     }
