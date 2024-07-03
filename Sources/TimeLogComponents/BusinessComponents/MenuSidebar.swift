@@ -223,6 +223,18 @@ extension MenuSidebar {
         public let labelText: String
         public let labelSystemImage: String
         public let type: MenuType
+        
+        init(
+            id: String,
+            labelText: String,
+            labelSystemImage: String,
+            type: MenuType
+        ) {
+            self.id = id
+            self.labelText = labelText
+            self.labelSystemImage = labelSystemImage
+            self.type = type
+        }
     }
     
     public struct MenuValues: Equatable {
