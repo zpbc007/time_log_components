@@ -117,12 +117,6 @@ public struct MenuSidebar: View {
                     }
                     
                     Spacer()
-
-                    Menu {
-                        bottomMenus(menus.bottomMoreMenus)
-                    } label: {
-                        Label("更多", systemImage: "ellipsis")
-                    }
                 }
                 .padding(.horizontal)
             }
@@ -214,51 +208,31 @@ extension MenuSidebar {
     }
     
     public struct BottomMenuValue: Identifiable, Equatable {
-        public enum MenuType {
-            case leading
-            case trailing
-        }
-        
         public let id: String
         public let labelText: String
         public let labelSystemImage: String
-        public let type: MenuType
         
         public init(
             id: String,
             labelText: String,
-            labelSystemImage: String,
-            type: MenuType
+            labelSystemImage: String
         ) {
             self.id = id
             self.labelText = labelText
             self.labelSystemImage = labelSystemImage
-            self.type = type
         }
     }
     
     public struct MenuValues: Equatable {
         public var sidebarMenus: IdentifiedArrayOf<TreeMenuValue> = []
         public var bottomAddMenus: [BottomMenuValue] = []
-        public var bottomMoreMenus: [BottomMenuValue] = []
         
         public init(
             sidebarMenus: IdentifiedArrayOf<TreeMenuValue> = [],
-            bottomMenus: [BottomMenuValue] = []
+            bottomAddMenus: [BottomMenuValue] = []
         ) {
             self.sidebarMenus = sidebarMenus
-            
-            var bottomAddMenus: [BottomMenuValue] = []
-            var bottomMoreMenus: [BottomMenuValue] = []
-            for menu in bottomMenus {
-                if menu.type == .leading {
-                    bottomAddMenus.append(menu)
-                } else {
-                    bottomMoreMenus.append(menu)
-                }
-            }
             self.bottomAddMenus = bottomAddMenus
-            self.bottomMoreMenus = bottomMoreMenus
         }
     }
     
@@ -306,18 +280,16 @@ extension MenuSidebar {
                                 )),
                             ]))
                         ]),
-                        bottomMenus: [
+                        bottomAddMenus: [
                             .init(
                                 id: UUID().uuidString,
                                 labelText: "add1",
-                                labelSystemImage: "add",
-                                type: .leading
+                                labelSystemImage: "add"
                             ),
                             .init(
                                 id: UUID().uuidString,
                                 labelText: "add2",
-                                labelSystemImage: "add",
-                                type: .trailing
+                                labelSystemImage: "add"
                             )
                         ]
                     ),
