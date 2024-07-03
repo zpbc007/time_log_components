@@ -23,54 +23,41 @@ public struct TaskTreeView: View {
     public typealias TaskInTree = CommonTreeNode<TaskItem>
     
     let taskTree: IdentifiedArrayOf<TaskInTree>
-    let recordingTaskId: String?
     let isEditMode: Bool
     let startButtonColor: Color
-    let stopButtonColor: Color
     let onTaskTapped: (String) -> Void
     let onTaskToggle: ((String, Bool) -> Void)?
     let onTaskStart: ((String) -> Void)?
-    let onTaskStop: ((String) -> Void)?
     let onTaskDelete: ((String) -> Void)?
     
     public init(
         taskTree: IdentifiedArrayOf<TaskInTree>,
         startButtonColor: Color,
-        stopButtonColor: Color,
         onTaskTapped: @escaping (String) -> Void
     ) {
         self.taskTree = taskTree
         self.startButtonColor = startButtonColor
-        self.stopButtonColor = stopButtonColor
-        self.recordingTaskId = nil
         self.isEditMode = false
         self.onTaskTapped = onTaskTapped
         self.onTaskToggle = nil
         self.onTaskStart = nil
-        self.onTaskStop = nil
         self.onTaskDelete = nil
     }
     
     public init(
         taskTree: IdentifiedArrayOf<TaskInTree>,
-        recordingTaskId: String?,
         startButtonColor: Color,
-        stopButtonColor: Color,
         onTaskTapped: @escaping (String) -> Void,
         onTaskToggle: @escaping (String, Bool) -> Void,
         onTaskStart: @escaping (String) -> Void,
-        onTaskStop: @escaping (String) -> Void,
         onTaskDelete: @escaping (String) -> Void
     ) {
         self.taskTree = taskTree
         self.startButtonColor = startButtonColor
-        self.stopButtonColor = stopButtonColor
-        self.recordingTaskId = recordingTaskId
         self.isEditMode = true
         self.onTaskTapped = onTaskTapped
         self.onTaskToggle = onTaskToggle
         self.onTaskStart = onTaskStart
-        self.onTaskStop = onTaskStop
         self.onTaskDelete = onTaskDelete
     }
     
@@ -115,14 +102,7 @@ public struct TaskTreeView: View {
             onTaskTapped(node.value.id)
         }
         .swipeActions(edge: .trailing) {
-            if recordingTaskId == node.value.id {// 停止进行中的任务
-                Button {
-                    onTaskStop?(node.value.id)
-                } label: {
-                    Image(systemName: "stop")
-                }
-                .tint(stopButtonColor)
-            } else if !node.value.done { // 未完成任务，展示开始入口
+            if !node.value.done { // 未完成任务，展示开始入口
                 Button {
                     onTaskStart?(node.id)
                 } label: {
@@ -137,7 +117,6 @@ public struct TaskTreeView: View {
                 Image(systemName: "trash")
             }
         }
-        .foregroundStyle(recordingTaskId == node.id ? startButtonColor : .primary)
     }
     
     @ViewBuilder
@@ -165,9 +144,7 @@ public struct TaskTreeView: View {
                     ])
                 )
             ]),
-            recordingTaskId: "task3-1",
             startButtonColor: .blue,
-            stopButtonColor: .gray,
             onTaskTapped: { id in
                 print("tapped \(id)")
             },
@@ -176,9 +153,6 @@ public struct TaskTreeView: View {
             },
             onTaskStart: { id in
                 print("start \(id)")
-            },
-            onTaskStop: { id in
-                print("stop \(id)")
             },
             onTaskDelete: { id in
                 print("delete \(id)")
@@ -202,8 +176,7 @@ public struct TaskTreeView: View {
                     ])
                 )
             ]),
-            startButtonColor: .blue,
-            stopButtonColor: .red
+            startButtonColor: .blue
         ) { id in
             print("tapped \(id)")
         }
