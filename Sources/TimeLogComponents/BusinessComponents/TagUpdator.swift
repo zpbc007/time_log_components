@@ -7,12 +7,22 @@
 
 import SwiftUI
 
-struct TagUpdator: View {
+public struct TagUpdator: View {
     let pageTitle: String
     @Binding var tagName: String
     let onSaveButtonTapped: () -> Void
     
-    var body: some View {
+    public init(
+        pageTitle: String,
+        tagName: Binding<String>,
+        onSaveButtonTapped: @escaping () -> Void
+    ) {
+        self.pageTitle = pageTitle
+        self._tagName = tagName
+        self.onSaveButtonTapped = onSaveButtonTapped
+    }
+    
+    public var body: some View {
         Form {
             VStack(alignment: .leading) {
                 TextField("标签名称", text: $tagName)
