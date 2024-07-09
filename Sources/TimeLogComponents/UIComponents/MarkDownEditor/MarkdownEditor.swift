@@ -75,24 +75,36 @@ extension MarkdownEditor {
                 target: self,
                 action: #selector(buttonTapped)
             )
+            let rightSpace = UIBarButtonItem(
+                barButtonSystemItem: .flexibleSpace,
+                target: nil,
+                action: nil
+            )
             let resetButton = UIBarButtonItem(
                 image: UIImage(systemName: "arrow.uturn.left"),
                 style: .plain,
                 target: self,
                 action: #selector(buttonTapped)
             )
-            let rightSpace = UIBarButtonItem(
-                barButtonSystemItem: .flexibleSpace,
-                target: nil,
-                action: nil
+            let downButton = UIBarButtonItem(
+                image: UIImage(systemName: "chevron.down"),
+                style: .plain,
+                target: self,
+                action: #selector(buttonTapped)
             )
+            
             toolbar.items = [
                 boldButton,
                 dashListButton,
                 numberListButton,
+                rightSpace,
                 resetButton,
-                rightSpace
+                downButton
             ]
+            
+            toolbar.items?.forEach({ item in
+                item.tintColor = .darkGray
+            })
             
             addSubview(toolbar)
         }
