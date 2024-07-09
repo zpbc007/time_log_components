@@ -10,21 +10,26 @@ import WebKit
 
 public struct MarkdownEditor: View {
     @FocusState private var isInputActive: Bool
+    @State private var input = ""
     
     public init() {}
     
     public var body: some View {
-        WebView()
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button("hide") {
-                        isInputActive = false
-                    }
+        VStack {
+            TextField("xxx", text: $input)
+                .focused($isInputActive)
+            WebView()
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Button("hide") {
+                    isInputActive = false
                 }
             }
-            .onAppear {
-                isInputActive = true
-            }
+        }
+        .onAppear {
+            isInputActive = true
+        }
     }
 }
 
@@ -115,7 +120,7 @@ extension MarkdownEditor {
         var body: some View {
             NavigationStack {
                 MarkdownEditor()
-                    .padding()
+//                    .padding()
                     .background(.red)
             }
         }
