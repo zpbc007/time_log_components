@@ -55,11 +55,39 @@ extension MarkdownEditor {
         }
         
         private func setupViews() {
-            let button = UIButton(type: .infoLight)
-            button.setTitle("Tap Me", for: .normal)
-            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+            let stackView = UIStackView()
+            stackView.axis = .horizontal
+            stackView.distribution = .fill
+            stackView.alignment = .leading
+            stackView.spacing = 10
+            stackView.translatesAutoresizingMaskIntoConstraints = false
             
-            addSubview(button)
+            addSubview(stackView)
+
+            let spacer = UIView()
+            spacer.backgroundColor = .clear
+            spacer.isUserInteractionEnabled = false
+            
+            stackView.addArrangedSubview(buildButton("button1"))
+            stackView.addArrangedSubview(buildButton("button2"))
+            stackView.addArrangedSubview(buildButton("button3"))
+            stackView.addArrangedSubview(spacer)
+            
+            NSLayoutConstraint.activate([
+                stackView.topAnchor.constraint(equalTo: topAnchor),
+                stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 15),
+                stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15)
+            ])
+        }
+        
+        private func buildButton(_ text: String) -> UIButton {
+            let button = UIButton(type: .system)
+            button.setTitle(text, for: .normal)
+            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            
+            return button
         }
         
         @objc func buttonTapped() {
@@ -158,8 +186,6 @@ extension MarkdownEditor {
         var body: some View {
             NavigationStack {
                 MarkdownEditor()
-//                    .padding()
-                    .background(.red)
             }
         }
     }
@@ -169,7 +195,7 @@ extension MarkdownEditor {
 
 #Preview("toolbar") {
     let bar = MarkdownEditor.KeyboardToolbar()
-    bar.backgroundColor = .red
+//    bar.backgroundColor = .red
     
     return bar
 }
