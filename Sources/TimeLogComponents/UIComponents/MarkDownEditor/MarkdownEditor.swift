@@ -8,8 +8,10 @@
 import SwiftUI
 import WebKit
 
-struct MarkdownEditor: UIViewRepresentable {
-    func makeUIView(context: Context) -> WKWebView {
+public struct MarkdownEditor: UIViewRepresentable {
+    public init() {}
+    
+    public func makeUIView(context: Context) -> WKWebView {
         let wkConfig = WKWebViewConfiguration()
         let userContentController = WKUserContentController()
         
@@ -79,7 +81,7 @@ struct MarkdownEditor: UIViewRepresentable {
         return webView
     }
     
-    func updateUIView(_ webView: WKWebView, context: Context) {
+    public func updateUIView(_ webView: WKWebView, context: Context) {
     }
 }
 
