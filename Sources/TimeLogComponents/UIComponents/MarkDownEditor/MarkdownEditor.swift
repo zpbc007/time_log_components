@@ -9,16 +9,21 @@ import SwiftUI
 import WebKit
 
 public struct MarkdownEditor: View {
+    @FocusState private var isInputActive: Bool
+    
     public init() {}
     
     public var body: some View {
         WebView()
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
-                    Button("Click me!") {
-                        print("Clicked")
+                    Button("hide") {
+                        isInputActive = false
                     }
                 }
+            }
+            .onAppear {
+                isInputActive = true
             }
     }
 }
