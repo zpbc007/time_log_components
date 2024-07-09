@@ -77,6 +77,7 @@ public struct MarkdownEditor: UIViewRepresentable {
         
         let webView = WKWebView(frame: .zero, configuration: wkConfig)
         webView.loadHTMLString(htmlString, baseURL: nil)
+        webView.isInspectable = true
         
         return webView
     }
