@@ -44,6 +44,10 @@ let package = Package(
                 .product(name: "CocoaLumberjack", package: "CocoaLumberjack"),
                 .product(name: "CocoaLumberjackSwift", package: "CocoaLumberjack"),
                 .product(name: "AlertToast", package: "AlertToast")
+            ],
+            resources: [
+                .copy("Resources/quill.js"),
+                .copy("Resources/quill.snow.css")
             ]
         ),
         .testTarget(
