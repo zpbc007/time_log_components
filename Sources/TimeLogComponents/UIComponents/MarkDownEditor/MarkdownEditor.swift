@@ -15,30 +15,38 @@ public struct MarkdownEditor: UIViewRepresentable {
         let wkConfig = WKWebViewConfiguration()
         let userContentController = WKUserContentController()
         
-        // 加载 js\css 文件
-        let jsURL = Bundle.module.url(forResource: "quill", withExtension: "js")
-        let cssURL = Bundle.module.url(forResource: "quill.snow", withExtension: "css")
+        // 注入 JS
+        self.injectQuillScript(userContentController)
+        self.injectCreateEditorScript(userContentController)
         
-        guard 
-            let jsURL,
-            let script = try? String(contentsOf: jsURL),
-            let cssURL,
-            let cssString = try? String(contentsOf: cssURL)
+        wkConfig.userContentController = userContentController
+                
+        let webView = WKWebView(frame: .zero, configuration: wkConfig)
+        webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
+        webView.isInspectable = true
+        
+        return webView
+    }
+    
+    public func updateUIView(_ webView: WKWebView, context: Context) {
+    }
+    
+    private func injectQuillScript(_ userContentController: WKUserContentController) {
+        // 加载 js\css 文件
+        let quillJsURL = Bundle.module.url(forResource: "quill", withExtension: "js")
+        
+        guard
+            let quillJsURL,
+            let quillJSString = try? String(contentsOf: quillJsURL)
         else {
-            return WKWebView()
+            return
         }
         
-        let userScript = WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        let quillScript = WKUserScript(source: quillJSString, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        userContentController.addUserScript(quillScript)
+    }
     
-        let insertCssJSString = """
-           var style = document.createElement('style');
-           style.innerHTML = '\(cssString.trimmingCharacters(in: .newlines).replacingOccurrences(of: "'", with: "\\'"))';
-           document.head.appendChild(style);
-        """
-        let insertCssScript = WKUserScript(source: insertCssJSString, injectionTime: .atDocumentStart, forMainFrameOnly: true)
-        
-        print(insertCssJSString)
-        
+    private func injectCreateEditorScript(_ userContentController: WKUserContentController) {
         let createEditorJSString = """
             const options = {
                 modules: {
@@ -49,17 +57,26 @@ public struct MarkdownEditor: UIViewRepresentable {
             const quill = new Quill('#editor', options);
         """
         let createEditorScript = WKUserScript(source: createEditorJSString, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-
-        userContentController.addUserScript(insertCssScript)
-        userContentController.addUserScript(userScript)
         userContentController.addUserScript(createEditorScript)
+    }
+    
+    private func genInitHTML() -> String {
+        // 加载 js\css 文件
+        let quillCssURL = Bundle.module.url(forResource: "quill.snow", withExtension: "css")
         
-        wkConfig.userContentController = userContentController
-        
-        let htmlString = """
-         <!DOCTYPE html>
+        var finalCssString = ""
+        if
+            let quillCssURL,
+            let quillCssString = try? String(contentsOf: quillCssURL)
+        {
+            finalCssString = quillCssString.trimmingCharacters(in: .newlines).replacingOccurrences(of: "'", with: "\\'")
+        }
+                
+        return """
+        <!DOCTYPE html>
         <html>
         <head><meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"></head>
+        <style>\(finalCssString)</style>
         <body>
         <div id="info">
         </div>
@@ -67,22 +84,9 @@ public struct MarkdownEditor: UIViewRepresentable {
           <h2>Demo Content</h2>
           <p>Preset build with <code>snow</code> theme, and some common formats.</p>
         </div>
-
-        <script>
-          
-        </script>
         </body>
         </html>
         """
-        
-        let webView = WKWebView(frame: .zero, configuration: wkConfig)
-        webView.loadHTMLString(htmlString, baseURL: nil)
-        webView.isInspectable = true
-        
-        return webView
-    }
-    
-    public func updateUIView(_ webView: WKWebView, context: Context) {
     }
 }
 
