@@ -55,30 +55,46 @@ extension MarkdownEditor {
         }
         
         private func setupViews() {
-            let stackView = UIStackView()
-            stackView.axis = .horizontal
-            stackView.distribution = .fill
-            stackView.alignment = .leading
-            stackView.spacing = 10
-            stackView.translatesAutoresizingMaskIntoConstraints = false
+            let toolbar = UIToolbar(frame: .zero)
+            toolbar.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            let boldButton = UIBarButtonItem(
+                image: UIImage(systemName: "bold"),
+                style: .plain,
+                target: self,
+                action: #selector(buttonTapped)
+            )
+            let dashListButton = UIBarButtonItem(
+                image: UIImage(systemName: "list.dash"),
+                style: .plain,
+                target: self,
+                action: #selector(buttonTapped)
+            )
+            let numberListButton = UIBarButtonItem(
+                image: UIImage(systemName: "list.number"),
+                style: .plain,
+                target: self,
+                action: #selector(buttonTapped)
+            )
+            let resetButton = UIBarButtonItem(
+                image: UIImage(systemName: "arrow.uturn.left"),
+                style: .plain,
+                target: self,
+                action: #selector(buttonTapped)
+            )
+            let rightSpace = UIBarButtonItem(
+                barButtonSystemItem: .flexibleSpace,
+                target: nil,
+                action: nil
+            )
+            toolbar.items = [
+                boldButton,
+                dashListButton,
+                numberListButton,
+                resetButton,
+                rightSpace
+            ]
             
-            addSubview(stackView)
-
-            let spacer = UIView()
-            spacer.backgroundColor = .clear
-            spacer.isUserInteractionEnabled = false
-            
-            stackView.addArrangedSubview(buildButton("button1"))
-            stackView.addArrangedSubview(buildButton("button2"))
-            stackView.addArrangedSubview(buildButton("button3"))
-            stackView.addArrangedSubview(spacer)
-            
-            NSLayoutConstraint.activate([
-                stackView.topAnchor.constraint(equalTo: topAnchor),
-                stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-                stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 15),
-                stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15)
-            ])
+            addSubview(toolbar)
         }
         
         private func buildButton(_ text: String) -> UIButton {
@@ -112,6 +128,7 @@ extension MarkdownEditor {
             let webView = CustomAccessoryWebView(frame: .zero, configuration: wkConfig)
             webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
             webView.isInspectable = true
+            
             let toolbar = KeyboardToolbar()
             toolbar.backgroundColor = .darkGray
             webView.myAccessoryView = toolbar
@@ -197,7 +214,7 @@ extension MarkdownEditor {
 
 #Preview("toolbar") {
     let bar = MarkdownEditor.KeyboardToolbar()
-//    bar.backgroundColor = .red
+    bar.backgroundColor = .red
     
     return bar
 }
