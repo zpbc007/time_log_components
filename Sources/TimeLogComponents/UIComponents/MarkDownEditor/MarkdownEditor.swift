@@ -112,7 +112,9 @@ extension MarkdownEditor {
             let webView = CustomAccessoryWebView(frame: .zero, configuration: wkConfig)
             webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
             webView.isInspectable = true
-            webView.myAccessoryView = KeyboardToolbar()
+            let toolbar = KeyboardToolbar()
+            toolbar.backgroundColor = .darkGray
+            webView.myAccessoryView = toolbar
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
             
             return webView
