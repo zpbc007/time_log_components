@@ -9,26 +9,62 @@ import SwiftUI
 import WebKit
 
 public struct MarkdownEditor: View {
-    @FocusState private var isInputActive: Bool
     @State private var input = ""
     
     public init() {}
     
     public var body: some View {
-        VStack {
-            TextField("xxx", text: $input)
-                .focused($isInputActive)
-            WebView()
-        }
+        WebView()
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Button("hide") {
-                    isInputActive = false
+                    
                 }
             }
         }
-        .onAppear {
-            isInputActive = true
+    }
+}
+
+extension MarkdownEditor {
+    class CustomAccessoryWebView: WKWebView {
+        override init(frame: CGRect, configuration: WKWebViewConfiguration) {
+            super.init(frame: frame, configuration: configuration)
+        }
+        
+        required init?(coder: NSCoder) {
+            super.init(coder: coder)
+        }
+        
+        var myAccessoryView: UIView?
+        override var inputAccessoryView: UIView? {
+            myAccessoryView
+        }
+    }
+}
+
+extension MarkdownEditor {
+    class KeyboardToolbar: UIView {
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            setupViews()
+        }
+        
+        required init?(coder: NSCoder) {
+            super.init(coder: coder)
+            setupViews()
+        }
+        
+        private func setupViews() {
+            let button = UIButton(type: .infoLight)
+            button.setTitle("Tap Me", for: .normal)
+            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+            
+            addSubview(button)
+        }
+        
+        @objc func buttonTapped() {
+            // 处理按钮点击事件
+            print("Button was tapped")
         }
     }
 }
@@ -45,9 +81,11 @@ extension MarkdownEditor {
             
             wkConfig.userContentController = userContentController
                     
-            let webView = WKWebView(frame: .zero, configuration: wkConfig)
+            let webView = CustomAccessoryWebView(frame: .zero, configuration: wkConfig)
             webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
             webView.isInspectable = true
+            webView.myAccessoryView = KeyboardToolbar()
+            webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
             
             return webView
         }
@@ -127,4 +165,11 @@ extension MarkdownEditor {
     }
     
     return Playground()
+}
+
+#Preview("toolbar") {
+    let bar = MarkdownEditor.KeyboardToolbar()
+    bar.backgroundColor = .red
+    
+    return bar
 }
