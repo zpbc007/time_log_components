@@ -69,7 +69,7 @@ public struct MarkdownEditor: UIViewRepresentable {
             let quillCssURL,
             let quillCssString = try? String(contentsOf: quillCssURL)
         {
-            finalCssString = quillCssString.trimmingCharacters(in: .newlines).replacingOccurrences(of: "'", with: "\\'")
+            finalCssString = quillCssString.trimmingCharacters(in: .newlines).replacingOccurrences(of: "'", with: "\'")
         }
                 
         return """
