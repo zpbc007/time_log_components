@@ -75,12 +75,6 @@ extension MarkdownEditor {
                 target: nil,
                 action: nil
             )
-            let resetButton = UIBarButtonItem(
-                image: UIImage(systemName: "arrow.uturn.left"),
-                style: .plain,
-                target: self,
-                action: #selector(buttonTapped)
-            )
             let downButton = UIBarButtonItem(
                 image: UIImage(systemName: "chevron.down"),
                 style: .plain,
@@ -93,7 +87,6 @@ extension MarkdownEditor {
                 dashListButton,
                 numberListButton,
                 rightSpace,
-                resetButton,
                 downButton
             ]
             
@@ -221,7 +214,20 @@ extension MarkdownEditor {
             return """
             <!DOCTYPE html>
             <html>
-            <head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, shrink-to-fit=no"></head>
+            <head>
+                <meta 
+                    name="viewport"
+                    content="width=device-width, initial-scale=1.0, maximum-scale=1, shrink-to-fit=no"
+                />
+                <style>
+                  body {
+                    margin: 0;
+                  }
+                  body > .ql-container.ql-snow {
+                    border: none;
+                  }
+                </style>
+            </head>
             <body>
             <div id="info">
             </div>
