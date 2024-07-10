@@ -138,11 +138,15 @@
      modules: {},
      theme: "snow",
    };
-   new Quill("#editor", options);
+   const quill = new Quill("#editor", options);
 
    // 加粗操作
    addEventListener("toolbar.boldButtonTapped", () => {
-     console.log("toolbar.bold.tapped!!!");
+     const range = quill.getSelection();
+     const formats = range == null ? {} : quill.getFormat(range);
+     const isActive = formats["bold"] != null;
+
+     quill.format("bold", !isActive);
    });
 
  })();
