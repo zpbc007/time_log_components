@@ -38,7 +38,12 @@ extension MarkdownEditor {
 extension MarkdownEditor {
     class KeyboardToolbar: UIView {
         var handleBoldButtonTapped: (() -> Void)?
-        
+        var handleNumberListButtonTapped: (() -> Void)?
+        var handleDashListButtonTapped: (() -> Void)?
+        var handleCheckBoxListButtonTapped: (() -> Void)?
+        var handleIncreaseIndentButtonTapped: (() -> Void)?
+        var handleDecreaseIndentButtonTapped: (() -> Void)?
+    
         override init(frame: CGRect) {
             super.init(frame: frame)
             setupViews()
@@ -58,17 +63,35 @@ extension MarkdownEditor {
                 target: self,
                 action: #selector(onBoldButtonTapped)
             )
-            let dashListButton = UIBarButtonItem(
-                image: UIImage(systemName: "list.dash"),
-                style: .plain,
-                target: self,
-                action: #selector(buttonTapped)
-            )
             let numberListButton = UIBarButtonItem(
                 image: UIImage(systemName: "list.number"),
                 style: .plain,
                 target: self,
-                action: #selector(buttonTapped)
+                action: #selector(onNumberListButtonTapped)
+            )
+            let dashListButton = UIBarButtonItem(
+                image: UIImage(systemName: "list.dash"),
+                style: .plain,
+                target: self,
+                action: #selector(onDashListButtonTapped)
+            )
+            let checkBoxListButton = UIBarButtonItem(
+                image: UIImage(systemName: "checklist"),
+                style: .plain,
+                target: self,
+                action: #selector(onCheckBoxListButtonTapped)
+            )
+            let increaseIndentButton = UIBarButtonItem(
+                image: UIImage(systemName: "increase.indent"),
+                style: .plain,
+                target: self,
+                action: #selector(onIncreaseIndentButtonTapped)
+            )
+            let decreaseIndentButton = UIBarButtonItem(
+                image: UIImage(systemName: "decrease.indent"),
+                style: .plain,
+                target: self,
+                action: #selector(onDecreaseIndentButtonTapped)
             )
             let rightSpace = UIBarButtonItem(
                 barButtonSystemItem: .flexibleSpace,
@@ -86,6 +109,9 @@ extension MarkdownEditor {
                 boldButton,
                 dashListButton,
                 numberListButton,
+                checkBoxListButton,
+                increaseIndentButton,
+                decreaseIndentButton,
                 rightSpace,
                 downButton
             ]
@@ -114,6 +140,26 @@ extension MarkdownEditor {
         @objc func onBoldButtonTapped() {
             handleBoldButtonTapped?()
         }
+        
+        @objc func onNumberListButtonTapped() {
+            handleNumberListButtonTapped?()
+        }
+        
+        @objc func onDashListButtonTapped() {
+            handleDashListButtonTapped?()
+        }
+        
+        @objc func onCheckBoxListButtonTapped() {
+            handleCheckBoxListButtonTapped?()
+        }
+        
+        @objc func onIncreaseIndentButtonTapped() {
+            handleIncreaseIndentButtonTapped?()
+        }
+        
+        @objc func onDecreaseIndentButtonTapped() {
+            handleDecreaseIndentButtonTapped?()
+        }
     }
 }
 
@@ -140,10 +186,7 @@ extension MarkdownEditor {
             webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
             webView.isInspectable = true
             
-            let toolbar = KeyboardToolbar()
-            toolbar.handleBoldButtonTapped = self.handleBoldButtonTapped
-            toolbar.backgroundColor = .darkGray
-            webView.myAccessoryView = toolbar
+            webView.myAccessoryView = self.setupToolbar()
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
                         
             self.bridge.updateWebview(webView)
@@ -240,8 +283,25 @@ extension MarkdownEditor {
             """
         }
         
-        private func handleBoldButtonTapped() {
-            bridge.trigger(eventName: Native2WebEvent.boldButtonTapped.rawValue)
+        private func setupToolbar() -> KeyboardToolbar {
+            let toolbar = KeyboardToolbar()
+            toolbar.backgroundColor = .darkGray
+            
+            // 触发事件
+            toolbar.handleBoldButtonTapped = handleButtonTapped(.boldButtonTapped)
+            toolbar.handleDashListButtonTapped = handleButtonTapped(.dashListButtonTapped)
+            toolbar.handleNumberListButtonTapped = handleButtonTapped(.numberListButtonTapped)
+            toolbar.handleCheckBoxListButtonTapped = handleButtonTapped(.checkBoxListButtonTapped)
+            toolbar.handleIncreaseIndentButtonTapped = handleButtonTapped(.increaseIndentButtonTapped)
+            toolbar.handleDecreaseIndentButtonTapped = handleButtonTapped(.decreaseIndentButtonTapped)
+            
+            return toolbar
+        }
+        
+        private func handleButtonTapped(_ eventName: Native2WebEvent) -> () -> Void {
+            {
+                bridge.trigger(eventName: eventName.rawValue)
+            }
         }
     }
 }
@@ -249,6 +309,11 @@ extension MarkdownEditor {
 extension MarkdownEditor.WebView {
     enum Native2WebEvent: String {
         case boldButtonTapped = "toolbar.boldButtonTapped"
+        case numberListButtonTapped = "toolbar.numberListButtonTapped"
+        case dashListButtonTapped = "toolbar.dashListButtonTapped"
+        case checkBoxListButtonTapped = "toolbar.checkBoxListButtonTapped"
+        case increaseIndentButtonTapped = "toolbar.increaseIndentButtonTapped"
+        case decreaseIndentButtonTapped = "toolbar.decreaseIndentButtonTapped"
     }
 }
 
