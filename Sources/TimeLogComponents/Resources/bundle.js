@@ -187,18 +187,19 @@
    function handleIndentChange(modifier) {
      const formats = getSelectionFormats();
      const indent = parseInt(formats.indent || 0, 10);
+     modifier *= formats.direction === "rtl" ? -1 : 1;
 
      quill.format("indent", indent + modifier);
    }
 
    // 增加缩进操作
    addEventListener("toolbar.increaseIndentButtonTapped", () => {
-     handleIndentChange(formats.direction === "rtl" ? -1 : 1);
+     handleIndentChange(1);
    });
 
    // 减少缩进操作
    addEventListener("toolbar.decreaseIndentButtonTapped", () => {
-     handleIndentChange(formats.direction === "rtl" ? 1 : -1);
+     handleIndentChange(-1);
    });
 
  })();
