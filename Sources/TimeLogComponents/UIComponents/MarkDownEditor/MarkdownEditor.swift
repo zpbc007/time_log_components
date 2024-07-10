@@ -184,12 +184,9 @@ extension MarkdownEditor {
                 let bundleJsURL,
                 let bundleJSString = try? String(contentsOf: bundleJsURL)
             else {
-                print("no bundle")
                 return
             }
-            
-            print(bundleJSString)
-            
+                        
             let bundleScript = WKUserScript(source: bundleJSString, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
             userContentController.addUserScript(bundleScript)
         }
@@ -201,9 +198,13 @@ extension MarkdownEditor {
             var finalCssString = ""
             if
                 let quillCssURL,
-                let quillCssString = try? String(contentsOf: quillCssURL)
+                let quillCssString = try? String(contentsOf: quillCssURL, encoding: .utf8)
             {
-                finalCssString = quillCssString.trimmingCharacters(in: .newlines).replacingOccurrences(of: "\"", with: "\\\"")
+                finalCssString = quillCssString
+                    .trimmingCharacters(in: .newlines)
+                    .replacingOccurrences(of: "\\", with: "\\\\") // 处理 unicode 中的 \
+                    .replacingOccurrences(of: "\"", with: "\\\"") // 处理 "
+                    
             }
             
             let createStyleJSString = """
