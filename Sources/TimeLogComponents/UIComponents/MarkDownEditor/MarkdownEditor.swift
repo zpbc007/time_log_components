@@ -126,7 +126,11 @@ extension MarkdownEditor {
 
 extension MarkdownEditor {
     struct WebView: UIViewRepresentable {
-        @State private var bridge: JSBridge?
+        private var bridge: JSBridge
+        
+        init() {
+            self.bridge = JSBridge()
+        }
         
         func makeUIView(context: Context) -> WKWebView {
             let wkConfig = WKWebViewConfiguration()
@@ -148,13 +152,14 @@ extension MarkdownEditor {
             toolbar.backgroundColor = .darkGray
             webView.myAccessoryView = toolbar
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
-            
-            self.bridge = JSBridge(webview: webView)
+                        
+            self.bridge.updateWebview(webView)
             
             return webView
         }
         
         func updateUIView(_ webView: WKWebView, context: Context) {
+            self.bridge.updateWebview(webView)
         }
         
         private func injectQuillScript(_ userContentController: WKUserContentController) {
@@ -229,7 +234,7 @@ extension MarkdownEditor {
         }
         
         private func handleBoldButtonTapped() {
-            bridge?.trigger(eventName: Native2WebEvent.boldButtonTapped.rawValue)
+            bridge.trigger(eventName: Native2WebEvent.boldButtonTapped.rawValue)
         }
     }
 }

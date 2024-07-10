@@ -31,12 +31,7 @@ extension LeakAvoider: WKScriptMessageHandler {
 public class JSBridge {
     static let JSBName = "timeLineBridge"
     
-    weak var webview: WKWebView?
-    
-    init(webview: WKWebView) {
-        self.webview = webview
-        addJSBMessageHandler()
-    }
+    private weak var webview: WKWebView?
     
     let eventBus = PassthroughSubject<JSBMessageFromJS, Never>()
     
@@ -57,6 +52,15 @@ public class JSBridge {
         let data: Data
     }
     
+    func updateWebview(_ webview: WKWebView) {
+        if webview == self.webview {
+            return
+        }
+        self.removeJSBMessageHandler()
+        self.webview = webview
+        self.addJSBMessageHandler()
+    }
+    
     func trigger(eventName: String) {
         let msg = JSBMessageFromNative<Never>(eventName: eventName, data: nil)
         dispatch(msg)
@@ -72,8 +76,16 @@ public class JSBridge {
         dispatch(msg)
     }
     
+    deinit {
+        removeJSBMessageHandler()
+    }
+    
     private func addJSBMessageHandler() {
         webview?.configuration.userContentController.add(LeakAvoider(self.handleJSMessage), name: Self.JSBName)
+    }
+    
+    private func removeJSBMessageHandler() {
+        webview?.configuration.userContentController.removeScriptMessageHandler(forName: Self.JSBName)
     }
     
     private func dispatch<D: Codable>(_ message: JSBMessageFromNative<D>) {
