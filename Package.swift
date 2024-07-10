@@ -47,7 +47,8 @@ let package = Package(
             ],
             resources: [
                 .copy("Resources/quill.js"),
-                .copy("Resources/quill.snow.css")
+                .copy("Resources/quill.snow.css"),
+                .copy("Resources/bundle.js")
             ]
         ),
         .testTarget(

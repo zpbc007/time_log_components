@@ -15,13 +15,6 @@ public struct MarkdownEditor: View {
     
     public var body: some View {
         WebView()
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Button("hide") {
-                    
-                }
-            }
-        }
     }
 }
 
@@ -44,6 +37,8 @@ extension MarkdownEditor {
 
 extension MarkdownEditor {
     class KeyboardToolbar: UIView {
+        var handleBoldButtonTapped: (() -> Void)?
+        
         override init(frame: CGRect) {
             super.init(frame: frame)
             setupViews()
@@ -61,7 +56,7 @@ extension MarkdownEditor {
                 image: UIImage(systemName: "bold"),
                 style: .plain,
                 target: self,
-                action: #selector(buttonTapped)
+                action: #selector(onBoldButtonTapped)
             )
             let dashListButton = UIBarButtonItem(
                 image: UIImage(systemName: "list.dash"),
@@ -122,18 +117,25 @@ extension MarkdownEditor {
             // 处理按钮点击事件
             print("Button was tapped")
         }
+        
+        @objc func onBoldButtonTapped() {
+            handleBoldButtonTapped?()
+        }
     }
 }
 
 extension MarkdownEditor {
     struct WebView: UIViewRepresentable {
+        @State private var bridge: JSBridge?
+        
         func makeUIView(context: Context) -> WKWebView {
             let wkConfig = WKWebViewConfiguration()
             let userContentController = WKUserContentController()
             
             // 注入 JS
             self.injectQuillScript(userContentController)
-            self.injectCreateEditorScript(userContentController)
+            self.injectCssScript(userContentController)
+            self.injectBundleScript(userContentController)
             
             wkConfig.userContentController = userContentController
                     
@@ -142,9 +144,12 @@ extension MarkdownEditor {
             webView.isInspectable = true
             
             let toolbar = KeyboardToolbar()
+            toolbar.handleBoldButtonTapped = self.handleBoldButtonTapped
             toolbar.backgroundColor = .darkGray
             webView.myAccessoryView = toolbar
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
+            
+            self.bridge = JSBridge(webview: webView)
             
             return webView
         }
@@ -167,21 +172,24 @@ extension MarkdownEditor {
             userContentController.addUserScript(quillScript)
         }
         
-        private func injectCreateEditorScript(_ userContentController: WKUserContentController) {
-            let createEditorJSString = """
-                const options = {
-                    modules: {
-                        
-                    },
-                    theme: 'snow'
-                }
-                const quill = new Quill('#editor', options);
-            """
-            let createEditorScript = WKUserScript(source: createEditorJSString, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-            userContentController.addUserScript(createEditorScript)
+        private func injectBundleScript(_ userContentController: WKUserContentController) {
+            let bundleJsURL = Bundle.module.url(forResource: "bundle", withExtension: "js")
+            
+            guard
+                let bundleJsURL,
+                let bundleJSString = try? String(contentsOf: bundleJsURL)
+            else {
+                print("no bundle")
+                return
+            }
+            
+            print(bundleJSString)
+            
+            let bundleScript = WKUserScript(source: bundleJSString, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+            userContentController.addUserScript(bundleScript)
         }
         
-        private func genInitHTML() -> String {
+        private func injectCssScript(_ userContentController: WKUserContentController) {
             // 加载 js\css 文件
             let quillCssURL = Bundle.module.url(forResource: "quill.snow", withExtension: "css")
             
@@ -190,14 +198,24 @@ extension MarkdownEditor {
                 let quillCssURL,
                 let quillCssString = try? String(contentsOf: quillCssURL)
             {
-                finalCssString = quillCssString.trimmingCharacters(in: .newlines).replacingOccurrences(of: "'", with: "\'")
+                finalCssString = quillCssString.trimmingCharacters(in: .newlines).replacingOccurrences(of: "\"", with: "\\\"")
             }
-                    
+            
+            let createStyleJSString = """
+            const style = document.createElement('style');
+            style.type = "text/css";
+            style.innerHTML = "\(finalCssString)";
+            document.head.append(style);
+            """
+            let createStyleScript = WKUserScript(source: createStyleJSString, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+            userContentController.addUserScript(createStyleScript)
+        }
+        
+        private func genInitHTML() -> String {
             return """
             <!DOCTYPE html>
             <html>
             <head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, shrink-to-fit=no"></head>
-            <style>\(finalCssString)</style>
             <body>
             <div id="info">
             </div>
@@ -209,6 +227,16 @@ extension MarkdownEditor {
             </html>
             """
         }
+        
+        private func handleBoldButtonTapped() {
+            bridge?.trigger(eventName: Native2WebEvent.boldButtonTapped.rawValue)
+        }
+    }
+}
+
+extension MarkdownEditor.WebView {
+    enum Native2WebEvent: String {
+        case boldButtonTapped = "toolbar.boldButtonTapped"
     }
 }
 
