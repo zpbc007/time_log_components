@@ -43,6 +43,7 @@ extension MarkdownEditor {
         var handleCheckBoxListButtonTapped: (() -> Void)?
         var handleIncreaseIndentButtonTapped: (() -> Void)?
         var handleDecreaseIndentButtonTapped: (() -> Void)?
+        var handleHideKeyboardButtonTapped: (() -> Void)?
     
         override init(frame: CGRect) {
             super.init(frame: frame)
@@ -98,11 +99,11 @@ extension MarkdownEditor {
                 target: nil,
                 action: nil
             )
-            let downButton = UIBarButtonItem(
+            let hideKeyboardButton = UIBarButtonItem(
                 image: UIImage(systemName: "chevron.down"),
                 style: .plain,
                 target: self,
-                action: #selector(buttonTapped)
+                action: #selector(onHideKeyboardButtonTapped)
             )
             
             toolbar.items = [
@@ -113,7 +114,7 @@ extension MarkdownEditor {
                 increaseIndentButton,
                 decreaseIndentButton,
                 rightSpace,
-                downButton
+                hideKeyboardButton
             ]
             
             toolbar.items?.forEach({ item in
@@ -159,6 +160,10 @@ extension MarkdownEditor {
         
         @objc func onDecreaseIndentButtonTapped() {
             handleDecreaseIndentButtonTapped?()
+        }
+        
+        @objc func onHideKeyboardButtonTapped() {
+            handleHideKeyboardButtonTapped?()
         }
     }
 }
@@ -294,6 +299,7 @@ extension MarkdownEditor {
             toolbar.handleCheckBoxListButtonTapped = handleButtonTapped(.checkBoxListButtonTapped)
             toolbar.handleIncreaseIndentButtonTapped = handleButtonTapped(.increaseIndentButtonTapped)
             toolbar.handleDecreaseIndentButtonTapped = handleButtonTapped(.decreaseIndentButtonTapped)
+            toolbar.handleHideKeyboardButtonTapped = handleButtonTapped(.blurButtonTapped)
             
             return toolbar
         }
@@ -314,6 +320,7 @@ extension MarkdownEditor.WebView {
         case checkBoxListButtonTapped = "toolbar.checkBoxListButtonTapped"
         case increaseIndentButtonTapped = "toolbar.increaseIndentButtonTapped"
         case decreaseIndentButtonTapped = "toolbar.decreaseIndentButtonTapped"
+        case blurButtonTapped = "toolbar.blurButtonTapped"
     }
 }
 

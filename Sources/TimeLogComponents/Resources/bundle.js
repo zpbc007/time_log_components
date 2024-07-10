@@ -202,4 +202,9 @@
      handleIndentChange(-1);
    });
 
+   // 减少缩进操作
+   addEventListener("toolbar.blurButtonTapped", () => {
+     quill.blur();
+   });
+
  })();
