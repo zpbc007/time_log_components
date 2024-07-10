@@ -62,7 +62,7 @@ public class JSBridge {
     }
     
     func trigger(eventName: String) {
-        let msg = JSBMessageFromNative<Never>(eventName: eventName, data: nil)
+        let msg = JSBMessageFromNative<String>(eventName: eventName, data: nil)
         dispatch(msg)
     }
     
@@ -101,11 +101,11 @@ public class JSBridge {
     }
     
     private func serialize<D: Codable>(_ message: JSBMessageFromNative<D>) -> String? {
-        guard let data = try? JSONSerialization.data(withJSONObject: message) else {
-            return nil
-        }
-        
-        guard var json = String(data: data, encoding: .utf8) else {
+        let encoder = JSONEncoder()
+
+        guard
+            let data = try? encoder.encode(message),
+            var json = String(data: data, encoding: .utf8) else {
             return nil
         }
         
