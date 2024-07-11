@@ -377,11 +377,16 @@ extension MarkdownEditor.WebView {
 
 #Preview {
     struct Playground: View {
-        @State private var content = "My Content"
+        @State private var content = "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}"
         
         var body: some View {
             NavigationStack {
-                MarkdownEditor(content: $content)
+                VStack {
+                    Button("add") {
+                        content = "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}},{\"insert\":\" the \"},{\"insert\":\"Grey\",\"attributes\":{\"color\":\"#cccccc\"}}]}"
+                    }
+                    MarkdownEditor(content: $content)
+                }
             }
         }
     }
