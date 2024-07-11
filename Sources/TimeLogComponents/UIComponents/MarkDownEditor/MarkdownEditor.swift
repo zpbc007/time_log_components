@@ -187,6 +187,7 @@ extension MarkdownEditor {
             wkConfig.userContentController = userContentController
                     
             let webView = CustomAccessoryWebView(frame: .zero, configuration: wkConfig)
+            webView.navigationDelegate = context.coordinator
             webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
             webView.isInspectable = true
             
@@ -195,16 +196,13 @@ extension MarkdownEditor {
                         
             context.coordinator.bridge.updateWebview(webView)
             
-            self.syncContent(context.coordinator)
-            
-            
             return webView
         }
         
         func updateUIView(_ webView: WKWebView, context: Context) {
             context.coordinator.bridge.updateWebview(webView)
             if context.coordinator.latestData != content {
-                self.syncContent(context.coordinator)
+                self.syncContent(context.coordinator.bridge)
             }
         }
         
@@ -315,8 +313,8 @@ extension MarkdownEditor {
         }
         
         // 通知 web 重新设置 content
-        private func syncContent(_ coordinator: Coordinator) {
-            coordinator.bridge.trigger(
+        func syncContent(_ bridge: JSBridge) {
+            bridge.trigger(
                 eventName: Native2WebEvent.editorSetContent.rawValue,
                 data: content
             )
@@ -325,7 +323,7 @@ extension MarkdownEditor {
 }
 
 extension MarkdownEditor.WebView {
-    class Coordinator: NSObject {
+    class Coordinator: NSObject, WKNavigationDelegate {
         var parent: MarkdownEditor.WebView
         var bridge: JSBridge
         private var cancellable: AnyCancellable?
@@ -354,6 +352,10 @@ extension MarkdownEditor.WebView {
                         parent.content = data
                     }
                 })
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            parent.syncContent(bridge)
         }
     }
 }
