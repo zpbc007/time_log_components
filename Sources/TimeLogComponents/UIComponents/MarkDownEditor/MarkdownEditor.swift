@@ -195,17 +195,17 @@ extension MarkdownEditor {
                         
             context.coordinator.bridge.updateWebview(webView)
             
-            // 通知 web 设置内容
-            context.coordinator.bridge.trigger(
-                eventName: Native2WebEvent.editorSetContent.rawValue,
-                data: content
-            )
+            self.syncContent(context.coordinator)
+            
             
             return webView
         }
         
         func updateUIView(_ webView: WKWebView, context: Context) {
             context.coordinator.bridge.updateWebview(webView)
+            if context.coordinator.latestData != content {
+                self.syncContent(context.coordinator)
+            }
         }
         
         func makeCoordinator() -> Coordinator {
@@ -313,6 +313,14 @@ extension MarkdownEditor {
                 coordinator.bridge.trigger(eventName: eventName.rawValue)
             }
         }
+        
+        // 通知 web 重新设置 content
+        private func syncContent(_ coordinator: Coordinator) {
+            coordinator.bridge.trigger(
+                eventName: Native2WebEvent.editorSetContent.rawValue,
+                data: content
+            )
+        }
     }
 }
 
@@ -321,12 +329,15 @@ extension MarkdownEditor.WebView {
         var parent: MarkdownEditor.WebView
         var bridge: JSBridge
         private var cancellable: AnyCancellable?
+        private(set) var latestData: String?
 
         init(_ parent: MarkdownEditor.WebView) {
             let bridge = JSBridge()
             
             self.parent = parent
             self.bridge = bridge
+            
+            super.init()
             
             // 处理前端发过来的消息
             self.cancellable = self.bridge
@@ -337,7 +348,12 @@ extension MarkdownEditor.WebView {
                 .map { msg in
                     msg.data ?? ""
                 }
-                .assign(to: \.content, on: parent)
+                .sink(receiveValue: {[weak self] data in
+                    self?.latestData = data
+                    if parent.content != data {
+                        parent.content = data
+                    }
+                })
         }
     }
 }
