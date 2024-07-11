@@ -9,7 +9,7 @@ import SwiftUI
 import WebKit
 import Combine
 
-public struct MarkdownEditor: View {
+public struct RichTextEditor: View {
     @Binding var content: String
     @Binding var fetchContentId: String
     
@@ -23,7 +23,7 @@ public struct MarkdownEditor: View {
     }
 }
 
-extension MarkdownEditor {
+extension RichTextEditor {
     class CustomAccessoryWebView: WKWebView {
         override init(frame: CGRect, configuration: WKWebViewConfiguration) {
             super.init(frame: frame, configuration: configuration)
@@ -40,7 +40,7 @@ extension MarkdownEditor {
     }
 }
 
-extension MarkdownEditor {
+extension RichTextEditor {
     class KeyboardToolbar: UIView {
         var handleBoldButtonTapped: (() -> Void)?
         var handleNumberListButtonTapped: (() -> Void)?
@@ -159,7 +159,7 @@ extension MarkdownEditor {
     }
 }
 
-extension MarkdownEditor {
+extension RichTextEditor {
     struct WebView: UIViewRepresentable {
         @Binding var content: String
         @Binding var fetchContentId: String // 用于主动获取 web content 的标识
@@ -305,16 +305,16 @@ extension MarkdownEditor {
     }
 }
 
-extension MarkdownEditor.WebView {
+extension RichTextEditor.WebView {
     class Coordinator: NSObject, WKNavigationDelegate {
-        var parent: MarkdownEditor.WebView
+        var parent: RichTextEditor.WebView
         var bridge: JSBridge
         private var cancellable: AnyCancellable?
         private var webViewFinished: Bool = false
         private var latestData: String?
         private var lastFetchId: String?
 
-        init(_ parent: MarkdownEditor.WebView) {
+        init(_ parent: RichTextEditor.WebView) {
             let bridge = JSBridge()
             
             self.parent = parent
@@ -388,7 +388,7 @@ extension MarkdownEditor.WebView {
     }
 }
 
-extension MarkdownEditor.WebView {
+extension RichTextEditor.WebView {
     enum Native2WebEvent: String {
         case boldButtonTapped = "toolbar.boldButtonTapped"
         case numberListButtonTapped = "toolbar.numberListButtonTapped"
@@ -426,7 +426,7 @@ extension MarkdownEditor.WebView {
                         fetchContentId = UUID().uuidString
                     }
                     
-                    MarkdownEditor(content: $content, fetchContentId: $fetchContentId)
+                    RichTextEditor(content: $content, fetchContentId: $fetchContentId)
                 }
             }
         }
@@ -436,7 +436,7 @@ extension MarkdownEditor.WebView {
 }
 
 #Preview("toolbar") {
-    let bar = MarkdownEditor.KeyboardToolbar()
+    let bar = RichTextEditor.KeyboardToolbar()
     bar.backgroundColor = .red
     
     return bar
