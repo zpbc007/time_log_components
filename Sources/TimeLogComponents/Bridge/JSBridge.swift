@@ -49,7 +49,8 @@ public class JSBridge {
     
     struct JSBMessageFromJS: Codable {
         let eventName: String
-        let data: Data
+        let callbackID: String?
+        let data: String?
     }
     
     func updateWebview(_ webview: WKWebView) {
@@ -80,10 +81,14 @@ public class JSBridge {
         removeJSBMessageHandler()
     }
     
-    func deserialize<T : Decodable>(_ data: Data, type: T.Type) -> T? {
+    func deserialize<T : Decodable>(_ jsonString: String?, type: T.Type) -> T? {
+        guard let json = jsonString?.data(using: .utf8) else {
+            return nil
+        }
+        
         let decoder = JSONDecoder()
         
-        return try? decoder.decode(type, from: data)
+        return try? decoder.decode(type, from: json)
     }
     
     private func addJSBMessageHandler() {

@@ -110,7 +110,11 @@
      }
 
      window.webkit.messageHandlers.timeLineBridge.postMessage(
-       JSON.stringify(message)
+       JSON.stringify({
+         ...message,
+         // 对数据序列化，如果 native 需要解析，再拿出来解析
+         data: message.data ? JSON.stringify(message.data) : null,
+       })
      );
    }
 

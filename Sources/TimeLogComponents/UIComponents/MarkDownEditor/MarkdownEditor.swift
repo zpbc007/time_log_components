@@ -335,7 +335,7 @@ extension MarkdownEditor.WebView {
                     message.eventName == Web2NativeEvent.editorTextChange.rawValue
                 }
                 .map { msg in
-                    bridge.deserialize(msg.data, type: String.self) ?? ""
+                    msg.data ?? ""
                 }
                 .assign(to: \.content, on: parent)
         }
