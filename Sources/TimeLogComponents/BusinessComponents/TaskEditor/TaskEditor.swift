@@ -12,6 +12,8 @@ public struct TaskEditor: View {
     public typealias TagInfo = TimeLogSelectable
     public typealias CheckListInfo = TimeLogSelectable
     
+    let fontColor: Color
+    let activeFontColor: Color
     let tags: IdentifiedArrayOf<TagInfo>
     let checklists: IdentifiedArrayOf<CheckListInfo>
     @Binding var title: String
@@ -19,8 +21,11 @@ public struct TaskEditor: View {
     @Binding var selectedTags: [String]
     @Binding var selectedCheckList: String?
     @State private var fetchContentId = UUID().uuidString
+    @FocusState private var titleFocused: Bool
     
     public init(
+        fontColor: Color,
+        activeFontColor: Color,
         tags: IdentifiedArrayOf<TagInfo>,
         checklists: IdentifiedArrayOf<CheckListInfo>,
         title: Binding<String>,
@@ -28,6 +33,8 @@ public struct TaskEditor: View {
         selectedTags: Binding<[String]>,
         selectedCheckList: Binding<String?>
     ) {
+        self.fontColor = fontColor
+        self.activeFontColor = activeFontColor
         self.tags = tags
         self.checklists = checklists
         self._title = title
@@ -43,25 +50,46 @@ public struct TaskEditor: View {
     public var body: some View {
         VStack {
             TextField("任务名称", text: $title)
+                .font(.title)
                 .padding()
-                .toolbar {
-                    ToolbarItem(placement: .keyboard) {
-                        HStack {
-                            Button("BTN") {}
-                            
-                            Spacer()
-                        }
-                    }
-                }
+                .focused($titleFocused)
             
             RichTextEditor(
                 content: $commentDeltaJson,
                 fetchContentId: $fetchContentId
             )
             
-            HStack {
-                Button("xx") {}
+            // tags checklist selector
+            VStack {
+                if !selectedTags.isEmpty {
+                    TaskEditor_Common.SelectedTags(
+                        tags: tags,
+                        selected: $selectedTags
+                    )
+                }
+                
+                // 工具栏
+                HStack(spacing: 20) {
+                    // tag 列表
+                    TaskEditor_Common.TagSelector(
+                        fontColor: fontColor,
+                        activeFontColor: activeFontColor,
+                        tags: tags,
+                        selected: $selectedTags
+                    )
+                    
+                    // checkList 列表
+                    TaskEditor_Common.CheckListSelector(
+                        activeFontColor: activeFontColor,
+                        checklists: checklists,
+                        selected: $selectedCheckList
+                    )
+                    
+                    Spacer()
+                }.foregroundStyle(fontColor)
             }
+        }.task {
+            titleFocused = true
         }
     }
 }
@@ -89,6 +117,8 @@ public struct TaskEditor: View {
         var body: some View {
             NavigationStack {
                 TaskEditor(
+                    fontColor: .black,
+                    activeFontColor: .blue,
                     tags: .init(uniqueElements: tags),
                     checklists: .init(uniqueElements: checklists),
                     title: $title,

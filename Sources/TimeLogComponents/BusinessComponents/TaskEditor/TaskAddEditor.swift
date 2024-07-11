@@ -66,103 +66,33 @@ public struct TaskAddEditor: View {
         ) {
             VStack {
                 if !selectedTags.isEmpty {
-                    selectedTagView
+                    TaskEditor_Common.SelectedTags(
+                        tags: tags,
+                        selected: $selectedTags
+                    )
                 }
                 
                 // 工具栏
                 HStack(spacing: 20) {
                     // tag 列表
-                    tagSelectorView
+                    TaskEditor_Common.TagSelector(
+                        fontColor: fontColor,
+                        activeFontColor: activeFontColor,
+                        tags: tags,
+                        selected: $selectedTags
+                    )
                     
                     // checkList 列表
-                    checkListSelectorView
+                    TaskEditor_Common.CheckListSelector(
+                        activeFontColor: activeFontColor,
+                        checklists: checklists,
+                        selected: $selectedCheckList
+                    )
                     
                     Spacer()
                     
                     confirmButtonView
                 }.foregroundStyle(fontColor)
-            }
-        }
-    }
-    
-    // 选中的 tag
-    @ViewBuilder
-    private var selectedTagView: some View {
-        WrappingHStack(alignment: .leading, spacing: .dynamic(minSpacing: 10)) {
-            ForEach(selectedTags, id: \.self) { tagId in
-                if let tag = tags[id: tagId] {
-                    Text(tag.name)
-                        .padding(6)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        .font(.caption2)
-                        .onTapGesture {
-                            selectedTags.removeAll(where: { $0 == tag.id })
-                        }
-                }
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private var tagSelectorView: some View {
-        Menu {
-            ForEach(tags) { tag in
-                Button {
-                    if selectedTags.contains(tag.id) {
-                        selectedTags.removeAll(where: { $0 == tag.id })
-                    } else {
-                        selectedTags.append(tag.id)
-                    }
-                } label: {
-                    if selectedTags.contains(tag.id) { 
-                        Label(tag.name, systemImage: "checkmark")
-                    } else {
-                        Text(tag.name)
-                    }
-                }
-            }
-        } label: {
-            Image(systemName: "tag")
-                .font(.title3)
-                .foregroundStyle(selectedTags.isEmpty ? fontColor : activeFontColor)
-        }
-    }
-    
-    @ViewBuilder
-    private var checkListSelectorView: some View {
-        Menu {
-            ForEach(checklists) { checkList in
-                Button {
-                    if selectedCheckList == checkList.id {
-                        selectedCheckList = nil
-                    } else {
-                        selectedCheckList = checkList.id
-                    }
-                } label: {
-                    if selectedCheckList == checkList.id {
-                        Label(checkList.name, systemImage: "checkmark")
-                    } else {
-                        Text(checkList.name)
-                    }
-                }
-            }
-        } label: {
-            if let checkListId = selectedCheckList,
-               let checkList = checklists[id: checkListId] {
-                HStack {
-                    Image(systemName: "tray")
-                        .font(.title3)
-                    
-                    // 选中的 checkList
-                    Text(checkList.name)
-                        .font(.callout)
-                }
-                .foregroundStyle(activeFontColor)
-            } else {
-                HStack {
-                    Image(systemName: "tray")
-                        .font(.title3)
-                }
             }
         }
     }
