@@ -80,6 +80,12 @@ public class JSBridge {
         removeJSBMessageHandler()
     }
     
+    func deserialize<T : Decodable>(_ data: Data, type: T.Type) -> T? {
+        let decoder = JSONDecoder()
+        
+        return try? decoder.decode(type, from: data)
+    }
+    
     private func addJSBMessageHandler() {
         webview?.configuration.userContentController.add(LeakAvoider(self.handleJSMessage), name: Self.JSBName)
     }

@@ -17,6 +17,32 @@
    // 主动触发，返回结果
    // window.timeLineBridge.trigger("editor.content.change", { content: "xxx" });
 
+   /**
+    * 使用示例
+    *
+    * 事件监听 无返回值
+    * const dispose = window.timeLineBridge.addEventListener("toolbar.bold.tapped", () => {
+    *  console.log("toolbar.bold.tapped");
+    * });
+    *
+    * 事件监听 有返回值
+    * const dispose = window.timeLineBridge.addEventHandler("editor.fetchContent", () => {
+    *  return quill.getContents();
+    * })
+    *
+    * 主动调用 native api，等待返回结果
+    * window.timeLineBridge.call("page.close", {data: true}, (result) => {
+    *  if (result) {
+    *    console.log("close success");
+    *  } else {
+    *    console.log("close failed");
+    *  }
+    * });
+    *
+    * 主动触发 web 事件，通知客户端
+    * window.timeLineBridge.trigger("editor.content.change", { content: "xxx" });
+    */
+
    const eventListeners = {};
    /**
     * 监听从 native 发过来的事件
@@ -126,12 +152,44 @@
      };
    })();
 
+   const eventHandlers = {};
+   function addEventHandler(eventName, handler) {
+     eventHandlers[eventName] = handler;
+
+     return () => {
+       if (eventHandlers[eventName] === handler) {
+         eventHandlers[eventName] = null;
+       }
+     };
+   }
+
+   function handleEventFromNative(message) {
+     const { eventName, data } = JSON.parse(message) || {};
+
+     const response = {
+       eventName,
+       data: null,
+     };
+
+     if (eventName && eventHandlers[eventName]) {
+       response.data = eventHandlers[eventName](data || null);
+     }
+
+     return response;
+   }
+
    // 供外部调用
    window.timeLineBridge = {
+     // 同一个 eventName 全局可以有多个
      addEventListener,
+     // 同一个 eventName 全局只能有一个
+     addEventHandler,
      callNative,
      triggerEvent,
+     // 客户端不获取返回值
      _handleMessageFromNative: handleMessageFromNative,
+     // 客户端需要获取返回值
+     _handleEventFromNative: handleEventFromNative,
    };
 
    const options = {
@@ -205,6 +263,16 @@
    // 减少缩进操作
    addEventListener("toolbar.blurButtonTapped", () => {
      quill.blur();
+   });
+
+   // 获取编辑器内容
+   addEventHandler("editor.fetchContent", () => {
+     return quill.getContents();
+   });
+
+   // 设置编辑器内容
+   addEventListener("editor.setContent", (newContent) => {
+     quill.setContents(newContent, 'api');
    });
 
  })();

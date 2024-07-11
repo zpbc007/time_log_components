@@ -7,14 +7,17 @@
 
 import SwiftUI
 import WebKit
+import Combine
 
 public struct MarkdownEditor: View {
-    @State private var input = ""
+    @Binding var content: String
     
-    public init() {}
+    public init(content: Binding<String>) {
+        self._content = content
+    }
     
     public var body: some View {
-        WebView()
+        WebView(content: $content)
     }
 }
 
@@ -170,11 +173,7 @@ extension MarkdownEditor {
 
 extension MarkdownEditor {
     struct WebView: UIViewRepresentable {
-        private var bridge: JSBridge
-        
-        init() {
-            self.bridge = JSBridge()
-        }
+        @Binding var content: String
         
         func makeUIView(context: Context) -> WKWebView {
             let wkConfig = WKWebViewConfiguration()
@@ -191,16 +190,26 @@ extension MarkdownEditor {
             webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
             webView.isInspectable = true
             
-            webView.myAccessoryView = self.setupToolbar()
+            webView.myAccessoryView = self.setupToolbar(context.coordinator)
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
                         
-            self.bridge.updateWebview(webView)
+            context.coordinator.bridge.updateWebview(webView)
+            
+            // 通知 web 设置内容
+            context.coordinator.bridge.trigger(
+                eventName: Native2WebEvent.editorSetContent.rawValue,
+                data: content
+            )
             
             return webView
         }
         
         func updateUIView(_ webView: WKWebView, context: Context) {
-            self.bridge.updateWebview(webView)
+            context.coordinator.bridge.updateWebview(webView)
+        }
+        
+        func makeCoordinator() -> Coordinator {
+            Coordinator(self)
         }
         
         private func injectQuillScript(_ userContentController: WKUserContentController) {
@@ -231,7 +240,7 @@ extension MarkdownEditor {
             let bundleScript = WKUserScript(source: bundleJSString, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
             userContentController.addUserScript(bundleScript)
         }
-        
+                
         private func injectCssScript(_ userContentController: WKUserContentController) {
             // 加载 js\css 文件
             let quillCssURL = Bundle.module.url(forResource: "quill.snow", withExtension: "css")
@@ -277,37 +286,58 @@ extension MarkdownEditor {
                 </style>
             </head>
             <body>
-            <div id="info">
-            </div>
-            <div id="editor">
-              <h2>Demo Content</h2>
-              <p>Preset build with <code>snow</code> theme, and some common formats.</p>
-            </div>
+            <div id="editor"></div>
             </body>
             </html>
             """
         }
         
-        private func setupToolbar() -> KeyboardToolbar {
+        private func setupToolbar(_ coordinator: Coordinator) -> KeyboardToolbar {
             let toolbar = KeyboardToolbar()
             toolbar.backgroundColor = .darkGray
             
             // 触发事件
-            toolbar.handleBoldButtonTapped = handleButtonTapped(.boldButtonTapped)
-            toolbar.handleDashListButtonTapped = handleButtonTapped(.dashListButtonTapped)
-            toolbar.handleNumberListButtonTapped = handleButtonTapped(.numberListButtonTapped)
-            toolbar.handleCheckBoxListButtonTapped = handleButtonTapped(.checkBoxListButtonTapped)
-            toolbar.handleIncreaseIndentButtonTapped = handleButtonTapped(.increaseIndentButtonTapped)
-            toolbar.handleDecreaseIndentButtonTapped = handleButtonTapped(.decreaseIndentButtonTapped)
-            toolbar.handleHideKeyboardButtonTapped = handleButtonTapped(.blurButtonTapped)
+            toolbar.handleBoldButtonTapped = handleButtonTapped(coordinator, .boldButtonTapped)
+            toolbar.handleDashListButtonTapped = handleButtonTapped(coordinator, .dashListButtonTapped)
+            toolbar.handleNumberListButtonTapped = handleButtonTapped(coordinator, .numberListButtonTapped)
+            toolbar.handleCheckBoxListButtonTapped = handleButtonTapped(coordinator, .checkBoxListButtonTapped)
+            toolbar.handleIncreaseIndentButtonTapped = handleButtonTapped(coordinator, .increaseIndentButtonTapped)
+            toolbar.handleDecreaseIndentButtonTapped = handleButtonTapped(coordinator, .decreaseIndentButtonTapped)
+            toolbar.handleHideKeyboardButtonTapped = handleButtonTapped(coordinator, .blurButtonTapped)
             
             return toolbar
         }
         
-        private func handleButtonTapped(_ eventName: Native2WebEvent) -> () -> Void {
+        private func handleButtonTapped(_ coordinator: Coordinator, _ eventName: Native2WebEvent) -> () -> Void {
             {
-                bridge.trigger(eventName: eventName.rawValue)
+                coordinator.bridge.trigger(eventName: eventName.rawValue)
             }
+        }
+    }
+}
+
+extension MarkdownEditor.WebView {
+    class Coordinator: NSObject {
+        var parent: MarkdownEditor.WebView
+        var bridge: JSBridge
+        private var cancellable: AnyCancellable?
+
+        init(_ parent: MarkdownEditor.WebView) {
+            let bridge = JSBridge()
+            
+            self.parent = parent
+            self.bridge = bridge
+            
+            // 处理前端发过来的消息
+            self.cancellable = self.bridge
+                .eventBus
+                .filter { message in
+                    message.eventName == Web2NativeEvent.editorTextChange.rawValue
+                }
+                .map { msg in
+                    bridge.deserialize(msg.data, type: String.self) ?? ""
+                }
+                .assign(to: \.content, on: parent)
         }
     }
 }
@@ -321,14 +351,21 @@ extension MarkdownEditor.WebView {
         case increaseIndentButtonTapped = "toolbar.increaseIndentButtonTapped"
         case decreaseIndentButtonTapped = "toolbar.decreaseIndentButtonTapped"
         case blurButtonTapped = "toolbar.blurButtonTapped"
+        case editorSetContent = "editor.setContent"
+    }
+    
+    enum Web2NativeEvent: String {
+        case editorTextChange = "editor.textChange"
     }
 }
 
 #Preview {
     struct Playground: View {
+        @State private var content = "My Content"
+        
         var body: some View {
             NavigationStack {
-                MarkdownEditor()
+                MarkdownEditor(content: $content)
             }
         }
     }
