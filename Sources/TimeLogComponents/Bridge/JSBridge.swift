@@ -83,10 +83,7 @@ public class JSBridge {
         return await withCheckedContinuation { continuation in
             DispatchQueue.main.async { [weak self] in
                 self?.webview?.evaluateJavaScript(jsCommand, completionHandler: { resultString, _ in
-                    guard 
-                        let jsonString = resultString as? String,
-                        let data = jsonString.data(using: .utf8)
-                    else {
+                    guard let jsonString = resultString as? String else {
                         continuation.resume(returning: nil)
                         return
                     }

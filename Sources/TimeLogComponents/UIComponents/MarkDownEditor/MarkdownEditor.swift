@@ -129,20 +129,6 @@ extension MarkdownEditor {
             addSubview(toolbar)
         }
         
-        private func buildButton(_ text: String) -> UIButton {
-            let button = UIButton(type: .system)
-            button.setTitle(text, for: .normal)
-            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-            button.translatesAutoresizingMaskIntoConstraints = false
-            
-            return button
-        }
-        
-        @objc func buttonTapped() {
-            // 处理按钮点击事件
-            print("Button was tapped")
-        }
-        
         @objc func onBoldButtonTapped() {
             handleBoldButtonTapped?()
         }
@@ -203,9 +189,11 @@ extension MarkdownEditor {
         }
         
         func updateUIView(_ webView: WKWebView, context: Context) {
-            print("\(content), \(fetchContentId)")
+            // 这里需要与 Binding 建立关联关系，不然不会更新
+            let _ = content
+            let _ = fetchContentId
             context.coordinator.bridge.updateWebview(webView)
-            context.coordinator.syncContent()
+            context.coordinator.syncContent(content)
             context.coordinator.fetchContent()
         }
         
@@ -322,8 +310,8 @@ extension MarkdownEditor.WebView {
         var parent: MarkdownEditor.WebView
         var bridge: JSBridge
         private var cancellable: AnyCancellable?
-        private(set) var latestData: String?
         private var webViewFinished: Bool = false
+        private var latestData: String?
         private var lastFetchId: String?
 
         init(_ parent: MarkdownEditor.WebView) {
@@ -338,7 +326,7 @@ extension MarkdownEditor.WebView {
             self.cancellable = self.bridge
                 .eventBus
                 .filter { message in
-                    message.eventName == Web2NativeEvent.editorTextChange.rawValue
+                    message.eventName == Web2NativeEvent.editorContentChange.rawValue
                 }
                 .map { msg in
                     msg.data ?? ""
@@ -353,18 +341,22 @@ extension MarkdownEditor.WebView {
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webViewFinished = true
-            syncContent()
+            self.syncContent(parent.content)
         }
         
-        func syncContent() {
-            guard webViewFinished, latestData != parent.content else {
+        /**
+         *  不能在此函数中使用 parent.content 进行判断，
+         *  当 parent.content 更新时，这里获取到的是旧值
+         */
+        func syncContent(_ newContent: String) {
+            guard webViewFinished, latestData != newContent else {
                 return
             }
             
-            latestData = parent.content
+            latestData = newContent
             bridge.trigger(
                 eventName: Native2WebEvent.editorSetContent.rawValue,
-                data: parent.content
+                data: newContent
             )
         }
         
@@ -409,7 +401,7 @@ extension MarkdownEditor.WebView {
     }
     
     enum Web2NativeEvent: String {
-        case editorTextChange = "editor.textChange"
+        case editorContentChange = "editor.contentChange"
     }
     
     enum NativeCallWebEvent: String {

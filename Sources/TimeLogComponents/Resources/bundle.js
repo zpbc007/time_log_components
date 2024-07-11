@@ -831,7 +831,7 @@
 
    // 5s 内没有改动，再进行同步
    const throttledNotice = throttle(noticeNativeTextChange, 5000, {
-     trailing: true,
+     leading: false,
    });
 
    quill.on("text-change", (delta, oldDelta, source) => {
