@@ -203,8 +203,10 @@ extension MarkdownEditor {
         }
         
         func updateUIView(_ webView: WKWebView, context: Context) {
+            print("\(content), \(fetchContentId)")
             context.coordinator.bridge.updateWebview(webView)
             context.coordinator.syncContent()
+            context.coordinator.fetchContent()
         }
         
         func makeCoordinator() -> Coordinator {
@@ -322,7 +324,7 @@ extension MarkdownEditor.WebView {
         private var cancellable: AnyCancellable?
         private(set) var latestData: String?
         private var webViewFinished: Bool = false
-        private var lastFetchId: String = ""
+        private var lastFetchId: String?
 
         init(_ parent: MarkdownEditor.WebView) {
             let bridge = JSBridge()
@@ -366,17 +368,32 @@ extension MarkdownEditor.WebView {
             )
         }
         
-        func fetchContent() async {
-            if lastFetchId != parent.fetchContentId {
-                guard let result = await bridge.callJS(
+        func fetchContent() {
+            Task { @MainActor [weak self] in
+                guard let self else {
+                    return
+                }
+                
+                // 首次执行，不需要获取内容
+                if self.lastFetchId == nil {
+                    self.lastFetchId = self.parent.fetchContentId
+                    return
+                }
+                
+                guard self.lastFetchId != self.parent.fetchContentId else {
+                    return
+                }
+                print("call js")
+                guard let result = await self.bridge.callJS(
                     eventName: NativeCallWebEvent.editorFetchContent.rawValue,
                     resultType: String.self
                 ) else {
+                    print("no content")
                     return
                 }
                 
                 self.latestData = result
-                parent.content = result
+                self.parent.content = result
             }
         }
     }
