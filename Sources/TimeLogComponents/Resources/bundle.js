@@ -109,7 +109,7 @@
        responseCallbacks[callbackID] = callback;
      }
 
-     window.webkit.eventListeners.timeLineBridge.postMessage(message);
+     window.webkit.messageHandlers.timeLineBridge.postMessage(message);
    }
 
    /**
