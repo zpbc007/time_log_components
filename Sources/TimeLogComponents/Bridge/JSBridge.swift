@@ -79,7 +79,7 @@ public class JSBridge {
             return nil
         }
         
-        let jsCommand = "window._handleEventFromNative('\(msgJSON)')"
+        let jsCommand = "window.timeLineBridge._handleEventFromNative('\(msgJSON)')"
         
         return await withCheckedContinuation { continuation in
             DispatchQueue.main.async { [weak self] in
