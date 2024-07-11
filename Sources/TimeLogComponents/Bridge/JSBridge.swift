@@ -72,10 +72,9 @@ public class JSBridge {
         dispatch(msg)
     }
     
-    func callJS<D: Codable>(eventName: String, resultType: D.Type) async -> D? {
+    func callJS(eventName: String) async -> String? {
         let msg = JSBMessageFromNative<String>(eventName: eventName, data: nil)
         guard let msgJSON = serialize(msg) else {
-            print("no json")
             return nil
         }
         
@@ -88,18 +87,11 @@ public class JSBridge {
                         let jsonString = resultString as? String,
                         let data = jsonString.data(using: .utf8)
                     else {
-                        print("no resultString: \(resultString)")
                         continuation.resume(returning: nil)
                         return
                     }
                     
-                    let decoder = JSONDecoder()
-                    guard let result = try? decoder.decode(resultType.self, from: data) else {
-                        continuation.resume(returning: nil)
-                        return
-                    }
-                    
-                    continuation.resume(returning: result)
+                    continuation.resume(returning: jsonString)
                 })
             }
         }

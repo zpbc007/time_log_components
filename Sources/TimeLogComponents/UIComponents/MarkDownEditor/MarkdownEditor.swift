@@ -383,12 +383,9 @@ extension MarkdownEditor.WebView {
                 guard self.lastFetchId != self.parent.fetchContentId else {
                     return
                 }
-                print("call js")
                 guard let result = await self.bridge.callJS(
-                    eventName: NativeCallWebEvent.editorFetchContent.rawValue,
-                    resultType: String.self
+                    eventName: NativeCallWebEvent.editorFetchContent.rawValue
                 ) else {
-                    print("no content")
                     return
                 }
                 
