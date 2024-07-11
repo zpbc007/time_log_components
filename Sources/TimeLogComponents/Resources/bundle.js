@@ -176,7 +176,7 @@
 
      if (eventName && eventHandlers[eventName]) {
        const res = eventHandlers[eventName](data || null);
-       return res == null ? null : JSON.stringify(response);
+       return res == null ? null : JSON.stringify(res);
      } else {
        return null;
      }
