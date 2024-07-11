@@ -105,6 +105,70 @@ struct TaskEditor_Common {
             }
         }
     }
+    
+    struct ConfirmButton: View {
+        let fontColor: Color
+        let activeFontColor: Color
+        let action: () -> Void
+        let isValid: Bool
+        
+        var body: some View {
+            Button(action: action) {
+                Image(systemName: "arrow.up.circle")
+                    .font(.title)
+                    .foregroundStyle(isValid ? activeFontColor : fontColor)
+            }.disabled(!isValid)
+        }
+    }
+    
+    struct TaskToolbar: View {
+        let fontColor: Color
+        let activeFontColor: Color
+        let tags: IdentifiedArrayOf<TimeLogSelectable>
+        let checklists: IdentifiedArrayOf<TimeLogSelectable>
+        let isValid: Bool
+        @Binding var selectedTags: [String]
+        @Binding var selectedCheckList: String?
+        let onSendButtonTapped: () -> Void
+        
+        var body: some View {
+            VStack {
+                if !selectedTags.isEmpty {
+                    TaskEditor_Common.SelectedTags(
+                        tags: tags,
+                        selected: $selectedTags
+                    )
+                }
+                
+                // 工具栏
+                HStack(spacing: 20) {
+                    // tag 列表
+                    TaskEditor_Common.TagSelector(
+                        fontColor: fontColor,
+                        activeFontColor: activeFontColor,
+                        tags: tags,
+                        selected: $selectedTags
+                    )
+                    
+                    // checkList 列表
+                    TaskEditor_Common.CheckListSelector(
+                        activeFontColor: activeFontColor,
+                        checklists: checklists,
+                        selected: $selectedCheckList
+                    )
+                    
+                    Spacer()
+                    
+                    TaskEditor_Common.ConfirmButton(
+                        fontColor: fontColor,
+                        activeFontColor: activeFontColor,
+                        action: onSendButtonTapped,
+                        isValid: isValid
+                    )
+                }.foregroundStyle(fontColor)
+            }
+        }
+    }
 }
 
 #Preview {
@@ -125,26 +189,17 @@ struct TaskEditor_Common {
         @State private var selectedCheckList: String? = nil
         
         var body: some View {
-            VStack {
-                HStack {
-                    TaskEditor_Common.TagSelector(
-                        fontColor: .primary,
-                        activeFontColor: .blue,
-                        tags: tags,
-                        selected: $selectedTags
-                    )
-                    TaskEditor_Common.SelectedTags(tags: tags, selected: $selectedTags)
-                }
-                
-                HStack {
-                    TaskEditor_Common.CheckListSelector(
-                        activeFontColor: .blue,
-                        checklists: checklists,
-                        selected: $selectedCheckList
-                    )
-                }
+            TaskEditor_Common.TaskToolbar(
+                fontColor: .primary,
+                activeFontColor: .blue,
+                tags: tags,
+                checklists: checklists,
+                isValid: true,
+                selectedTags: $selectedTags,
+                selectedCheckList: $selectedCheckList
+            ) {
+                print("confirm")
             }.padding()
-            
         }
     }
     

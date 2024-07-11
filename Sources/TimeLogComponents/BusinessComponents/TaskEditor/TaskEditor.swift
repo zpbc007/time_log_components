@@ -59,35 +59,18 @@ public struct TaskEditor: View {
                 fetchContentId: $fetchContentId
             )
             
-            // tags checklist selector
-            VStack {
-                if !selectedTags.isEmpty {
-                    TaskEditor_Common.SelectedTags(
-                        tags: tags,
-                        selected: $selectedTags
-                    )
+            TaskEditor_Common.TaskToolbar(
+                fontColor: fontColor,
+                activeFontColor: activeFontColor,
+                tags: tags,
+                checklists: checklists,
+                isValid: isValid,
+                selectedTags: $selectedTags,
+                selectedCheckList: $selectedCheckList,
+                onSendButtonTapped: {
+                    
                 }
-                
-                // 工具栏
-                HStack(spacing: 20) {
-                    // tag 列表
-                    TaskEditor_Common.TagSelector(
-                        fontColor: fontColor,
-                        activeFontColor: activeFontColor,
-                        tags: tags,
-                        selected: $selectedTags
-                    )
-                    
-                    // checkList 列表
-                    TaskEditor_Common.CheckListSelector(
-                        activeFontColor: activeFontColor,
-                        checklists: checklists,
-                        selected: $selectedCheckList
-                    )
-                    
-                    Spacer()
-                }.foregroundStyle(fontColor)
-            }
+            )
         }.task {
             titleFocused = true
         }

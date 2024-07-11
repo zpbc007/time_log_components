@@ -64,36 +64,16 @@ public struct TaskAddEditor: View {
             desc: $desc,
             dismiss: dismiss
         ) {
-            VStack {
-                if !selectedTags.isEmpty {
-                    TaskEditor_Common.SelectedTags(
-                        tags: tags,
-                        selected: $selectedTags
-                    )
-                }
-                
-                // 工具栏
-                HStack(spacing: 20) {
-                    // tag 列表
-                    TaskEditor_Common.TagSelector(
-                        fontColor: fontColor,
-                        activeFontColor: activeFontColor,
-                        tags: tags,
-                        selected: $selectedTags
-                    )
-                    
-                    // checkList 列表
-                    TaskEditor_Common.CheckListSelector(
-                        activeFontColor: activeFontColor,
-                        checklists: checklists,
-                        selected: $selectedCheckList
-                    )
-                    
-                    Spacer()
-                    
-                    confirmButtonView
-                }.foregroundStyle(fontColor)
-            }
+            TaskEditor_Common.TaskToolbar(
+                fontColor: fontColor,
+                activeFontColor: activeFontColor,
+                tags: tags,
+                checklists: checklists,
+                isValid: isValid,
+                selectedTags: $selectedTags,
+                selectedCheckList: $selectedCheckList,
+                onSendButtonTapped: onSendButtonTapped
+            )
         }
     }
     
