@@ -174,16 +174,12 @@
    function handleEventFromNative(message) {
      const { eventName, data } = JSON.parse(message) || {};
 
-     const response = {
-       eventName,
-       data: null,
-     };
-
      if (eventName && eventHandlers[eventName]) {
-       response.data = eventHandlers[eventName](data || null);
+       const res = eventHandlers[eventName](data || null);
+       return res == null ? null : JSON.stringify(response);
+     } else {
+       return null;
      }
-
-     return response;
    }
 
    // 供外部调用
@@ -814,7 +810,7 @@
      handleIndentChange(-1);
    });
 
-   // 减少缩进操作
+   // 清除聚焦状态
    addEventListener("toolbar.blurButtonTapped", () => {
      quill.blur();
    });
@@ -830,15 +826,17 @@
    });
 
    function noticeNativeTextChange(delta) {
-     callNative("editor.textChange", delta);
+     callNative("editor.contentChange", delta);
    }
-   const throttledNotice = throttle(noticeNativeTextChange, 300, {
+
+   // 5s 内没有改动，再进行同步
+   const throttledNotice = throttle(noticeNativeTextChange, 5000, {
      trailing: true,
    });
 
    quill.on("text-change", (delta, oldDelta, source) => {
      if (source == "user") {
-       throttledNotice(delta);
+       throttledNotice(quill.getContents());
      }
    });
 

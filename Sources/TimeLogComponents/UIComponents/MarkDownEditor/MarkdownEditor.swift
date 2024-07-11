@@ -11,13 +11,15 @@ import Combine
 
 public struct MarkdownEditor: View {
     @Binding var content: String
+    @Binding var fetchContentId: String
     
-    public init(content: Binding<String>) {
+    public init(content: Binding<String>, fetchContentId: Binding<String>) {
         self._content = content
+        self._fetchContentId = fetchContentId
     }
     
     public var body: some View {
-        WebView(content: $content)
+        WebView(content: $content, fetchContentId: $fetchContentId)
     }
 }
 
@@ -174,6 +176,7 @@ extension MarkdownEditor {
 extension MarkdownEditor {
     struct WebView: UIViewRepresentable {
         @Binding var content: String
+        @Binding var fetchContentId: String // 用于主动获取 web content 的标识
         
         func makeUIView(context: Context) -> WKWebView {
             let wkConfig = WKWebViewConfiguration()
@@ -201,9 +204,7 @@ extension MarkdownEditor {
         
         func updateUIView(_ webView: WKWebView, context: Context) {
             context.coordinator.bridge.updateWebview(webView)
-            if context.coordinator.latestData != content {
-                self.syncContent(context.coordinator.bridge)
-            }
+            context.coordinator.syncContent()
         }
         
         func makeCoordinator() -> Coordinator {
@@ -311,14 +312,6 @@ extension MarkdownEditor {
                 coordinator.bridge.trigger(eventName: eventName.rawValue)
             }
         }
-        
-        // 通知 web 重新设置 content
-        func syncContent(_ bridge: JSBridge) {
-            bridge.trigger(
-                eventName: Native2WebEvent.editorSetContent.rawValue,
-                data: content
-            )
-        }
     }
 }
 
@@ -328,6 +321,8 @@ extension MarkdownEditor.WebView {
         var bridge: JSBridge
         private var cancellable: AnyCancellable?
         private(set) var latestData: String?
+        private var webViewFinished: Bool = false
+        private var lastFetchId: String = ""
 
         init(_ parent: MarkdownEditor.WebView) {
             let bridge = JSBridge()
@@ -355,7 +350,34 @@ extension MarkdownEditor.WebView {
         }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            parent.syncContent(bridge)
+            webViewFinished = true
+            syncContent()
+        }
+        
+        func syncContent() {
+            guard webViewFinished, latestData != parent.content else {
+                return
+            }
+            
+            latestData = parent.content
+            bridge.trigger(
+                eventName: Native2WebEvent.editorSetContent.rawValue,
+                data: parent.content
+            )
+        }
+        
+        func fetchContent() async {
+            if lastFetchId != parent.fetchContentId {
+                guard let result = await bridge.callJS(
+                    eventName: NativeCallWebEvent.editorFetchContent.rawValue,
+                    resultType: String.self
+                ) else {
+                    return
+                }
+                
+                self.latestData = result
+                parent.content = result
+            }
         }
     }
 }
@@ -375,19 +397,30 @@ extension MarkdownEditor.WebView {
     enum Web2NativeEvent: String {
         case editorTextChange = "editor.textChange"
     }
+    
+    enum NativeCallWebEvent: String {
+        case editorFetchContent = "editor.fetchContent"
+    }
 }
 
 #Preview {
     struct Playground: View {
         @State private var content = "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}"
+        @State private var fetchContentId = UUID().uuidString
         
         var body: some View {
             NavigationStack {
                 VStack {
-                    Button("add") {
+                    TextEditor(text: $content)
+                    
+                    Button("set") {
                         content = "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}},{\"insert\":\" the \"},{\"insert\":\"Grey\",\"attributes\":{\"color\":\"#cccccc\"}}]}"
                     }
-                    MarkdownEditor(content: $content)
+                    Button("fetch") {
+                        fetchContentId = UUID().uuidString
+                    }
+                    
+                    MarkdownEditor(content: $content, fetchContentId: $fetchContentId)
                 }
             }
         }

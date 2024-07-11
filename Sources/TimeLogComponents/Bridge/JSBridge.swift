@@ -72,6 +72,37 @@ public class JSBridge {
         dispatch(msg)
     }
     
+    func callJS<D: Codable>(eventName: String, resultType: D.Type) async -> D? {
+        let msg = JSBMessageFromNative<String>(eventName: eventName, data: nil)
+        guard let msgJSON = serialize(msg) else {
+            return nil
+        }
+        
+        let jsCommand = "window._handleEventFromNative('\(msgJSON)')"
+        
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { [weak self] in
+                self?.webview?.evaluateJavaScript(jsCommand, completionHandler: { resultString, _ in
+                    guard 
+                        let jsonString = resultString as? String,
+                        let data = jsonString.data(using: .utf8)
+                    else {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    
+                    let decoder = JSONDecoder()
+                    guard let result = try? decoder.decode(resultType.self, from: data) else {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    
+                    continuation.resume(returning: result)
+                })
+            }
+        }
+    }
+    
     func response<D: Codable>(eventName: String, callbackID: String, data: D) {
         let msg = JSBMessageFromNative(eventName: eventName, callbackID: callbackID, data: data)
         dispatch(msg)
