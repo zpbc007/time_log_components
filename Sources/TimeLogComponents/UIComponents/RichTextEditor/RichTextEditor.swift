@@ -160,7 +160,7 @@ extension RichTextEditor {
         
         private let syncStream = PassthroughSubject<String, Never>()
         
-        public init(_ content: String) {
+        public init(_ content: String = "") {
             self.content = content
         }
         
