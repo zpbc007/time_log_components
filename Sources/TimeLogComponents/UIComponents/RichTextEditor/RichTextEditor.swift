@@ -10,16 +10,8 @@ import WebKit
 import Combine
 
 public struct RichTextEditor: View {
-    @Binding var content: String
-    @Binding var fetchContentId: String
-    
-    public init(content: Binding<String>, fetchContentId: Binding<String>) {
-        self._content = content
-        self._fetchContentId = fetchContentId
-    }
-    
     public var body: some View {
-        WebView(content: $content, fetchContentId: $fetchContentId)
+        WebView()
     }
 }
 
@@ -160,9 +152,77 @@ extension RichTextEditor {
 }
 
 extension RichTextEditor {
+    class ViewModel: ObservableObject {
+        // 用于主动获取 web content 的标识
+        @Published var fetchContentId: String = UUID().uuidString
+        @Published private(set) var content: String
+        private var cancelable: AnyCancellable?
+        
+        private let syncStream = PassthroughSubject<String, Never>()
+        
+        init(_ content: String) {
+            self.content = content
+        }
+        
+        // 与 web 同步 content
+        func syncContent() async -> String {
+            let newId = UUID().uuidString
+            let oldContent = self.content
+            self.fetchContentId = newId
+            
+            let newContent = await withCheckedContinuation {[weak self] continuation in
+                if let cancel = self?.cancelable {
+                    cancel.cancel()
+                }
+                
+                var cancelable: AnyCancellable?
+                cancelable = self?.syncStream
+                    .prefix(1)
+                    .sink { content in
+                        if self?.cancelable == cancelable {
+                            self?.cancelable = nil
+                        }
+                        print("resume")
+                        continuation.resume(returning: content)
+                    }
+                
+                self?.cancelable = cancelable
+            }
+            
+            // 保证没有新的请求发出
+            guard newId == self.fetchContentId else {
+                return self.content
+            }
+            
+            // 保证 content 未更新
+            guard oldContent == self.content else {
+                return self.content
+            }
+            
+            self.content = newContent
+            return newContent
+        }
+        
+        func updateContent(_ newContent: String) {
+            if newContent != self.content {
+                self.content = newContent
+            }
+        }
+        
+        func finishSync(_ newContent: String?) {
+            if let newContent {
+                self.updateContent(newContent)
+                self.syncStream.send(newContent)
+            } else {
+                self.syncStream.send(self.content)
+            }
+        }
+    }
+}
+
+extension RichTextEditor {
     struct WebView: UIViewRepresentable {
-        @Binding var content: String
-        @Binding var fetchContentId: String // 用于主动获取 web content 的标识
+        @EnvironmentObject var viewModel: RichTextEditor.ViewModel
         
         func makeUIView(context: Context) -> WKWebView {
             let wkConfig = WKWebViewConfiguration()
@@ -190,10 +250,10 @@ extension RichTextEditor {
         
         func updateUIView(_ webView: WKWebView, context: Context) {
             // 这里需要与 Binding 建立关联关系，不然不会更新
-            let _ = content
-            let _ = fetchContentId
+            let _ = viewModel.content
+            let _ = viewModel.fetchContentId
             context.coordinator.bridge.updateWebview(webView)
-            context.coordinator.syncContent(content)
+            context.coordinator.syncContent(viewModel.content)
             context.coordinator.fetchContent()
         }
         
@@ -333,15 +393,13 @@ extension RichTextEditor.WebView {
                 }
                 .sink(receiveValue: {[weak self] data in
                     self?.latestData = data
-                    if parent.content != data {
-                        parent.content = data
-                    }
+                    parent.viewModel.updateContent(data)
                 })
         }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webViewFinished = true
-            self.syncContent(parent.content)
+            self.syncContent(parent.viewModel.content)
         }
         
         /**
@@ -368,21 +426,24 @@ extension RichTextEditor.WebView {
                 
                 // 首次执行，不需要获取内容
                 if self.lastFetchId == nil {
-                    self.lastFetchId = self.parent.fetchContentId
+                    self.lastFetchId = self.parent.viewModel.fetchContentId
                     return
                 }
                 
-                guard self.lastFetchId != self.parent.fetchContentId else {
+                // 没有请求过
+                guard self.lastFetchId != self.parent.viewModel.fetchContentId else {
                     return
                 }
+                self.lastFetchId = self.parent.viewModel.fetchContentId
                 guard let result = await self.bridge.callJS(
                     eventName: NativeCallWebEvent.editorFetchContent.rawValue
                 ) else {
+                    self.parent.viewModel.finishSync(nil)
                     return
                 }
                 
                 self.latestData = result
-                self.parent.content = result
+                self.parent.viewModel.finishSync(result)
             }
         }
     }
@@ -411,22 +472,25 @@ extension RichTextEditor.WebView {
 
 #Preview {
     struct Playground: View {
-        @State private var content = "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}"
-        @State private var fetchContentId = UUID().uuidString
+        @StateObject private var editorVM = RichTextEditor.ViewModel("{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}")
         
         var body: some View {
             NavigationStack {
                 VStack {
-                    TextEditor(text: $content)
+                    Text(editorVM.content)
                     
                     Button("set") {
-                        content = "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}},{\"insert\":\" the \"},{\"insert\":\"Grey\",\"attributes\":{\"color\":\"#cccccc\"}}]}"
+                        editorVM.updateContent("{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}},{\"insert\":\" the \"},{\"insert\":\"Grey\",\"attributes\":{\"color\":\"#cccccc\"}}]}")
                     }
-                    Button("fetch") {
-                        fetchContentId = UUID().uuidString
+                    Button("save") {
+                        Task { @MainActor in
+                            let content = await editorVM.syncContent()
+                            print("get content: ", content)
+                        }
                     }
                     
-                    RichTextEditor(content: $content, fetchContentId: $fetchContentId)
+                    RichTextEditor()
+                        .environmentObject(editorVM)
                 }
             }
         }

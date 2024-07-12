@@ -16,11 +16,11 @@ public struct TaskEditor: View {
     let activeFontColor: Color
     let tags: IdentifiedArrayOf<TagInfo>
     let checklists: IdentifiedArrayOf<CheckListInfo>
+    let onSendButtonTapped: () -> Void
     @Binding var title: String
-    @Binding var commentDeltaJson: String
     @Binding var selectedTags: [String]
     @Binding var selectedCheckList: String?
-    @State private var fetchContentId = UUID().uuidString
+    
     @FocusState private var titleFocused: Bool
     
     public init(
@@ -29,18 +29,18 @@ public struct TaskEditor: View {
         tags: IdentifiedArrayOf<TagInfo>,
         checklists: IdentifiedArrayOf<CheckListInfo>,
         title: Binding<String>,
-        commentDeltaJson: Binding<String>,
         selectedTags: Binding<[String]>,
-        selectedCheckList: Binding<String?>
+        selectedCheckList: Binding<String?>,
+        onSendButtonTapped: @escaping () -> Void
     ) {
         self.fontColor = fontColor
         self.activeFontColor = activeFontColor
         self.tags = tags
         self.checklists = checklists
         self._title = title
-        self._commentDeltaJson = commentDeltaJson
         self._selectedTags = selectedTags
         self._selectedCheckList = selectedCheckList
+        self.onSendButtonTapped = onSendButtonTapped
     }
     
     private var isValid: Bool {
@@ -53,10 +53,7 @@ public struct TaskEditor: View {
                 .font(.title)
                 .focused($titleFocused)
             
-            RichTextEditor(
-                content: $commentDeltaJson,
-                fetchContentId: $fetchContentId
-            )
+            RichTextEditor()
             
             TaskEditor_Common.TaskToolbar(
                 fontColor: fontColor,
@@ -66,9 +63,7 @@ public struct TaskEditor: View {
                 isValid: isValid,
                 selectedTags: $selectedTags,
                 selectedCheckList: $selectedCheckList,
-                onSendButtonTapped: {
-                    
-                }
+                onSendButtonTapped: onSendButtonTapped
             )
         }
         .padding()
@@ -94,9 +89,9 @@ public struct TaskEditor: View {
         ]
         
         @State private var title: String = ""
-        @State private var commentDeltaJson: String = ""
         @State private var selectedTags: [String] = []
         @State private var selectedCheckList: String? = nil
+        @StateObject private var editorVM = RichTextEditor.ViewModel("")
         
         var body: some View {
             NavigationStack {
@@ -106,10 +101,12 @@ public struct TaskEditor: View {
                     tags: .init(uniqueElements: tags),
                     checklists: .init(uniqueElements: checklists),
                     title: $title,
-                    commentDeltaJson: $commentDeltaJson,
                     selectedTags: $selectedTags,
                     selectedCheckList: $selectedCheckList
-                )
+                ) {
+                    print("send")
+                }
+                .environmentObject(editorVM)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("保存") {
