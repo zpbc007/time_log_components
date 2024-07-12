@@ -391,6 +391,7 @@ extension RichTextEditor.WebView {
                 .map { msg in
                     msg.data ?? ""
                 }
+                .receive(on: DispatchQueue.main)
                 .sink(receiveValue: {[weak self] data in
                     self?.latestData = data
                     parent.viewModel.updateContent(data)
