@@ -152,7 +152,7 @@ extension RichTextEditor {
 }
 
 extension RichTextEditor {
-    class ViewModel: ObservableObject {
+    public class ViewModel: ObservableObject {
         // 用于主动获取 web content 的标识
         @Published var fetchContentId: String = UUID().uuidString
         @Published private(set) var content: String
@@ -160,7 +160,7 @@ extension RichTextEditor {
         
         private let syncStream = PassthroughSubject<String, Never>()
         
-        init(_ content: String) {
+        public init(_ content: String) {
             self.content = content
         }
         
