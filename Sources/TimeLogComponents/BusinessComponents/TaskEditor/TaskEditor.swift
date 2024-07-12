@@ -51,7 +51,6 @@ public struct TaskEditor: View {
         VStack {
             TextField("任务名称", text: $title)
                 .font(.title)
-                .padding()
                 .focused($titleFocused)
             
             RichTextEditor(
@@ -71,7 +70,9 @@ public struct TaskEditor: View {
                     
                 }
             )
-        }.task {
+        }
+        .padding()
+        .task {
             titleFocused = true
         }
     }
