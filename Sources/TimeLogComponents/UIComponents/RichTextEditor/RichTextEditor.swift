@@ -155,7 +155,7 @@ extension RichTextEditor {
     public class ViewModel: ObservableObject {
         // 用于主动获取 web content 的标识
         @Published var fetchContentId: String = UUID().uuidString
-        @Published private(set) var content: String
+        @Published public private(set) var content: String
         private var cancelable: AnyCancellable?
         
         private let syncStream = PassthroughSubject<String, Never>()
@@ -165,7 +165,7 @@ extension RichTextEditor {
         }
         
         // 与 web 同步 content
-        func syncContent() async -> String {
+        public func syncContent() async -> String {
             let newId = UUID().uuidString
             let oldContent = self.content
             self.fetchContentId = newId
