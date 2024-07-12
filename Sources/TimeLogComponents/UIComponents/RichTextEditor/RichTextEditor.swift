@@ -326,12 +326,16 @@ extension RichTextEditor {
                     content="width=device-width, initial-scale=1.0, maximum-scale=1, shrink-to-fit=no"
                 />
                 <style>
-                  body {
-                    margin: 0;
-                  }
-                  body > .ql-container.ql-snow {
-                    border: none;
-                  }
+                    body {
+                        margin: 0;
+                    }
+                    #editor.ql-container.ql-snow {
+                        border: none;
+                        font-size: 16px;
+                    }
+                    #editor .ql-editor {
+                        padding: 0;
+                    }
                 </style>
             </head>
             <body>
