@@ -156,12 +156,18 @@ extension RichTextEditor {
         // 用于主动获取 web content 的标识
         @Published var fetchContentId: String = UUID().uuidString
         @Published public private(set) var content: String
-        private var cancelable: AnyCancellable?
         
+        private var cancelable: AnyCancellable?
         private let syncStream = PassthroughSubject<String, Never>()
         
         public init(_ content: String = "") {
             self.content = content
+        }
+        
+        public func updateContent(_ newContent: String) {
+            if newContent != self.content {
+                self.content = newContent
+            }
         }
         
         // 与 web 同步 content
@@ -201,12 +207,6 @@ extension RichTextEditor {
             
             self.content = newContent
             return newContent
-        }
-        
-        func updateContent(_ newContent: String) {
-            if newContent != self.content {
-                self.content = newContent
-            }
         }
         
         func finishSync(_ newContent: String?) {
