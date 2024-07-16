@@ -744,7 +744,7 @@
 
    const options = {
      modules: {
-       toolbar: false,
+       // toolbar: false,
      },
      placeholder: "备注",
      theme: "snow",

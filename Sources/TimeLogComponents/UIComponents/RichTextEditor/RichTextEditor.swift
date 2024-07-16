@@ -10,6 +10,8 @@ import WebKit
 import Combine
 
 public struct RichTextEditor: View {
+    public init() {}
+    
     public var body: some View {
         WebView()
     }
