@@ -158,12 +158,20 @@ extension RichTextEditor {
         // 用于主动获取 web content 的标识
         @Published var fetchContentId: String = UUID().uuidString
         @Published public private(set) var content: String
+        let focusOnInit: Bool
+        let roundedTopCorners: Bool
         
         private var cancelable: AnyCancellable?
         private let syncStream = PassthroughSubject<String, Never>()
         
-        public init(_ content: String = "") {
+        public init(
+            _ content: String = "",
+            focused: Bool = false,
+            roundedTopCorners: Bool = false
+        ) {
             self.content = content
+            self.focusOnInit = focused
+            self.roundedTopCorners = roundedTopCorners
         }
         
         public func updateContent(_ newContent: String) {
@@ -309,6 +317,10 @@ extension RichTextEditor {
             }
             
             let createStyleJSString = """
+            window.editorParams = {
+                focus: \(String(viewModel.focusOnInit)),
+                roundedTopCorners: \(String(viewModel.roundedTopCorners)),
+            };
             const style = document.createElement('style');
             style.type = "text/css";
             style.innerHTML = "\(finalCssString)";
@@ -479,7 +491,11 @@ extension RichTextEditor.WebView {
 
 #Preview {
     struct Playground: View {
-        @StateObject private var editorVM = RichTextEditor.ViewModel("{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}")
+        @StateObject private var editorVM = RichTextEditor.ViewModel(
+            "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}",
+            focused: true,
+            roundedTopCorners: true
+        )
         
         var body: some View {
             NavigationStack {

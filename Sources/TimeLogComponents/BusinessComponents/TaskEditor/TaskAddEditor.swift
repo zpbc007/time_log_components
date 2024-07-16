@@ -10,6 +10,11 @@ import IdentifiedCollections
 import WrappingHStack
 
 public struct TaskAddEditor: View {
+    enum Field: Hashable {
+        case title
+        case desc
+    }
+    
     public typealias TagInfo = TimeLogSelectable
     public typealias CheckListInfo = TimeLogSelectable
     
@@ -24,6 +29,8 @@ public struct TaskAddEditor: View {
     @Binding var selectedCheckList: String?
     let onSendButtonTapped: () -> Void
     let dismiss: () -> Void
+    
+    @FocusState private var focusedField: Field?
     
     public init(
         bgColor: Color,
@@ -57,23 +64,34 @@ public struct TaskAddEditor: View {
     
     public var body: some View {
         KeyboardEditor(
-            titlePlaceholder: "任务名称",
-            descPlaceholder: "任务备注",
             bgColor: bgColor,
-            title: $title,
-            desc: $desc,
             dismiss: dismiss
         ) {
-            TaskEditor_Common.TaskToolbar(
-                fontColor: fontColor,
-                activeFontColor: activeFontColor,
-                tags: tags,
-                checklists: checklists,
-                isValid: isValid,
-                selectedTags: $selectedTags,
-                selectedCheckList: $selectedCheckList,
-                onSendButtonTapped: onSendButtonTapped
-            )
+            VStack {
+                TextField("任务名称", text: $title)
+                    .focused($focusedField, equals: .title)
+                    .font(.title3)
+                
+                TextField("任务备注", text: $desc, axis: .vertical)
+                    .lineLimit(2...10)
+                    .focused($focusedField, equals: .desc)
+                    .font(.callout)
+                
+                TaskEditor_Common.TaskToolbar(
+                    fontColor: fontColor,
+                    activeFontColor: activeFontColor,
+                    tags: tags,
+                    checklists: checklists,
+                    isValid: isValid,
+                    selectedTags: $selectedTags,
+                    selectedCheckList: $selectedCheckList,
+                    onSendButtonTapped: onSendButtonTapped
+                )
+            }
+            .padding()
+            .onAppear {
+                focusedField = .title
+            }
         }
     }
     
@@ -110,7 +128,7 @@ public struct TaskAddEditor: View {
         
         var body: some View {
             ZStack {
-                Color.black
+                Color.gray
                 
                 if visible {
                     TaskAddEditor(

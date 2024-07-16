@@ -742,9 +742,19 @@
      });
    }
 
+   /**
+    * native 在初始化时设置的
+    * focus: Bool 在初始化后调用 focus api
+    */
+   const editorParams = {
+     focus: false,
+     roundedTopCorners: false,
+     ...(window.editorParams || {}),
+   };
+
    const options = {
      modules: {
-       // toolbar: false,
+       toolbar: false,
      },
      placeholder: "备注",
      theme: "snow",
@@ -839,6 +849,14 @@
      if (source == "user") {
        throttledNotice(quill.getContents());
      }
+   });
+
+   document.addEventListener("DOMContentLoaded", () => {
+     if (editorParams.focus) {
+       quill.focus();
+     }
+
+     document.querySelector("#editor").classList.add("rounded-corner");
    });
 
  })();

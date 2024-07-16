@@ -3,31 +3,19 @@
 import SwiftUI
 import Combine
 
-public struct KeyboardEditor<ActionView: View>: View {
-    let titlePlaceholder: String
-    let descPlaceholder: String
+public struct KeyboardEditor<ContentView: View>: View {
     let bgColor: Color
-    @Binding var title: String
-    @Binding var desc: String
-    let action: () -> ActionView
+    let content: () -> ContentView
     let dismiss: () -> Void
     
     public init(
-        titlePlaceholder: String,
-        descPlaceholder: String,
         bgColor: Color,
-        title: Binding<String>,
-        desc: Binding<String>,
         dismiss: @escaping () -> Void,
-        action: @escaping () -> ActionView
+        content: @escaping () -> ContentView
     ) {
-        self.titlePlaceholder = titlePlaceholder
-        self.descPlaceholder = descPlaceholder
         self.bgColor = bgColor
-        self._title = title
-        self._desc = desc
         self.dismiss = dismiss
-        self.action = action
+        self.content = content
     }
     
     public var body: some View {
@@ -37,14 +25,8 @@ public struct KeyboardEditor<ActionView: View>: View {
                 .onTapGesture(perform: dismiss)
                 .ignoresSafeArea()
             
-            ContentView(
-                titlePlaceholder: titlePlaceholder,
-                descPlaceholder: descPlaceholder,
-                bgColor: bgColor,
-                title: $title,
-                desc: $desc,
-                action: action
-            )
+            content()
+                .background(bgColor, in: .rect(topLeadingRadius: 10, topTrailingRadius: 10))
         }
     }
 }
@@ -80,30 +62,34 @@ public struct KeyboardEditor<ActionView: View>: View {
                 
                 if showAdd {
                     KeyboardEditor(
-                        titlePlaceholder: "任务名称",
-                        descPlaceholder: "任务描述",
                         bgColor: .white,
-                        title: $title,
-                        desc: $desc,
                         dismiss: {
                             showAdd = false
                         }
                     ) {
-                        HStack {
-                            Menu {
-                                ForEach(1..<100) { item in
-                                    Button("tag-\(item)") {}
-                                }
-                            } label: {
-                                Image(systemName: "tag")
-                            }
+                        VStack {
+                            TextField("任务名称", text: $title)
+                                .font(.title3)
                             
-                            Spacer()
-                                                        
-                            Button {
+                            TextField("任务描述", text: $desc)
+                                .font(.callout)
+                            
+                            HStack {
+                                Menu {
+                                    ForEach(1..<100) { item in
+                                        Button("tag-\(item)") {}
+                                    }
+                                } label: {
+                                    Image(systemName: "tag")
+                                }
                                 
-                            } label: {
-                                Image(systemName: "arrow.up.circle")
+                                Spacer()
+                                                            
+                                Button {
+                                    
+                                } label: {
+                                    Image(systemName: "arrow.up.circle")
+                                }
                             }
                         }
                     }
