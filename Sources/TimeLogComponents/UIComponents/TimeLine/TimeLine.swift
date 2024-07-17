@@ -68,8 +68,7 @@ public struct TimeLine: View {
             
             TimeLineCard(
                 title: state.title,
-                color: state.color,
-                comment: state.comment
+                color: state.color
             ) {
                 Group {
                     if let durationString {
@@ -103,18 +102,15 @@ extension TimeLine {
     struct TimeLineCard<TagView: View>: View {
         let title: String
         let color: Color
-        let comment: String?
         let tagView: () -> TagView
         
         init(
             title: String,
             color: Color,
-            comment: String? = nil,
             @ViewBuilder tagView: @escaping () -> TagView
         ) {
             self.title = title
             self.color = color
-            self.comment = comment
             self.tagView = tagView
         }
         
@@ -127,13 +123,6 @@ extension TimeLine {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(.ultraThinMaterial) // 保证 title 部分背景色和 Text 的对比度
                     .background(color.opacity(0.5)) // 加深 Title 部分颜色
-                
-                if let comment {
-                    Text(comment)
-                        .font(.caption)
-                        .padding(.horizontal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
                 
                 tagView()
                     .padding(.horizontal)
@@ -153,7 +142,6 @@ extension TimeLine {
         id: UUID().uuidString,
         startTime: .now,
         title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
-        color: .yellow,
-        comment: "xxxxx"
+        color: .yellow
     ))
 }
