@@ -96,7 +96,7 @@ public struct TaskLogAddEditor: View {
             .init(id: UUID().uuidString, name: "玩乐")
         ])
         @State private var selectedCheckList: String? = nil
-        @StateObject var editorVM: RichTextEditor.ViewModel = .init(focused: true, roundedTopCorners: true)
+        @StateObject var editorVM: RichTextEditor.ViewModel = .init()
         @State private var showEditor = false
         @State private var startTime: Date = .now
         @State private var endTime: Date = .now
