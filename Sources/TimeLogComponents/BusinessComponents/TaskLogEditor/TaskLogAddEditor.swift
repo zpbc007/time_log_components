@@ -82,6 +82,7 @@ public struct TaskLogAddEditor: View {
                         isValid: isValid
                     )
                 }
+                .padding(.top)
             }.padding()
         }
     }
