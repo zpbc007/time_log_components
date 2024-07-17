@@ -21,7 +21,8 @@ public struct KeyboardEditor<ContentView: View>: View {
     public var body: some View {
         ZStack(alignment: .bottom) {
             Rectangle()
-                .fill(Color.black.opacity(0.0001))
+//                .fill(Color.black.opacity(0.0001))
+                .fill(Color.black.opacity(0.6))
                 .onTapGesture(perform: dismiss)
                 .ignoresSafeArea()
             
