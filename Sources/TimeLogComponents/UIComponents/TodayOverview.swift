@@ -34,7 +34,7 @@ public struct TodayOverview: View {
         VStack {
             ProgressView(value: recordSeconds, total: 24 * 60 * 60)
                 .tint(.green)
-                .scaleEffect(x: 1, y: 4, anchor: .center)
+                .scaleEffect(x: 1, y: 1.5, anchor: .center)
             
             HStack {
                 Text("已记录")
