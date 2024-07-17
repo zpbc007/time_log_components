@@ -20,6 +20,7 @@ public struct TaskLogAddEditor: View {
     let onSelectTaskButtonTapped: () -> Void
     let onSendButtonTapped: () -> Void
     let dismiss: () -> Void
+    let onDeleteButtonTapped: (() -> Void)?
     
     public init(
         fontColor: Color,
@@ -30,7 +31,8 @@ public struct TaskLogAddEditor: View {
         endTime: Binding<Date>,
         onSelectTaskButtonTapped: @escaping () -> Void,
         onSendButtonTapped: @escaping () -> Void,
-        dismiss: @escaping () -> Void
+        dismiss: @escaping () -> Void,
+        onDeleteButtonTapped: (() -> Void)? = nil
     ) {
         self.fontColor = fontColor
         self.activeFontColor = activeFontColor
@@ -41,6 +43,7 @@ public struct TaskLogAddEditor: View {
         self.onSelectTaskButtonTapped = onSelectTaskButtonTapped
         self.onSendButtonTapped = onSendButtonTapped
         self.dismiss = dismiss
+        self.onDeleteButtonTapped = onDeleteButtonTapped
     }
     
     var isValid: Bool {
@@ -53,6 +56,16 @@ public struct TaskLogAddEditor: View {
             dismiss: dismiss
         ) {
             VStack {
+                if let onDeleteButtonTapped {
+                    HStack {
+                        Spacer()
+                        
+                        Button(role: .destructive, action: onDeleteButtonTapped) {
+                            Image(systemName: "trash.circle")
+                        }.font(.title2)
+                    }
+                }
+                
                 RichTextEditor()
                     .frame(maxHeight: 200)
                 
@@ -121,10 +134,13 @@ public struct TaskLogAddEditor: View {
                     ) {
                         print("onSelectTaskButtonTapped")
                     } onSendButtonTapped: {
-                            print("onSendButtonTapped")
+                        print("onSendButtonTapped")
                     } dismiss: {
                         showEditor = false
-                    }.environmentObject(editorVM)
+                    } onDeleteButtonTapped: {
+                        print("delete")
+                    }
+                    .environmentObject(editorVM)
                 }
             }
             
