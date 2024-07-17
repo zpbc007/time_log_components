@@ -14,10 +14,10 @@ public struct TaskLogAddEditor: View {
     let fontColor: Color
     let activeFontColor: Color
     let bgColor: Color
-    let checklists: IdentifiedArrayOf<CheckListInfo>
-    @Binding var selectedCheckList: String?
+    let selectedTaskName: String?
     @Binding var startTime: Date
     @Binding var endTime: Date
+    let onSelectTaskButtonTapped: () -> Void
     let onSendButtonTapped: () -> Void
     let dismiss: () -> Void
     
@@ -25,26 +25,26 @@ public struct TaskLogAddEditor: View {
         fontColor: Color,
         activeFontColor: Color,
         bgColor: Color,
-        checklists: IdentifiedArrayOf<CheckListInfo>,
-        selectedCheckList: Binding<String?>,
+        selectedTaskName: String?,
         startTime: Binding<Date>,
         endTime: Binding<Date>,
+        onSelectTaskButtonTapped: @escaping () -> Void,
         onSendButtonTapped: @escaping () -> Void,
         dismiss: @escaping () -> Void
     ) {
         self.fontColor = fontColor
         self.activeFontColor = activeFontColor
         self.bgColor = bgColor
-        self.checklists = checklists
-        self._selectedCheckList = selectedCheckList
+        self.selectedTaskName = selectedTaskName
         self._startTime = startTime
         self._endTime = endTime
+        self.onSelectTaskButtonTapped = onSelectTaskButtonTapped
         self.onSendButtonTapped = onSendButtonTapped
         self.dismiss = dismiss
     }
     
     var isValid: Bool {
-        startTime < endTime && selectedCheckList != nil
+        startTime < endTime && selectedTaskName != nil
     }
     
     public var body: some View {
@@ -67,10 +67,11 @@ public struct TaskLogAddEditor: View {
                     )
                     
                     HStack {
-                        TaskEditor_Common.CheckListSelector(
-                            activeFontColor: activeFontColor,
-                            checklists: checklists,
-                            selected: $selectedCheckList
+                        Button(
+                            action: onSelectTaskButtonTapped,
+                            label: {
+                                Label(selectedTaskName ?? "选择任务", systemImage: "checkmark.square")
+                            }
                         )
                         
                         Spacer()
@@ -119,14 +120,14 @@ public struct TaskLogAddEditor: View {
                         fontColor: .primary,
                         activeFontColor: .blue,
                         bgColor: .white,
-                        checklists: checklists,
-                        selectedCheckList: $selectedCheckList,
+                        selectedTaskName: "xxx",
                         startTime: $startTime,
-                        endTime: $endTime,
-                        onSendButtonTapped: {
-                            print("send")
-                        }
+                        endTime: $endTime
                     ) {
+                        print("onSelectTaskButtonTapped")
+                    } onSendButtonTapped: {
+                            print("onSendButtonTapped")
+                    } dismiss: {
                         showEditor = false
                     }.environmentObject(editorVM)
                 }
