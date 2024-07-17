@@ -851,12 +851,12 @@
      }
    });
 
-   document.addEventListener("DOMContentLoaded", () => {
-     if (editorParams.focus) {
-       quill.focus();
-     }
+   if (editorParams.focus) {
+     quill.focus();
+   }
 
+   if (editorParams.roundedTopCorners) {
      document.querySelector("#editor").classList.add("rounded-corner");
-   });
+   }
 
  })();
