@@ -56,39 +56,33 @@ public struct TaskLogAddEditor: View {
                 RichTextEditor()
                     .frame(maxHeight: 200)
                 
-                VStack {
-                    DatePicker(
-                        "开始时间",
-                        selection: $startTime
+                DatePicker(
+                    "开始时间",
+                    selection: $startTime
+                )
+                DatePicker(
+                    "结束时间",
+                    selection: $endTime
+                )
+                
+                HStack {
+                    Button(
+                        action: onSelectTaskButtonTapped,
+                        label: {
+                            Label(selectedTaskName ?? "选择任务", systemImage: "checkmark.square")
+                        }
                     )
-                    DatePicker(
-                        "结束时间",
-                        selection: $endTime
+                    
+                    Spacer()
+                    
+                    TaskEditor_Common.ConfirmButton(
+                        fontColor: fontColor,
+                        activeFontColor: activeFontColor,
+                        action: onSendButtonTapped,
+                        isValid: isValid
                     )
-                    
-                    HStack {
-                        Button(
-                            action: onSelectTaskButtonTapped,
-                            label: {
-                                Label(selectedTaskName ?? "选择任务", systemImage: "checkmark.square")
-                            }
-                        )
-                        
-                        Spacer()
-                        
-                        TaskEditor_Common.ConfirmButton(
-                            fontColor: fontColor,
-                            activeFontColor: activeFontColor,
-                            action: onSendButtonTapped,
-                            isValid: isValid
-                        )
-                    }
-                    
-                    
                 }
-                .padding(.horizontal)
-                .clipped()
-            }
+            }.padding()
         }
     }
 }
@@ -109,7 +103,7 @@ public struct TaskLogAddEditor: View {
         
         var body: some View {
             ZStack {
-                Color.gray
+//                Color.gray
                 
                 Button("click") {
                     showEditor.toggle()
