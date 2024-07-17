@@ -8,7 +8,7 @@
 import SwiftUI
 import IdentifiedCollections
 
-public struct TaskLogAddEditor: View {
+public struct TaskLogEditor: View {
     public typealias CheckListInfo = TimeLogSelectable
     
     let fontColor: Color
@@ -124,7 +124,7 @@ public struct TaskLogAddEditor: View {
                 }
                 
                 if showEditor {
-                    TaskLogAddEditor(
+                    TaskLogEditor(
                         fontColor: .primary,
                         activeFontColor: .blue,
                         bgColor: .white,
