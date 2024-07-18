@@ -340,6 +340,12 @@ extension RichTextEditor {
                     #editor .ql-editor {
                         padding: 0;
                     }
+                    @media (prefers-color-scheme: dark) {
+                      body {
+                          background-color: #1c1c1e;
+                          color: white;
+                      }
+                    }
                 </style>
             </head>
             <body>
