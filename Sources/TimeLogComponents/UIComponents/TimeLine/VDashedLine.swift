@@ -10,7 +10,7 @@ import SwiftUI
 struct VDashedLine { 
     // 日期下面的 padding
     static let DateBottomPadding: CGFloat = 15
-    static let StartTimeMinHeight: CGFloat = 30
+    static let StartTimeMinHeight: CGFloat = 5
     static let EndTimeMinHeight: CGFloat = 30
 }
 
@@ -78,8 +78,6 @@ extension VDashedLine {
                 
                 if let endTime = endTime {
                     timeText(endTime)
-                    RealLine()
-                        .frame(height: VDashedLine.EndTimeMinHeight)
                 }
             }
             .frame(width: 50)
@@ -121,13 +119,19 @@ extension VDashedLine {
         HStack {
             VDashedLine.WithTime(startTime: .now, endTime: .now.addingTimeInterval(60))
             
-            Spacer()
+            RoundedRectangle(cornerSize: CGSize(width: 10, height: 10))
+                .fill(.black)
+                .frame(height: 100)
+                .padding()
         }
         
         HStack {
             VDashedLine.WithTime(startTime: .now.addingTimeInterval(180), endTime: nil)
             
-            Spacer()
+            RoundedRectangle(cornerSize: CGSize(width: 10, height: 10))
+                .fill(.black)
+                .frame(height: 100)
+                .padding()
         }
     }
 }

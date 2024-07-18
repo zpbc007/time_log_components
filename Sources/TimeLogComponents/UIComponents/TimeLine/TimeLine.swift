@@ -60,7 +60,7 @@ public struct TimeLine: View {
     }
     
     public var body: some View {
-        HStack(alignment: .top) {
+        HStack {
             VDashedLine.WithTime(
                 startTime: state.startTime,
                 endTime: state.showEndTime ? state.endTime : nil
@@ -138,7 +138,6 @@ extension TimeLine {
             })
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 5))
-            .padding(.bottom, VDashedLine.StartTimeMinHeight)
         }
     }
 }
@@ -147,14 +146,16 @@ extension TimeLine {
     List {
         TimeLine(.init(
             id: UUID().uuidString,
-            startTime: .now,
+            startTime: .now.addingTimeInterval(-600),
+            endTime: .now.addingTimeInterval(-180),
             title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
             color: .yellow
         ))
         
         TimeLine(.init(
             id: UUID().uuidString,
-            startTime: .now,
+            startTime: .now.addingTimeInterval(-600),
+            endTime: .now.addingTimeInterval(-180),
             title: "正常title",
             color: .yellow
         ))

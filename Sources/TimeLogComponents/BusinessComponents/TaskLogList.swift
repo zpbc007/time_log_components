@@ -36,18 +36,26 @@ public struct TaskLogList: View {
             }
         } else {
             List {
-                ForEach(rows) { taskLogState in
-                    if let timeLineState = taskLogState.timeLineState {
-                        TimeLine(timeLineState)
-                            .listRowSeparator(.hidden)
-                            .onTapGesture {
-                                onCellTapped(timeLineState)
-                            }
-                    }
-                    
-                    if let dashedLineState = taskLogState.dashedLineState {
-                        VDashedLine.WithDate(date: dashedLineState.date)
-                            .listRowSeparator(.hidden)
+                VStack(alignment: .leading) {
+                    ForEach(rows) { taskLogState in
+                        if let timeLineState = taskLogState.timeLineState {
+                            TimeLine(timeLineState)
+                                .listRowSeparator(.hidden)
+                                .onTapGesture {
+                                    onCellTapped(timeLineState)
+                                }
+                            
+                            HStack {
+                                VDashedLine.RealLine()
+                                    .frame(height: VDashedLine.EndTimeMinHeight)
+                                Spacer()
+                            }.padding(.leading, 25)
+                        }
+                        
+                        if let dashedLineState = taskLogState.dashedLineState {
+                            VDashedLine.WithDate(date: dashedLineState.date)
+                                .listRowSeparator(.hidden)
+                        }
                     }
                 }
             }
@@ -115,6 +123,13 @@ extension TaskLogList {
             startTime: .now.addingTimeInterval(-600),
             endTime: .now.addingTimeInterval(-180) ,
             title: "已结束任务",
+            color: .blue
+        )),
+        .TimeLine(.init(
+            id: UUID().uuidString,
+            startTime: .now.addingTimeInterval(-600),
+            endTime: .now.addingTimeInterval(-180) ,
+            title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
             color: .blue
         )),
         .TimeLine(.init(
