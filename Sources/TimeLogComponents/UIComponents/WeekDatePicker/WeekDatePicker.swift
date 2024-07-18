@@ -9,6 +9,7 @@ import SwiftUI
 import Foundation
 
 public struct WeekDatePicker: View {
+    let activeColor: Color
     let indicatorColor: Color
     let showIndicatorDays: Set<Date>
     
@@ -16,10 +17,12 @@ public struct WeekDatePicker: View {
     @State private var page: Int = 0
     
     public init(
+        activeColor: Color,
         indicatorColor: Color,
         showIndicatorDays: Set<Date>,
         date: Binding<Date>
     ) {
+        self.activeColor = activeColor
         self.indicatorColor = indicatorColor
         self.showIndicatorDays = showIndicatorDays
         self._date = date
@@ -67,6 +70,7 @@ public struct WeekDatePicker: View {
                 page: $page
             ) { page in
                 WeekView(
+                    activeColor: activeColor,
                     today: .now.todayStartPoint,
                     days: calculatePageDays(page),
                     date: $date.animation(.easeOut)
@@ -87,7 +91,6 @@ public struct WeekDatePicker: View {
                 date = newPageDate
             }
         }
-//        .background(.red.opacity(0.3))
     }
 }
 
@@ -127,6 +130,7 @@ public struct WeekDatePicker: View {
                 }.padding(.horizontal)                
                 
                 WeekDatePicker(
+                    activeColor: .accentColor, 
                     indicatorColor: .green,
                     showIndicatorDays: showIndicatorDays,
                     date: $date

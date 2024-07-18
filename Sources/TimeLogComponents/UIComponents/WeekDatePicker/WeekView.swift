@@ -17,6 +17,7 @@ extension WeekDatePicker {
                 day
             }
         }
+        let activeColor: Color
         let today: Date
         let days: [DateInfo]
         @Binding var date: Date
@@ -33,7 +34,7 @@ extension WeekDatePicker {
                         ZStack {
                             Circle()
                                 .padding(.horizontal, 5)
-                                .foregroundColor(weekDay.day == date ? .accentColor : .clear)
+                                .foregroundColor(weekDay.day == date ? activeColor : .clear)
                             
                             Text(weekDay.day.toString(format: "d"))
                                 .frame(maxWidth: .infinity)
@@ -96,6 +97,7 @@ extension WeekDatePicker {
             VStack {
                 Text("Header")
                 WeekDatePicker.WeekView(
+                    activeColor: .accentColor,
                     today: .now.todayStartPoint,
                     days: days,
                     date: $selectedDate
