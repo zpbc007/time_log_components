@@ -115,23 +115,26 @@ extension TimeLine {
         }
         
         var body: some View {
-            VStack(alignment: .leading) {
+            HStack {
                 Text(title)
                     .font(.headline)
                     .fontWeight(.bold)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.ultraThinMaterial) // 保证 title 部分背景色和 Text 的对比度
-                    .background(color.opacity(0.5)) // 加深 Title 部分颜色
+                    .padding(.vertical)
                 
                 tagView()
-                    .padding(.horizontal)
-                    .padding(.bottom, 10)
+                    .padding(.trailing, 5)
             }
+            .padding(.leading, 15)
+            .overlay(content: {
+                HStack {
+                    Rectangle()
+                        .fill(color)
+                        .frame(width: 10)
+                    Spacer()
+                }
+            })
             .background(.ultraThinMaterial)
-            .background(color.opacity(0.5))
             .clipShape(RoundedRectangle(cornerRadius: 10))
-            .padding(.horizontal)
             .padding(.bottom, VDashedLine.StartTimeMinHeight)
         }
     }
