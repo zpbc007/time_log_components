@@ -120,31 +120,44 @@ extension TimeLine {
                     .font(.headline)
                     .fontWeight(.bold)
                     .padding(.vertical)
+                    .padding(.leading)
+                
+                Spacer()
                 
                 tagView()
                     .padding(.trailing, 5)
             }
-            .padding(.leading, 15)
+            .padding(.leading, 5)
             .overlay(content: {
                 HStack {
                     Rectangle()
                         .fill(color)
-                        .frame(width: 10)
+                        .frame(width: 5)
                     Spacer()
                 }
             })
             .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: 5))
             .padding(.bottom, VDashedLine.StartTimeMinHeight)
         }
     }
 }
 
 #Preview {
-    TimeLine(.init(
-        id: UUID().uuidString,
-        startTime: .now,
-        title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
-        color: .yellow
-    ))
+    List {
+        TimeLine(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
+            color: .yellow
+        ))
+        
+        TimeLine(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            title: "正常title",
+            color: .yellow
+        ))
+    }
+    
 }
