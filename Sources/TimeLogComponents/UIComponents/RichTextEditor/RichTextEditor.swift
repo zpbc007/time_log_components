@@ -346,7 +346,7 @@ extension RichTextEditor {
                           color: white;
                       }
             
-                      .ql-editor.ql-blank::before {
+                      #editor .ql-editor.ql-blank::before {
                           color: #a4a4a5;
                       }
                     }
