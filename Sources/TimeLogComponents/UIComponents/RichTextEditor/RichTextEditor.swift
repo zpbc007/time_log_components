@@ -330,16 +330,6 @@ extension RichTextEditor {
                     content="width=device-width, initial-scale=1.0, maximum-scale=1, shrink-to-fit=no"
                 />
                 <style>
-                    body {
-                        margin: 0;
-                    }
-                    #editor.ql-container.ql-snow {
-                        border: none;
-                        font-size: 16px;
-                    }
-                    #editor .ql-editor {
-                        padding: 0;
-                    }
                     @media (prefers-color-scheme: dark) {
                       body {
                           background-color: #1c1c1e;
@@ -349,6 +339,16 @@ extension RichTextEditor {
                       #editor .ql-editor.ql-blank::before {
                           color: #a4a4a5;
                       }
+                    }
+                    body {
+                        margin: 0;
+                    }
+                    #editor.ql-container.ql-snow {
+                        border: none;
+                        font-size: 16px;
+                    }
+                    #editor .ql-editor {
+                        padding: 0;
                     }
                 </style>
             </head>
@@ -522,7 +522,7 @@ extension RichTextEditor.WebView {
 
 #Preview("toolbar") {
     let bar = RichTextEditor.KeyboardToolbar()
-    bar.backgroundColor = .red
+    bar.backgroundColor = .white
     
     return bar
 }
