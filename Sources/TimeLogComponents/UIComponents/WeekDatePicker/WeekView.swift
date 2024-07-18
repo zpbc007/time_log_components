@@ -59,11 +59,6 @@ extension WeekDatePicker {
         }
         
         private func getDateFontColor(info: DateInfo) -> Color {
-            // 选中状态
-            if info.day == date {
-                return .white
-            }
-            
             // 今日
             if info.day == today {
                 return .accentColor
