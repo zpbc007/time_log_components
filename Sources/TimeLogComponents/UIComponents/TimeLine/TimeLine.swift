@@ -158,6 +158,13 @@ extension TimeLine {
             title: "正常title",
             color: .yellow
         ))
+        
+        TimeLine(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            title: "正常title",
+            color: .yellow
+        ))
     }
     
 }

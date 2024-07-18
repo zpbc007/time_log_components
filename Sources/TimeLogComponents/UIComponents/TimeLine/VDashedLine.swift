@@ -10,7 +10,7 @@ import SwiftUI
 struct VDashedLine { 
     // 日期下面的 padding
     static let DateBottomPadding: CGFloat = 15
-    static let StartTimeMinHeight: CGFloat = 50
+    static let StartTimeMinHeight: CGFloat = 30
     static let EndTimeMinHeight: CGFloat = 30
 }
 
