@@ -105,8 +105,8 @@ extension FeedbackView {
 extension FeedbackView {
     public struct UserInfo {
         let uid: String
-        let displayName: String
-        let photoUrl: String
+        let displayName: String?
+        let photoUrl: String?
         
         public init(uid: String, displayName: String, photoUrl: String) {
             self.uid = uid
