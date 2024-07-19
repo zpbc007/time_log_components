@@ -117,10 +117,8 @@ extension RichTextEditor {
             ]
             
             toolbar.items?.forEach({ item in
-                if traitCollection.userInterfaceStyle == .dark {
-                    item.tintColor = .lightGray
-                } else {
-                    item.tintColor = .darkGray
+                item.tintColor = UIColor.init { (trait) -> UIColor in
+                    return trait.userInterfaceStyle == .dark ? .lightGray : .darkGray
                 }
             })
                         
