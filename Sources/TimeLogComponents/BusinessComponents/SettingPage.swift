@@ -16,7 +16,9 @@ public struct SettingPage: View {
     
     public var body: some View {
         Form {
-            UserInfoView(user: user)
+            Section {
+                UserInfoView(user: user)
+            }
             
             NavigationLink {
                 HelpCenterWebView()
@@ -42,9 +44,14 @@ extension SettingPage {
                 if let photoUrl = user?.photoUrl, !photoUrl.isEmpty {
                     AsyncImageLoader(urlString: photoUrl)
                         .padding(.trailing, 10)
+                } else {
+                    Image(systemName: "person.circle")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .padding(.trailing, 10)
                 }
                 
-                Text(user?.displayName ?? "")
+                Text(user?.displayName ?? "未设置昵称")
             }
         }
     }
@@ -97,8 +104,20 @@ extension SettingPage {
         SettingPage(
             user: .init(
                 uid: UUID().uuidString,
-                displayName: "用户名 XXX",
+                displayName: "用户 xxx",
                 photoUrl: "https://slab.com/static/b5ae12a602adf067eb2373415281d9fe/7aa54/banner.webp"
+            )
+        )
+    }
+}
+
+#Preview("未设置") {
+    NavigationStack {
+        SettingPage(
+            user: .init(
+                uid: UUID().uuidString,
+                displayName: nil,
+                photoUrl: nil
             )
         )
     }
