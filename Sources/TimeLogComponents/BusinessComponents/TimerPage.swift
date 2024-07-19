@@ -99,11 +99,13 @@ public struct TimerPage: View {
                         action: startTimer,
                         label: {
                             Text("开始")
+                                .font(.title3)
                                 .foregroundStyle(fontColor)
                                 .padding(.horizontal, 15)
                                 .padding(.vertical, 5)
                         }
                     )
+                    .frame(width: 150, height: 40)
                     .background(
                         buttonBgColor,
                         in: RoundedRectangle(cornerRadius: 10)
