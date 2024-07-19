@@ -64,6 +64,7 @@ public struct TimerPage: View {
         VStack {
             HStack {
                 Text(taskName ?? "选择任务")
+                    .font(.title2)
                 
                 if !status.inCounting {
                     // 非记录中状态展示
