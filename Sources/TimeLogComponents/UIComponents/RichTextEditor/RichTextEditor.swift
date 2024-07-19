@@ -117,9 +117,13 @@ extension RichTextEditor {
             ]
             
             toolbar.items?.forEach({ item in
-                item.tintColor = .darkGray
+                if traitCollection.userInterfaceStyle == .dark {
+                    item.tintColor = .lightGray
+                } else {
+                    item.tintColor = .darkGray
+                }
             })
-            
+                        
             addSubview(toolbar)
         }
         
