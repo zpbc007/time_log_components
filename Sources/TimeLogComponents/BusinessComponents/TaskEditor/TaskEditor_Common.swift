@@ -117,7 +117,7 @@ struct TaskEditor_Common {
                 Image(systemName: "arrow.up.circle")
                     .font(.title)
                     .foregroundStyle(isValid ? activeFontColor : fontColor)
-            }.disabled(!isValid)
+            }
         }
     }
     
