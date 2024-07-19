@@ -82,9 +82,12 @@ public struct TaskLogEditor: View {
                     Button(
                         action: onSelectTaskButtonTapped,
                         label: {
-                            Label(selectedTaskName ?? "选择任务", systemImage: "checkmark.square")
+                            HStack(alignment: .center) {
+                                Text(selectedTaskName ?? "选择任务")
+                                Image(systemName: "chevron.down")
+                            }
                         }
-                    )
+                    ).tint(selectedTaskName == nil ? fontColor : activeFontColor)
                     
                     Spacer()
                     
@@ -128,7 +131,7 @@ public struct TaskLogEditor: View {
                         fontColor: .primary,
                         activeFontColor: .blue,
                         bgColor: .white,
-                        selectedTaskName: "xxx",
+                        selectedTaskName: nil,
                         startTime: $startTime,
                         endTime: $endTime
                     ) {
