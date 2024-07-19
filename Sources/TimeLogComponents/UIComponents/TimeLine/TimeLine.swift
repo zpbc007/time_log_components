@@ -117,8 +117,6 @@ extension TimeLine {
         var body: some View {
             HStack {
                 Text(title)
-                    .font(.headline)
-                    .fontWeight(.bold)
                     .padding(.vertical)
                     .padding(.leading)
                 
