@@ -22,12 +22,14 @@ public struct SettingPage: View {
             
             NavigationLink {
                 HelpCenterWebView()
+                    .toolbar(.hidden, for: .tabBar)
             } label: {
                 Label("新手指南", systemImage: "questionmark.circle")
             }
             
             NavigationLink {
                 FeedbackView(user: user)
+                    .toolbar(.hidden, for: .tabBar)
             } label: {
                 Label("联系我们", systemImage: "phone.circle")
             }
