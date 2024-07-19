@@ -243,6 +243,8 @@ extension RichTextEditor {
             webView.navigationDelegate = context.coordinator
             webView.loadHTMLString(self.genInitHTML(), baseURL: nil)
             webView.isInspectable = true
+            webView.isOpaque = false
+            webView.backgroundColor = .clear
             
             webView.myAccessoryView = self.setupToolbar(context.coordinator)
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
@@ -331,14 +333,13 @@ extension RichTextEditor {
                 />
                 <style>
                     @media (prefers-color-scheme: dark) {
-                      body {
-                          background-color: #1c1c1e;
-                          color: white;
-                      }
-            
-                      #editor .ql-editor.ql-blank::before {
-                          color: #a4a4a5;
-                      }
+                        body {
+                            background-color: #1c1c1e;
+                            color: white;
+                        }
+                        #editor .ql-editor.ql-blank::before {
+                            color: #a4a4a5;
+                        }
                     }
                     body {
                         margin: 0;
