@@ -108,7 +108,7 @@ extension FeedbackView {
         let displayName: String?
         let photoUrl: String?
         
-        public init(uid: String, displayName: String, photoUrl: String) {
+        public init(uid: String, displayName: String?, photoUrl: String?) {
             self.uid = uid
             self.displayName = displayName
             self.photoUrl = photoUrl
