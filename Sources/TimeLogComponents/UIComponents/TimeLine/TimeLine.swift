@@ -149,6 +149,7 @@ extension TimeLine {
             title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
             color: .yellow
         ))
+        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
         
         TimeLine(.init(
             id: UUID().uuidString,
@@ -165,5 +166,6 @@ extension TimeLine {
             color: .yellow
         ))
     }
+    .listStyle(.plain)
     
 }
