@@ -11,17 +11,17 @@ import IdentifiedCollections
 public struct AnalyzeDayPage: View {
     let date: Date
     let totalTime: Int
-    let maxTime: Int
-    let maxTimeName: String
-    let pipeChartValues: PipeChart.Values
+    let maxTime: Int?
+    let maxTimeName: String?
+    let pipeChartValues: PipeChart.Values?
     let lineChartValues: IdentifiedArrayOf<LineChart.Value>
     
     public init(
         date: Date,
         totalTime: Int,
-        maxTime: Int,
-        maxTimeName: String,
-        pipeChartValues: PipeChart.Values,
+        maxTime: Int?,
+        maxTimeName: String?,
+        pipeChartValues: PipeChart.Values?,
         lineChartValues: IdentifiedArrayOf<LineChart.Value>
     ) {
         self.date = date
@@ -43,11 +43,19 @@ public struct AnalyzeDayPage: View {
                 )
             }
             
-            if (!pipeChartValues.items.isEmpty) {
-                Section("四象限") {
+            Section("四象限") {
+                if let pipeChartValues {
                     PipeChart(values: pipeChartValues)
+                } else {
+                    HStack {
+                        Spacer()
+                        Text("添加标签为 \"四象限\" 的任务")
+                            .font(.caption)
+                        Spacer()
+                    }
                 }
             }
+            
             
             if (!lineChartValues.isEmpty) {
                 Section("明细") {
@@ -70,6 +78,24 @@ public struct AnalyzeDayPage: View {
             .init(duration: 3000, label: "不重要不紧急", color: .black),
             .init(duration: 3000, label: "不重要紧急", color: .green)
         ])),
+        lineChartValues: .init(
+            uniqueElements: [
+                .init(label: "重要紧急", count: 1, duration: 50, color: .red),
+                .init(label: "重要不紧急", count: 1, duration: 100, color: .blue),
+                .init(label: "不重要不紧急", count: 1, duration: 500, color: .green),
+                .init(label: "不重要紧急", count: 1, duration: 500, color: .green)
+            ]
+        )
+    )
+}
+
+#Preview("Empty") {
+    AnalyzeDayPage(
+        date: .now,
+        totalTime: 10,
+        maxTime: nil,
+        maxTimeName: nil,
+        pipeChartValues: nil,
         lineChartValues: .init(
             uniqueElements: [
                 .init(label: "重要紧急", count: 1, duration: 50, color: .red),

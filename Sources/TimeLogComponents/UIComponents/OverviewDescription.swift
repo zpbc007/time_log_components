@@ -16,8 +16,8 @@ struct OverviewDescription: View {
     }
     let type: DurationType
     let totalTime: Int
-    let maxTime: Int
-    let maxTimeName: String
+    let maxTime: Int?
+    let maxTimeName: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
@@ -28,15 +28,17 @@ struct OverviewDescription: View {
                 Text("次")
             }
             
-            HStack {
-                Text(maxTimeName)
-                    .bold()
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Text("记录了")
-                Text(maxTime, format: .number)
-                    .font(.largeTitle)
-                Text("次")
+            if let maxTime, let maxTimeName {
+                HStack {
+                    Text(maxTimeName)
+                        .bold()
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Text("记录了")
+                    Text(maxTime, format: .number)
+                        .font(.largeTitle)
+                    Text("次")
+                }
             }
         }
     }
@@ -48,5 +50,14 @@ struct OverviewDescription: View {
         totalTime: 10,
         maxTime: 20,
         maxTimeName: "yyy任务"
+    )
+}
+
+#Preview("Empty") {
+    OverviewDescription(
+        type: .day,
+        totalTime: 10,
+        maxTime: nil,
+        maxTimeName: nil
     )
 }

@@ -96,9 +96,9 @@ public struct PipeChart: View {
 
 extension PipeChart {
     public struct Value: Identifiable, Equatable {
-        let duration: Double
-        let label: String
-        let color: Color
+        public var duration: Double
+        public var label: String
+        public var color: Color
         
         public var id: String {
             label
