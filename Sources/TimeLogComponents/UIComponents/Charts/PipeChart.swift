@@ -12,6 +12,7 @@ import Charts
 public struct PipeChart: View {
     let values: Values
     
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedDuration: Double?
     @State private var selectedSector: String?
     
@@ -25,7 +26,7 @@ public struct PipeChart: View {
                 buildSectorMark(item)
             }
         }
-        .chartForegroundStyleScale(range: values.colorArray)
+        .chartForegroundStyleScale(range: colorScheme == .dark ? values.darkColorArray : values.colorArray)
         .chartLegend(.hidden)
         .chartAngleSelection(value: .init(get: {
             selectedDuration
@@ -120,6 +121,7 @@ extension PipeChart {
         let totalDuration: Double
         let totalDurationString: String
         let colorArray: [Color]
+        let darkColorArray: [Color]
         
         public init(_ items: IdentifiedArrayOf<Value>) {
             self.items = items
@@ -129,6 +131,7 @@ extension PipeChart {
             self.totalDuration = totalDuraiton
             self.totalDurationString = totalDuraiton.formatInterval()
             self.colorArray = items.map({ $0.color })
+            self.darkColorArray = items.map({ $0.color.opacity(TLConstant.darkColorOpacity) })
         }
     }
 }

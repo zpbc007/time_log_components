@@ -10,6 +10,7 @@ import Charts
 import IdentifiedCollections
 
 public struct LineChart: View {
+    @Environment(\.colorScheme) private var colorScheme
     let values: IdentifiedArrayOf<Value>
     
     public init(values: IdentifiedArrayOf<Value>) {
@@ -39,7 +40,11 @@ public struct LineChart: View {
                 }
                 
                 ProgressView(value: precent)
-                    .tint(item.color)
+                    .tint(
+                        colorScheme == .dark
+                        ? item.color.opacity(TLConstant.darkColorOpacity)
+                        : item.color
+                    )
             }
             .frame(minHeight: 20)
             // 控制 padding
