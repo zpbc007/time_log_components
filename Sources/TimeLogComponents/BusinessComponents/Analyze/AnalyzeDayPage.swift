@@ -14,7 +14,7 @@ public struct AnalyzeDayPage: View {
     let maxTime: Int?
     let maxTimeName: String?
     let pipeChartValues: PipeChart.Values?
-    let lineChartValues: IdentifiedArrayOf<LineChart.Value>
+    let lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     
     public init(
         date: Date,
@@ -22,7 +22,7 @@ public struct AnalyzeDayPage: View {
         maxTime: Int?,
         maxTimeName: String?,
         pipeChartValues: PipeChart.Values?,
-        lineChartValues: IdentifiedArrayOf<LineChart.Value>
+        lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     ) {
         self.date = date
         self.totalTime = totalTime
@@ -56,10 +56,16 @@ public struct AnalyzeDayPage: View {
                 }
             }
             
-            
-            if (!lineChartValues.isEmpty) {
-                Section("明细") {
+            Section("明细") {
+                if let lineChartValues {
                     LineChart(values: lineChartValues)
+                } else {
+                    HStack {
+                        Spacer()
+                        Text("无数据")
+                            .font(.caption)
+                        Spacer()
+                    }
                 }
             }
         }
@@ -96,13 +102,6 @@ public struct AnalyzeDayPage: View {
         maxTime: nil,
         maxTimeName: nil,
         pipeChartValues: nil,
-        lineChartValues: .init(
-            uniqueElements: [
-                .init(label: "重要紧急", count: 1, duration: 50, color: .red),
-                .init(label: "重要不紧急", count: 1, duration: 100, color: .blue),
-                .init(label: "不重要不紧急", count: 1, duration: 500, color: .green),
-                .init(label: "不重要紧急", count: 1, duration: 500, color: .green)
-            ]
-        )
+        lineChartValues: nil
     )
 }
