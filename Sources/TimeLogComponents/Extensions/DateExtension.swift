@@ -8,6 +8,18 @@
 import SwiftUI
 
 extension Date {
+    public var todayStartPoint: Date {
+        Calendar.current.startOfDay(for: self)
+    }
+    
+    /// 当前周的周一（周一为当前周的第一天）
+    public var thisWeekFirstMonday: Date {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // 周一为一周中的第一天
+        
+        return self.weekFirstDay(calendar: calendar)
+    }
+    
     /// 获取 date 所在周的所有日期
     public func weekDays() -> [Date] {
         var result: [Date] = .init()
@@ -43,10 +55,6 @@ extension Date {
         return formatter.string(from: self)
     }
     
-    public var todayStartPoint: Date {
-        Calendar.current.startOfDay(for: self)
-    }
-    
     public func isSame(day: Date, _ components: Set<Calendar.Component> = [.year, .month, .day]) -> Bool {
         let calendar = Calendar.current
         let todayComponents = calendar.dateComponents(components, from: self)
@@ -66,5 +74,5 @@ extension Date {
         }
         
         return true
-    }
+    }    
 }
