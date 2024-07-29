@@ -7,19 +7,18 @@
 
 import SwiftUI
 
-struct OverviewDescription: View {
-    enum DurationType: String {
+public struct OverviewDescription: View {
+    public enum DurationType: String {
         case day = "今日"
         case week = "本周"
         case month = "本月"
-        case year = "今年"
     }
     let type: DurationType
     let totalTime: Int
     let maxTime: Int?
     let maxTimeName: String?
     
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
                 Text("\(type.rawValue)共记录")

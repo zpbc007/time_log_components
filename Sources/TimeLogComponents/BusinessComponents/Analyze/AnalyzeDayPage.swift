@@ -9,7 +9,7 @@ import SwiftUI
 import IdentifiedCollections
 
 public struct AnalyzeDayPage: View {
-    let date: Date
+    let type: OverviewDescription.DurationType
     let totalTime: Int
     let maxTime: Int?
     let maxTimeName: String?
@@ -17,14 +17,14 @@ public struct AnalyzeDayPage: View {
     let lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     
     public init(
-        date: Date,
+        type: OverviewDescription.DurationType,
         totalTime: Int,
         maxTime: Int?,
         maxTimeName: String?,
         pipeChartValues: PipeChart.Values?,
         lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     ) {
-        self.date = date
+        self.type = type
         self.totalTime = totalTime
         self.maxTime = maxTime
         self.maxTimeName = maxTimeName
@@ -36,7 +36,7 @@ public struct AnalyzeDayPage: View {
         List {
             Section {
                 OverviewDescription(
-                    type: .day,
+                    type: type,
                     totalTime: totalTime,
                     maxTime: maxTime,
                     maxTimeName: maxTimeName
@@ -74,7 +74,7 @@ public struct AnalyzeDayPage: View {
 
 #Preview {
     AnalyzeDayPage(
-        date: .now,
+        type: .day,
         totalTime: 10,
         maxTime: 20,
         maxTimeName: "yyy任务",
@@ -97,7 +97,7 @@ public struct AnalyzeDayPage: View {
 
 #Preview("Empty") {
     AnalyzeDayPage(
-        date: .now,
+        type: .day,
         totalTime: 10,
         maxTime: nil,
         maxTimeName: nil,
