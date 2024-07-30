@@ -7,13 +7,23 @@
 
 import SwiftUI
 
-struct WeekWheelPicker: View {
+public struct WeekWheelPicker: View {
     let startDate: Date
     let endDate: Date
     // 所选择的周的周一
     @Binding var selectedWeekStartDate: Date
     
     @State private var showPicker = false
+    
+    public init(
+        startDate: Date,
+        endDate: Date,
+        selectedWeekStartDate: Binding<Date>
+    ) {
+        self.startDate = startDate
+        self.endDate = endDate
+        self._selectedWeekStartDate = selectedWeekStartDate
+    }
     
     private var weeks: [Date] {
         var calendar = Calendar.current
@@ -42,7 +52,7 @@ struct WeekWheelPicker: View {
         return "\(dateFormatter.string(from: weekStartDate))-\(dateFormatter.string(from: weekEndDate))"
     }
     
-    var body: some View {
+    public var body: some View {
         Text(selectedWeekString)
             .foregroundStyle(showPicker ? .blue : .primary)
             .padding(.horizontal, 10)
@@ -56,6 +66,7 @@ struct WeekWheelPicker: View {
                 Picker("Week", selection: $selectedWeekStartDate) {
                     ForEach(weeks, id: \.self) { week in
                         Text(formatWeek(week))
+                            .tag(week)
                     }
                 }
                 .pickerStyle(.wheel)
