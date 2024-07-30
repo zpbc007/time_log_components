@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension Date {
-    static func from(year: Int, month: Int, day: Int = 1) -> Date {
+    public static func from(year: Int, month: Int, day: Int = 1) -> Date {
         Calendar.current.date(from: DateComponents(year: year, month: month, day: day)) ?? Date()
     }
     
