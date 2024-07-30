@@ -8,8 +8,23 @@
 import SwiftUI
 
 extension Date {
+    static func from(year: Int, month: Int, day: Int = 1) -> Date {
+        Calendar.current.date(from: DateComponents(year: year, month: month, day: day)) ?? Date()
+    }
+    
     public var todayStartPoint: Date {
         Calendar.current.startOfDay(for: self)
+    }
+    
+    public var todayEndPoint: Date {
+        let calendar = Calendar.current
+        let endOfDay = calendar.date(
+            bySettingHour: 23,
+            minute: 59,
+            second: 59,
+            of: self
+        )
+        return endOfDay ?? self
     }
     
     /// 当前周的周一（周一为当前周的第一天）
@@ -36,6 +51,16 @@ extension Date {
         }
 
         return result
+    }
+    
+    public var thisMonthStartPoint: Date {
+        Date.from(year: self.year, month: self.month).todayStartPoint
+    }
+    
+    public var thisMonthEndPoint: Date {
+        let lastDay = Calendar.current.range(of: .day, in: .month, for: self)?.count ?? 1
+        
+        return Date.from(year: self.year, month: self.month, day: lastDay).todayEndPoint
     }
     
     public func weekFirstDay(calendar: Calendar) -> Date {
@@ -74,5 +99,21 @@ extension Date {
         }
         
         return true
-    }    
+    }
+    
+    public func add(byAdding component: Calendar.Component = .day, _ value: Int) -> Date {
+        Calendar.current.date(
+            byAdding: component,
+            value: value,
+            to: self
+        )!
+    }
+    
+    public var month: Int {
+        Calendar.current.component(.month, from: self)
+    }
+    
+    public var year: Int {
+        Calendar.current.component(.year, from: self)
+    }
 }
