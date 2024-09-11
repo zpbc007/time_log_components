@@ -8,17 +8,23 @@
 import SwiftUI
 
 public struct SettingPage: View {
-    let user: FeedbackView.UserInfo?
+    @Binding var syncByICloud: Bool
     
-    public init(user: FeedbackView.UserInfo?) {
-        self.user = user
+    public init(syncByICloud: Binding<Bool>) {
+        self._syncByICloud = syncByICloud
     }
     
     public var body: some View {
         Form {
-            Section {
-                UserInfoView(user: user)
-            }
+            Toggle(
+                isOn: $syncByICloud,
+                label: {
+                    HStack {
+                        Text("通过 iCloud 同步")
+                        PlusTag()
+                    }
+                }
+            )
             
             NavigationLink {
                 HelpCenterWebView()
@@ -28,11 +34,26 @@ public struct SettingPage: View {
             }
             
             NavigationLink {
-                FeedbackView(user: user)
+                FeedbackView(user: nil)
                     .toolbar(.hidden, for: .tabBar)
             } label: {
                 Label("联系我们", systemImage: "phone.circle")
             }
+        }
+    }
+}
+
+extension SettingPage {
+    struct PlusTag: View {
+        var body: some View {
+            Text("Plus")
+                .font(.callout)
+                .bold()
+                .padding(6)
+                .background(
+                    .ultraThinMaterial,
+                    in: RoundedRectangle(cornerRadius: 10)
+                )
         }
     }
 }
@@ -102,25 +123,15 @@ extension SettingPage {
 }
 
 #Preview {
-    NavigationStack {
-        SettingPage(
-            user: .init(
-                uid: UUID().uuidString,
-                displayName: "用户 xxx",
-                photoUrl: "https://slab.com/static/b5ae12a602adf067eb2373415281d9fe/7aa54/banner.webp"
-            )
-        )
+    struct Playground: View {
+        @State private var syncByICloud = false
+        
+        var body: some View {
+            NavigationStack {
+                SettingPage(syncByICloud: $syncByICloud)
+            }
+        }
     }
-}
-
-#Preview("未设置") {
-    NavigationStack {
-        SettingPage(
-            user: .init(
-                uid: UUID().uuidString,
-                displayName: nil,
-                photoUrl: nil
-            )
-        )
-    }
+    
+    return Playground()
 }
