@@ -9,9 +9,14 @@ import SwiftUI
 
 public struct SettingPage: View {
     @Binding var syncByICloud: Bool
+    @Binding var isDemoMode: Bool
     
-    public init(syncByICloud: Binding<Bool>) {
+    public init(
+        syncByICloud: Binding<Bool>,
+        isDemoMode: Binding<Bool>
+    ) {
         self._syncByICloud = syncByICloud
+        self._isDemoMode = isDemoMode
     }
     
     public var body: some View {
@@ -22,6 +27,15 @@ public struct SettingPage: View {
                     HStack {
                         Text("通过 iCloud 同步")
                         PlusTag()
+                    }
+                }
+            )
+            
+            Toggle(
+                isOn: $isDemoMode, 
+                label: {
+                    HStack {
+                        Text("演示模式")
                     }
                 }
             )
@@ -125,10 +139,14 @@ extension SettingPage {
 #Preview {
     struct Playground: View {
         @State private var syncByICloud = false
+        @State private var isDemoMode = false
         
         var body: some View {
             NavigationStack {
-                SettingPage(syncByICloud: $syncByICloud)
+                SettingPage(
+                    syncByICloud: $syncByICloud,
+                    isDemoMode: $isDemoMode
+                )
             }
         }
     }
