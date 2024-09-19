@@ -22,23 +22,25 @@ public struct SettingPage: View {
     public var body: some View {
         Form {
             Toggle(
-                isOn: $syncByICloud,
-                label: {
-                    HStack {
-                        Text("通过 iCloud 同步")
-                        PlusTag()
-                    }
-                }
-            )
-            
-            Toggle(
-                isOn: $isDemoMode, 
+                isOn: $isDemoMode.animation(),
                 label: {
                     HStack {
                         Text("演示模式")
                     }
                 }
             )
+            
+            if !isDemoMode {
+                Toggle(
+                    isOn: $syncByICloud,
+                    label: {
+                        HStack {
+                            Text("通过 iCloud 同步")
+                            PlusTag()
+                        }
+                    }
+                )
+            }
             
             NavigationLink {
                 HelpCenterWebView()
