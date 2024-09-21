@@ -7,27 +7,20 @@
 
 import SwiftUI
 
-public struct SettingPage<TitleContent: View>: View {
+public struct SettingPage: View {
     @Binding var syncByICloud: Bool
     @Binding var isDemoMode: Bool
-    let titleContent: () -> TitleContent
     
     public init(
         syncByICloud: Binding<Bool>,
-        isDemoMode: Binding<Bool>,
-        titleContent: @escaping () -> TitleContent
+        isDemoMode: Binding<Bool>
     ) {
         self._syncByICloud = syncByICloud
         self._isDemoMode = isDemoMode
-        self.titleContent = titleContent
     }
     
     public var body: some View {
         Form {
-            Section {
-                titleContent()
-            }
-            
             Toggle(
                 isOn: $isDemoMode.animation(),
                 label: {
@@ -155,9 +148,7 @@ extension SettingPage {
                 SettingPage(
                     syncByICloud: $syncByICloud,
                     isDemoMode: $isDemoMode
-                ) {
-                    Text("Title")
-                }
+                )
             }
         }
     }
