@@ -7,13 +7,25 @@
 
 import SwiftUI
 
-struct DemoModeInfoBar: View {
+public struct DemoModeInfoBar: View {
     let bgColor: Color
     let fontColor: Color
     let buttonFontColor: Color
     let onExitTapped: () -> Void
     
-    var body: some View {
+    public init(
+        bgColor: Color,
+        fontColor: Color,
+        buttonFontColor: Color, 
+        onExitTapped: @escaping () -> Void
+    ) {
+        self.bgColor = bgColor
+        self.fontColor = fontColor
+        self.buttonFontColor = buttonFontColor
+        self.onExitTapped = onExitTapped
+    }
+    
+    public var body: some View {
         HStack {
             Text("当前为演示模式")
             
