@@ -65,7 +65,7 @@ extension Date {
     
     public func weekFirstDay(calendar: Calendar) -> Date {
         calendar.date(
-            from: Calendar.current.dateComponents(
+            from: calendar.dateComponents(
                 [.yearForWeekOfYear, .weekOfYear],
                 from: self
             )
