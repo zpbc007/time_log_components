@@ -37,6 +37,7 @@ public struct TimerPage: View {
     @State private var elapsedTime = 0.0
     @State private var timer: Timer? = nil
     @State private var showCanNotStartMsg = false
+    @Environment(\.scenePhase) var scenePhase
     
     let taskName: String?
     let fontColor: Color
@@ -136,9 +137,10 @@ public struct TimerPage: View {
                 )
             }
         }
-        .onAppear {
-            // 回到前台后
-            tryRecoveryElapsedTime()
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                tryRecoveryElapsedTime()
+            }
         }
     }
     
