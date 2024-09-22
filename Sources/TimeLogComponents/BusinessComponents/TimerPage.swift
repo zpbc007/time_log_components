@@ -126,7 +126,7 @@ public struct TimerPage: View {
             elapsedTime = 0
             
             if status.inCounting {
-                elapsedTime = Date.now.timeIntervalSince(status.startDate!)
+                self.tryRecoveryElapsedTime()
                 timer = Timer.scheduledTimer(
                     withTimeInterval: 1.0,
                     repeats: true,
@@ -135,6 +135,10 @@ public struct TimerPage: View {
                     }
                 )
             }
+        }
+        .onAppear {
+            // 回到前台后
+            tryRecoveryElapsedTime()
         }
     }
     
@@ -149,6 +153,12 @@ public struct TimerPage: View {
     
     private func stopTimer() {
         status = .idle
+    }
+    
+    private func tryRecoveryElapsedTime() {
+        if let startDate = status.startDate {
+            elapsedTime = Date.now.timeIntervalSince(startDate)
+        }
     }
 }
 
