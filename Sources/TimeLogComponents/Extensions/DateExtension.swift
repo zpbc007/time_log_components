@@ -36,12 +36,12 @@ extension Date {
     }
     
     /// 获取 date 所在周的所有日期
-    public func weekDays() -> [Date] {
+    public func weekDays(calendar: Calendar = .current) -> [Date] {
         var result: [Date] = .init()
-        let startOfWeek = self.weekFirstDay(calendar: .current)
+        let startOfWeek = self.weekFirstDay(calendar: calendar)
 
         (0...6).forEach { day in
-            if let weekday = Calendar.current.date(
+            if let weekday = calendar.date(
                 byAdding: .day,
                 value: day,
                 to: startOfWeek

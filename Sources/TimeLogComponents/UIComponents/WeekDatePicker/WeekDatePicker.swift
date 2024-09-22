@@ -15,6 +15,7 @@ public struct WeekDatePicker: View {
     
     @Binding var date: Date
     @State private var page: Int = 0
+    private let calendar: Calendar
     
     public init(
         activeColor: Color,
@@ -22,6 +23,10 @@ public struct WeekDatePicker: View {
         showIndicatorDays: Set<Date>,
         date: Binding<Date>
     ) {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // 周一为一周中的第一天
+        
+        self.calendar = calendar
         self.activeColor = activeColor
         self.indicatorColor = indicatorColor
         self.showIndicatorDays = showIndicatorDays
@@ -29,18 +34,18 @@ public struct WeekDatePicker: View {
     }
     
     private func calculatePageFirstDate(_ page: Int) -> Date {
-        Calendar.current.date(
+        calendar.date(
             byAdding: .day,
             value: page * 7,
-            to: Date.now.weekFirstDay(calendar: .current)
+            to: Date.now.weekFirstDay(calendar: calendar)
         )!
     }
     
     private func calculateDatePage(_ date: Date) -> Int {
-        let components = Calendar.current.dateComponents(
+        let components = calendar.dateComponents(
             [.day],
             from: date,
-            to: .now.weekFirstDay(calendar: .current)
+            to: .now.weekFirstDay(calendar: calendar)
         )
         
         guard let days = components.day else {
@@ -53,7 +58,7 @@ public struct WeekDatePicker: View {
     private func calculatePageDays(_ page: Int) -> [WeekView.DateInfo] {
         let pageDate = calculatePageFirstDate(page)
         
-        return pageDate.weekDays().map { date in
+        return pageDate.weekDays(calendar: calendar).map { date in
             .init(
                 day: date,
                 disabled: date > .now,
