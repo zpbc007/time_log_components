@@ -178,6 +178,7 @@ extension RichTextEditor {
         }
         
         // 与 web 同步 content
+        @MainActor
         public func syncContent() async -> String {
             let newId = UUID().uuidString
             let oldContent = self.content
