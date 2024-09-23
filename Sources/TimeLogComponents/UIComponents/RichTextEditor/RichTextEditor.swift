@@ -190,6 +190,7 @@ extension RichTextEditor {
                 var cancelable: AnyCancellable?
                 cancelable = self?.syncStream
                     .prefix(1)
+                    .receive(on: RunLoop.main)
                     .sink { content in
                         if self?.cancelable == cancelable {
                             self?.cancelable = nil
