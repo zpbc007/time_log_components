@@ -170,6 +170,7 @@ extension RichTextEditor {
             self.content = content
         }
         
+        @MainActor
         public func updateContent(_ newContent: String) {
             if newContent != self.content {
                 self.content = newContent
@@ -216,6 +217,7 @@ extension RichTextEditor {
             return newContent
         }
         
+        @MainActor
         func finishSync(_ newContent: String?) {
             if let newContent {
                 self.updateContent(newContent)
@@ -416,7 +418,10 @@ extension RichTextEditor.WebView {
                 .receive(on: DispatchQueue.main)
                 .sink(receiveValue: {[weak self] data in
                     self?.latestData = data
-                    parent.viewModel.updateContent(data)
+                    
+                    Task {
+                        await parent.viewModel.updateContent(data)
+                    }
                 })
         }
         
