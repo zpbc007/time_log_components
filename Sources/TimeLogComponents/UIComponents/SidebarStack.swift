@@ -24,7 +24,7 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
     
     public init(
         sidebarWidthPercent: CGFloat = 0.8,
-        sidebarToggleMinWidthPercent: CGFloat = 0.5,
+        sidebarToggleMinWidthPercent: CGFloat = 0.2,
         showSidebar: Binding<Bool>,
         showSidebarDragArea: Binding<Bool>,
         @ViewBuilder sidebar: () -> SidebarContent,
@@ -43,17 +43,31 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
     private var dragGesture: some Gesture {
         DragGesture()
             .updating($offset) { value, state, _ in
-                if (value.translation.width >= 0 || showSidebar) {
-                    state = value.translation.width
-                }
+                state = value.translation.width
             }
             .onEnded { value in
-                if value.translation.width >= sidebarToggleMinWidth {
-                    showSidebar = true
-                } else {
+                let width = value.translation.width
+                guard abs(width) >= sidebarToggleMinWidth else {
+                    return
+                }
+                
+                if showSidebar && width < 0 {
                     showSidebar = false
                 }
+                
+                if !showSidebar && width > 0 {
+                    showSidebar = true
+                }
             }
+    }
+    
+    private var xOffset: CGFloat {
+        let value = showSidebar ? sidebarWidth + offset : offset
+        if (value < 0) {
+            return 0
+        }
+        
+        return min(value, sidebarWidth)
     }
     
     public var body: some View {
@@ -69,18 +83,19 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
                                 .opacity(0)
                                 .contentShape(Rectangle())
                                 .gesture(
-                                    TapGesture()
-                                        .onEnded({ _ in
-                                            showSidebar = false
-                                        })
-                                        .exclusively(before: dragGesture)
+                                    dragGesture.exclusively(
+                                        before: TapGesture()
+                                            .onEnded({ _ in
+                                                showSidebar = false
+                                            })
+                                    )
                                 )
                         } else if showSidebarDragArea {
                             HStack {
                                 Color.white
                                     .opacity(0)
                                     .contentShape(Rectangle())
-                                    .frame(width: 10)
+                                    .frame(width: 20)
                                     .gesture(dragGesture)
                                 
                                 Spacer()
@@ -88,8 +103,8 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
                         }
                     }
                 )
-                .offset(x: showSidebar ? sidebarWidth + offset : offset)
-                .animation(.easeInOut, value: showSidebar ? sidebarWidth + offset : offset)
+                .offset(x: xOffset)
+                .animation(.easeInOut, value: xOffset)
         }
     }
 }
@@ -138,7 +153,6 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
                         ForEach(1..<50) { item in
                             Text("Content-\(item)")
                         }.onDelete(perform: { indexSet in
-                            
                         })
                     }
                 }
