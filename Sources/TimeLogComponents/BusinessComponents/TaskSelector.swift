@@ -53,7 +53,6 @@ public struct TaskSelector: View {
                         Text("无任务")
                         Spacer()
                     }
-                    
                 } else {
                     List {
                         OutlineGroup(filteredTasks, children: \.children) { item in
@@ -165,7 +164,21 @@ extension TaskSelector {
                     .init(value: .init(id: UUID().uuidString, name: "任务 1-2"))
             ])),
             .init(value: .init(id: UUID().uuidString, name: "任务2")),
-            .init(value: .init(id: UUID().uuidString, name: "任务3"))
+            .init(value: .init(id: UUID().uuidString, name: "任务3")),
+            .init(value: .init(id: UUID().uuidString, name: "任务4")),
+            .init(value: .init(id: UUID().uuidString, name: "任务5")),
+            .init(value: .init(id: UUID().uuidString, name: "任务6")),
+            .init(value: .init(id: UUID().uuidString, name: "任务7")),
+            .init(value: .init(id: UUID().uuidString, name: "任务8")),
+            .init(value: .init(id: UUID().uuidString, name: "任务9")),
+            .init(value: .init(id: UUID().uuidString, name: "任务10")),
+            .init(value: .init(id: UUID().uuidString, name: "任务11")),
+            .init(value: .init(id: UUID().uuidString, name: "任务12")),
+            .init(value: .init(id: UUID().uuidString, name: "任务13")),
+            .init(value: .init(id: UUID().uuidString, name: "任务14")),
+            .init(value: .init(id: UUID().uuidString, name: "任务15")),
+            .init(value: .init(id: UUID().uuidString, name: "任务16")),
+            .init(value: .init(id: UUID().uuidString, name: "任务17")),
         ])
         
         @State private var searchText = ""

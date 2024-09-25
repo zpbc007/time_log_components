@@ -32,94 +32,59 @@ public struct TimerPage: View {
             }
         }
     }
+    static let radius: CGFloat = 130
     
-    @Binding var status: Status
+    let status: Status
+    let onStop: () -> Void
     @State private var elapsedTime = 0.0
     @State private var timer: Timer? = nil
-    @State private var showCanNotStartMsg = false
-    @Environment(\.scenePhase) var scenePhase
+    @Environment(\.scenePhase) private var scenePhase
     
-    let taskName: String?
     let fontColor: Color
     let buttonBgColor: Color
-    let alertColor: Color
-    let onTaskNameTapped: () -> Void
+    let taskName: String
     
     public init(
-        status: Binding<Status>,
+        status: Status,
         fontColor: Color,
         buttonBgColor: Color,
-        alertColor: Color,
-        taskName: String?,
-        onTaskNameTapped: @escaping () -> Void
+        taskName: String,
+        onStop: @escaping () -> Void
     ) {
-        self._status = status
+        self.status = status
         self.fontColor = fontColor
         self.buttonBgColor = buttonBgColor
-        self.alertColor = alertColor
         self.taskName = taskName
-        self.onTaskNameTapped = onTaskNameTapped
+        self.onStop = onStop
     }
     
     public var body: some View {
         VStack {
-            HStack {
-                Text(taskName ?? "选择任务")
-                    .font(.title2)
-                
-                if !status.inCounting {
-                    // 非记录中状态展示
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
-                }
-            }
-            .padding(.bottom)
-            .onTapGesture(perform: onTaskNameTapped)
-            
             ZStack {
                 Circle()
                     .stroke(buttonBgColor, style: .init(lineWidth: 5))
-                    .frame(width: 260)
+                    .frame(width: Self.radius * 2)
                 
-                VStack {
-                    TimerText(seconds: elapsedTime)
-                }.font(.largeTitle)
+                TimerText(seconds: elapsedTime)
+                    .font(.largeTitle)
+                
+                Button(
+                    action: onStop,
+                    label: {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.largeTitle)
+                    }
+                ).offset(CGSize(width: 0, height: Self.radius / 2))
             }
             
-            HStack {
-                if status.startDate != nil {
-                    Button(
-                        action: stopTimer,
-                        label: {
-                            Image(systemName: "stop.circle.fill")
-                                .font(.largeTitle)
-                        }
-                    )
-                } else {
-                    Button(
-                        action: startTimer,
-                        label: {
-                            Text("开始")
-                                .font(.title3)
-                                .foregroundStyle(fontColor)
-                                .padding(.horizontal, 15)
-                                .padding(.vertical, 5)
-                        }
-                    )
-                    .frame(width: 150, height: 40)
-                    .background(
-                        buttonBgColor,
-                        in: RoundedRectangle(cornerRadius: 10)
-                    )
-                }
+            VStack {
+                Text("进行中的任务")
+                    .font(.caption)
+                Text(taskName)
+                    .font(.title2)
             }
-            .padding()
+            .padding(.top)
         }
-        .toast(
-            $showCanNotStartMsg,
-            state: .init(message: "请先选择任务", type: .error(alertColor))
-        )
         .onChange(of: status, initial: true) { oldValue, newValue in
             // reset
             timer?.invalidate()
@@ -144,19 +109,6 @@ public struct TimerPage: View {
         }
     }
     
-    private func startTimer() {
-        guard let taskName, !taskName.isEmpty else {
-            showCanNotStartMsg = true
-            return
-        }
-        
-        status = .counting(.now)
-    }
-    
-    private func stopTimer() {
-        status = .idle
-    }
-    
     private func tryRecoveryElapsedTime() {
         if let startDate = status.startDate {
             elapsedTime = Date.now.timeIntervalSince(startDate)
@@ -166,17 +118,16 @@ public struct TimerPage: View {
 
 #Preview {
     struct TimerPagePlayground: View {
-        @State private var status: TimerPage.Status = .idle
+        @State private var status: TimerPage.Status = .counting(.now)
         
         var body: some View {
             TimerPage(
-                status: $status,
+                status: status,
                 fontColor: .white,
                 buttonBgColor: .blue,
-                alertColor: .red,
-                taskName: "task1-1"
+                taskName: "选中的任务"
             ) {
-                
+                self.status = .idle
             }.onChange(of: status) { oldValue, newValue in
                 if let startDate = oldValue.startDate, newValue == .idle {
                     print("finish record, startDate: \(startDate)")
@@ -192,31 +143,18 @@ public struct TimerPage: View {
     return TimerPagePlayground()
 }
 
-#Preview("empty task name") {
-    TimerPage(
-        status: .constant(.idle),
-        fontColor: .white,
-        buttonBgColor: .blue,
-        alertColor: .red,
-        taskName: nil
-    ) {
-        
-    }
-}
-
 #Preview("restore state") {
     struct TimerPagePlayground: View {
         @State private var status: TimerPage.Status = .counting(.now.addingTimeInterval(-60))
         
         var body: some View {
             TimerPage(
-                status: $status,
+                status: status,
                 fontColor: .white,
                 buttonBgColor: .blue,
-                alertColor: .red,
-                taskName: "task1-1"
+                taskName: "选中的任务"
             ) {
-                
+                self.status = .idle
             }.onChange(of: status) { oldValue, newValue in
                 if let startDate = oldValue.startDate, newValue == .idle {
                     print("finish record, startDate: \(startDate)")
