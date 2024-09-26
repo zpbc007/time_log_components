@@ -81,9 +81,11 @@ public struct TimerPage: View {
                 Text("进行中的任务")
                     .font(.caption)
                 Text(taskName)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
                     .font(.title2)
             }
-            .padding(.top)
+            .padding()
         }
         .onChange(of: status, initial: true) { oldValue, newValue in
             // reset
@@ -152,7 +154,7 @@ public struct TimerPage: View {
                 status: status,
                 fontColor: .white,
                 buttonBgColor: .blue,
-                taskName: "选中的任务"
+                taskName: "选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务"
             ) {
                 self.status = .idle
             }.onChange(of: status) { oldValue, newValue in
