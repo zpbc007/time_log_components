@@ -60,9 +60,11 @@ public struct TaskSelector: View {
                                 HStack {
                                     if item.id == selectedTask?.id {
                                         Text(item.value.name)
+                                            .lineLimit(1)
                                             .foregroundStyle(.selection)
                                     } else {
                                         Text(item.value.name)
+                                            .lineLimit(1)
                                             .foregroundStyle(.primary)
                                     }
                                     
@@ -163,7 +165,7 @@ extension TaskSelector {
                     .init(value: .init(id: UUID().uuidString, name: "任务 1-1")),
                     .init(value: .init(id: UUID().uuidString, name: "任务 1-2"))
             ])),
-            .init(value: .init(id: UUID().uuidString, name: "任务2")),
+            .init(value: .init(id: UUID().uuidString, name: "长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2")),
             .init(value: .init(id: UUID().uuidString, name: "任务3")),
             .init(value: .init(id: UUID().uuidString, name: "任务4")),
             .init(value: .init(id: UUID().uuidString, name: "任务5")),
