@@ -9,7 +9,7 @@ import SwiftUI
 import IdentifiedCollections
 import WrappingHStack
 
-public struct TaskEditor_Common {
+struct TaskEditor_Common {
     struct TagSelector: View {
         let fontColor: Color
         let activeFontColor: Color
@@ -106,13 +106,13 @@ public struct TaskEditor_Common {
         }
     }
     
-    public struct ConfirmButton: View {
+    struct ConfirmButton: View {
         let fontColor: Color
         let activeFontColor: Color
         let action: () -> Void
         let isValid: Bool
         
-        public init(
+        init(
             fontColor: Color,
             activeFontColor: Color,
             action: @escaping () -> Void,
@@ -124,7 +124,7 @@ public struct TaskEditor_Common {
             self.isValid = isValid
         }
         
-        public var body: some View {
+        var body: some View {
             Button(action: action) {
                 Image(systemName: "arrow.up.circle")
                     .font(.title)
