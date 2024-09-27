@@ -76,6 +76,7 @@ public struct SideBarStack<SidebarContent: View, Content: View>: View {
                 .frame(width: sidebarWidth, alignment: .center)
             
             mainContent
+                .shadow(radius: 15)
                 .overlay (
                     Group {
                         if showSidebar {
