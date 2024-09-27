@@ -21,27 +21,6 @@ public struct SettingPage: View {
     
     public var body: some View {
         Form {
-            Toggle(
-                isOn: $isDemoMode.animation(),
-                label: {
-                    HStack {
-                        Text("演示模式")
-                    }
-                }
-            )
-            
-            if !isDemoMode {
-                Toggle(
-                    isOn: $syncByICloud,
-                    label: {
-                        HStack {
-                            Text("通过 iCloud 同步")
-                            PlusTag()
-                        }
-                    }
-                )
-            }
-            
             NavigationLink {
                 HelpCenterWebView()
                     .toolbar(.hidden, for: .tabBar)
@@ -54,6 +33,29 @@ public struct SettingPage: View {
                     .toolbar(.hidden, for: .tabBar)
             } label: {
                 Label("联系我们", systemImage: "phone.circle")
+            }
+
+            if !isDemoMode {
+                Toggle(
+                    isOn: $syncByICloud,
+                    label: {
+                        HStack {
+                            Text("通过 iCloud 同步")
+                            PlusTag()
+                        }
+                    }
+                )
+            }
+            
+            Section(footer: Text("重启后，演示模式中的数据会被重置！")) {
+                Toggle(
+                    isOn: $isDemoMode.animation(),
+                    label: {
+                        HStack {
+                            Text("演示模式")
+                        }
+                    }
+                )
             }
         }
     }
