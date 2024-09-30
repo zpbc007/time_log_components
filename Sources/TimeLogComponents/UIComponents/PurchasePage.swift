@@ -75,12 +75,12 @@ public struct PurchasePage: View {
 
 extension PurchasePage {
     public struct ButtonConf: Equatable {
-        let price: Int
+        let price: Decimal
         let fontColor: Color
         let bgColor: Color
         
         public init(
-            price: Int,
+            price: Decimal,
             fontColor: Color,
             bgColor: Color
         ) {
@@ -115,8 +115,8 @@ extension PurchasePage {
             .init(text: "标签", desc: "无限创建标签"),
             .init(text: "更多功能", desc: "努力开发中，敬请期待")
         ],
-        monthlyConf: .init(price: 6, fontColor: .green, bgColor: .white),
-        yearlyConf: .init(price: 38, fontColor: .white, bgColor: .green),
+        monthlyConf: .init(price: 6.2, fontColor: .green, bgColor: .white),
+        yearlyConf: .init(price: 38.9, fontColor: .white, bgColor: .green),
         monthlyAction: {},
         yearlyAction: {}
     )

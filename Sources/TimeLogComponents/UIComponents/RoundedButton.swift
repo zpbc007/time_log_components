@@ -36,6 +36,8 @@ struct RoundedButton: View {
                             .fill(bgColor)
                             .strokeBorder(borderColor, lineWidth: 2)
                     )
+                    .minimumScaleFactor(0.5)
+                    .scaledToFit()
             }
         )
     }
