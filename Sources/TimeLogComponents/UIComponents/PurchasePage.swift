@@ -13,19 +13,25 @@ public struct PurchasePage: View {
     let yearlyConf: ButtonConf
     let monthlyAction: () -> Void
     let yearlyAction: () -> Void
+    let restoreAction: () -> Void
+    let contactAction: () -> Void
     
     public init(
         features: [FeatureConf],
         monthlyConf: ButtonConf,
         yearlyConf: ButtonConf,
         monthlyAction: @escaping () -> Void,
-        yearlyAction: @escaping () -> Void
+        yearlyAction: @escaping () -> Void,
+        restoreAction: @escaping () -> Void,
+        contactAction: @escaping () -> Void
     ) {
         self.features = features
         self.monthlyConf = monthlyConf
         self.yearlyConf = yearlyConf
         self.monthlyAction = monthlyAction
         self.yearlyAction = yearlyAction
+        self.restoreAction = restoreAction
+        self.contactAction = contactAction
     }
     
     public var body: some View {
@@ -33,7 +39,7 @@ public struct PurchasePage: View {
             List {
                 HStack {
                     Text("会员专属功能")
-                        .font(.title)
+                        .font(.title2)
                     
                     Spacer()
                 }.listRowInsets(EdgeInsets())
@@ -51,6 +57,29 @@ public struct PurchasePage: View {
             .listStyle(.plain)
             
             Spacer()
+            
+            HStack {
+                Text("购买说明")
+                    .font(.title2)
+                Spacer()
+            }
+            
+            VStack(alignment: .leading) {
+                HStack {
+                    Text("1. 如果购买未生效，请")
+                    Button("恢复购买", action: restoreAction)
+                    Spacer()
+                }
+                
+                Text("2. 购买会员后不支持退款")
+                
+                HStack {
+                    Text("3. 如果有其他问题请")
+                    Button("联系我们", action: contactAction)
+                }
+            }
+            .font(.footnote)
+            .padding(.bottom)
             
             HStack {
                 RoundedButton(
@@ -115,9 +144,19 @@ extension PurchasePage {
             .init(text: "标签", desc: "无限创建标签"),
             .init(text: "更多功能", desc: "努力开发中，敬请期待")
         ],
-        monthlyConf: .init(price: 6.2, fontColor: .green, bgColor: .white),
+        monthlyConf: .init(price: 6.2, fontColor: .green, bgColor: .clear),
         yearlyConf: .init(price: 38.9, fontColor: .white, bgColor: .green),
-        monthlyAction: {},
-        yearlyAction: {}
+        monthlyAction: {
+            print("monthlyAction")
+        },
+        yearlyAction: {
+            print("yearlyAction")
+        },
+        restoreAction: {
+            print("restoreAction")
+        },
+        contactAction: {
+            print("contactAction")
+        }
     )
 }
