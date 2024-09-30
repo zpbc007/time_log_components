@@ -78,6 +78,16 @@ extension PurchasePage {
         let price: Int
         let fontColor: Color
         let bgColor: Color
+        
+        public init(
+            price: Int,
+            fontColor: Color,
+            bgColor: Color
+        ) {
+            self.price = price
+            self.fontColor = fontColor
+            self.bgColor = bgColor
+        }
     }
 }
 
@@ -88,6 +98,11 @@ extension PurchasePage {
         
         public var id: String {
             text
+        }
+        
+        public init(text: String, desc: String) {
+            self.text = text
+            self.desc = desc
         }
     }
 }
