@@ -80,8 +80,7 @@ extension Date {
         return formatter.string(from: self)
     }
     
-    public func isSame(day: Date, _ components: Set<Calendar.Component> = [.year, .month, .day]) -> Bool {
-        let calendar = Calendar.current
+    public func isSame(day: Date, calendar: Calendar = Calendar.current, _ components: Set<Calendar.Component> = [.year, .month, .day]) -> Bool {
         let todayComponents = calendar.dateComponents(components, from: self)
         let dateComponents = calendar.dateComponents(components, from: day)
         

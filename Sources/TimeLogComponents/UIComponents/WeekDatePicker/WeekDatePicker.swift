@@ -9,23 +9,21 @@ import SwiftUI
 import Foundation
 
 public struct WeekDatePicker: View {
+    let calendar: Calendar
+    let showIndicatorDays: Set<Date>
     let activeColor: Color
     let indicatorColor: Color
-    let showIndicatorDays: Set<Date>
     
     @Binding var date: Date
     @State private var page: Int = 0
-    private let calendar: Calendar
     
     public init(
-        activeColor: Color,
-        indicatorColor: Color,
+        calendar: Calendar,
         showIndicatorDays: Set<Date>,
-        date: Binding<Date>
+        date: Binding<Date>,
+        activeColor: Color,
+        indicatorColor: Color
     ) {
-        var calendar = Calendar.current
-        calendar.firstWeekday = 2 // 周一为一周中的第一天
-        
         self.calendar = calendar
         self.activeColor = activeColor
         self.indicatorColor = indicatorColor
@@ -33,10 +31,10 @@ public struct WeekDatePicker: View {
         self._date = date
     }
     
-    private func calculatePageFirstDate(_ page: Int) -> Date {
+    private func calculatePageDate(_ page: Int, isFirst: Bool) -> Date {
         calendar.date(
             byAdding: .day,
-            value: page * 7,
+            value: page * 7 + (isFirst ? 0 : 6),
             to: Date.now.weekFirstDay(calendar: calendar)
         )!
     }
@@ -56,7 +54,7 @@ public struct WeekDatePicker: View {
     }
     
     private func calculatePageDays(_ page: Int) -> [WeekView.DateInfo] {
-        let pageDate = calculatePageFirstDate(page)
+        let pageDate = calculatePageDate(page, isFirst: true)
         
         return pageDate.weekDays(calendar: calendar).map { date in
             .init(
@@ -87,9 +85,9 @@ public struct WeekDatePicker: View {
                 page = newPage
             }
         }.onChange(of: page) { oldValue, newValue in
-            let newPageDate = calculatePageFirstDate(newValue)
+            let newPageDate = calculatePageDate(newValue, isFirst: newValue >= oldValue)
             // 在同一个周
-            if date.isSame(day: newPageDate, [.year, .month, .weekOfYear]) {
+            if date.isSame(day: newPageDate, calendar: calendar, [.year, .month, .weekOfYear]) {
                 return
             }
             if newPageDate != date {
@@ -101,7 +99,13 @@ public struct WeekDatePicker: View {
 
 #Preview {
     struct Playground: View {
-        @State var date = Calendar.current.startOfDay(for: Date.now)
+        @State
+        private var date = Calendar.current.startOfDay(for: Date.now)
+        private var calendar: Calendar = {
+            var calendar = Calendar.current
+//            calendar.firstWeekday = 2 // 周一为一周中的第一天
+            return calendar
+        }()
         
         var dateString: String {
             let dateFormatter = DateFormatter()
@@ -130,15 +134,16 @@ public struct WeekDatePicker: View {
                         .bold()
                     Spacer()
                     Button("Today") {
-                        date = Calendar.current.startOfDay(for: Date.now)
+                        date = calendar.startOfDay(for: Date.now)
                     }
                 }.padding(.horizontal)                
                 
                 WeekDatePicker(
-                    activeColor: .accentColor, 
-                    indicatorColor: .green,
+                    calendar: calendar,
                     showIndicatorDays: showIndicatorDays,
-                    date: $date
+                    date: $date,
+                    activeColor: .accentColor,
+                    indicatorColor: .green
                 ).frame(height: 90)
                 
                 HStack {
