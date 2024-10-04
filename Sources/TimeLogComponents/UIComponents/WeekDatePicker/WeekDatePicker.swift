@@ -87,7 +87,7 @@ public struct WeekDatePicker: View {
         }.onChange(of: page) { oldValue, newValue in
             let newPageDate = calculatePageDate(newValue, isFirst: newValue >= oldValue)
             // 在同一个周
-            if date.isSame(day: newPageDate, calendar: calendar, [.year, .month, .weekOfYear]) {
+            if date.isSame(day: newPageDate, calendar: calendar, [.year, .weekOfYear]) {
                 return
             }
             if newPageDate != date {
