@@ -35,7 +35,8 @@ public struct TimerPage: View {
     static let radius: CGFloat = 130
     
     let status: Status
-    let onStop: () -> Void
+    let editAction: () -> Void
+    let stopAction: () -> Void
     @State private var elapsedTime = 0.0
     @State private var timer: Timer? = nil
     @Environment(\.scenePhase) private var scenePhase
@@ -49,13 +50,15 @@ public struct TimerPage: View {
         fontColor: Color,
         buttonBgColor: Color,
         taskName: String,
-        onStop: @escaping () -> Void
+        editAction: @escaping () -> Void,
+        stopAction: @escaping () -> Void
     ) {
         self.status = status
         self.fontColor = fontColor
         self.buttonBgColor = buttonBgColor
         self.taskName = taskName
-        self.onStop = onStop
+        self.editAction = editAction
+        self.stopAction = stopAction
     }
     
     public var body: some View {
@@ -68,13 +71,24 @@ public struct TimerPage: View {
                 TimerText(seconds: elapsedTime)
                     .font(.largeTitle)
                 
-                Button(
-                    action: onStop,
-                    label: {
-                        Image(systemName: "stop.circle.fill")
-                            .font(.largeTitle)
-                    }
-                ).offset(CGSize(width: 0, height: Self.radius / 2))
+                HStack {
+                    Button(
+                        action: editAction,
+                        label: {
+                            Image(systemName: "pencil.circle")
+                                .font(.largeTitle)
+                        }
+                    )
+                    
+                    Button(
+                        action: stopAction,
+                        label: {
+                            Image(systemName: "stop.circle.fill")
+                                .font(.largeTitle)
+                        }
+                    )
+                }
+                .offset(CGSize(width: 0, height: Self.radius / 2))
             }
             
             VStack {
@@ -129,8 +143,11 @@ public struct TimerPage: View {
                 buttonBgColor: .blue,
                 taskName: "选中的任务"
             ) {
+                self.status = .counting(.now)
+            } stopAction: {
                 self.status = .idle
-            }.onChange(of: status) { oldValue, newValue in
+            }
+            .onChange(of: status) { oldValue, newValue in
                 if let startDate = oldValue.startDate, newValue == .idle {
                     print("finish record, startDate: \(startDate)")
                 }
@@ -156,6 +173,8 @@ public struct TimerPage: View {
                 buttonBgColor: .blue,
                 taskName: "选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务选中的任务"
             ) {
+                self.status = .counting(.now)
+            } stopAction: {
                 self.status = .idle
             }.onChange(of: status) { oldValue, newValue in
                 if let startDate = oldValue.startDate, newValue == .idle {
