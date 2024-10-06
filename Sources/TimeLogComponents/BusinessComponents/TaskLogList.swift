@@ -44,6 +44,7 @@ public struct TaskLogList: View {
                                 .onTapGesture {
                                     onCellTapped(timeLineState)
                                 }
+                                .transition(.move(edge: .trailing))
                             
                             HStack {
                                 VDashedLine.RealLine()
@@ -148,4 +149,40 @@ extension TaskLogList {
     TaskLogList(rows: []) { cell in
         print("cell tapped: \(cell.id)")
     }
+}
+
+#Preview("动态") {
+    struct Playground: View {
+        @State private var rows: [TaskLogList.TaskLogCellViewState] = []
+        
+        var body: some View {
+            VStack {
+                Button("添加") {
+                    withAnimation {
+                        rows.append(.TimeLine(.init(
+                            id: UUID().uuidString,
+                            startTime: .now,
+                            title: "log-\(rows.count)",
+                            color: .init(
+                                uiColor: .init(
+                                    red: .random(in: 0...1),
+                                    green: .random(in: 0...1),
+                                    blue: .random(in: 0...1),
+                                    alpha: .random(in: 0...1)
+                                )
+                            )
+                        )))
+                    }
+                    
+                }
+                
+                TaskLogList(rows: rows) { _ in
+                    
+                }
+            }
+            
+        }
+    }
+    
+    return Playground()
 }
