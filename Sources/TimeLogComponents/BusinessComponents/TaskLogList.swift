@@ -8,6 +8,8 @@
 import SwiftUI
 
 public struct TaskLogList: View {
+    static let BottomId = "bottom"
+    
     let rows: [TaskLogCellViewState]
     let onCellTapped: (TimeLine.State) -> Void
     
@@ -35,39 +37,51 @@ public struct TaskLogList: View {
                 Spacer()
             }
         } else {
-            List {
-                VStack(alignment: .leading) {
-                    ForEach(rows) { taskLogState in
-                        if let timeLineState = taskLogState.timeLineState {
-                            TimeLine(timeLineState)
-                                .listRowSeparator(.hidden)
-                                .onTapGesture {
-                                    onCellTapped(timeLineState)
-                                }
-                                .transition(
-                                    .move(edge: .trailing)
-                                    .combined(
-                                        with: .scale(scale: 0.1)
+            ScrollViewReader{ proxy in
+                List {
+                    LazyVStack(alignment: .leading) {
+                        ForEach(rows) { taskLogState in
+                            if let timeLineState = taskLogState.timeLineState {
+                                TimeLine(timeLineState)
+                                    .listRowSeparator(.hidden)
+                                    .onTapGesture {
+                                        onCellTapped(timeLineState)
+                                    }
+                                    .transition(
+                                        .move(edge: .trailing)
+                                        .combined(
+                                            with: .scale(scale: 0.1)
+                                        )
                                     )
-                                )
+                                
+                                HStack {
+                                    VDashedLine.RealLine()
+                                        .frame(height: VDashedLine.EndTimeMinHeight)
+                                    Spacer()
+                                }.padding(.leading, 25)
+                            }
                             
-                            HStack {
-                                VDashedLine.RealLine()
-                                    .frame(height: VDashedLine.EndTimeMinHeight)
-                                Spacer()
-                            }.padding(.leading, 25)
-                        }
-                        
-                        if let dashedLineState = taskLogState.dashedLineState {
-                            VDashedLine.WithDate(date: dashedLineState.date)
-                                .listRowSeparator(.hidden)
+                            if let dashedLineState = taskLogState.dashedLineState {
+                                VDashedLine.WithDate(date: dashedLineState.date)
+                                    .listRowSeparator(.hidden)
+                            }
                         }
                     }
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    
+                    HStack {}
+                        .frame(width: .infinity, height: 1)
+                        .background(.black)
+                        .listRowSeparator(.hidden)
+                        .id(Self.BottomId)
                 }
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .defaultScrollAnchor(.bottom)
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .onChange(of: rows) { oldValue, newValue in
+                    proxy.scrollTo(Self.BottomId, anchor: .bottom)
+                }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
         }
     }
 }
@@ -164,7 +178,7 @@ extension TaskLogList {
             VStack {
                 Button("添加") {
                     withAnimation {
-                        rows.insert(.TimeLine(.init(
+                        rows.append(.TimeLine(.init(
                             id: UUID().uuidString,
                             startTime: .now,
                             title: "log-\(rows.count)",
@@ -176,7 +190,7 @@ extension TaskLogList {
                                     alpha: .random(in: 0...1)
                                 )
                             )
-                        )), at: 0)
+                        )))
                     }
                     
                 }
