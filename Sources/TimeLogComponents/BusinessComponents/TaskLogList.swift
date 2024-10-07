@@ -70,8 +70,7 @@ public struct TaskLogList: View {
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     
                     HStack {}
-                        .frame(width: .infinity, height: 1)
-                        .background(.black)
+                        .background(.clear)
                         .listRowSeparator(.hidden)
                         .id(Self.BottomId)
                 }
