@@ -47,7 +47,7 @@ public struct FeedbackView: View {
         let clientVersion: String = AppInfo.bundleVersion
         let os: String = AppInfo.systemName
         let osVersion: String = AppInfo.systemVersion
-        let bodyString = "openid=\(user?.uid ?? "")&nickname=\(user?.displayName ?? "")&avatar=\(user?.photoUrl ?? "")&clientInfo=\(clientInfo)&clientVersion=\(clientVersion)&os=\(os)&osVersion=\(osVersion)"
+        let bodyString = "openid=\(user?.uid ?? "123")&nickname=\(user?.displayName ?? "")&avatar=\(user?.photoUrl ?? "")&clientInfo=\(clientInfo)&clientVersion=\(clientVersion)&os=\(os)&osVersion=\(osVersion)"
         
         var req = URLRequest(
             url: URL(string: "https://support.qq.com/product/637892")!
@@ -116,8 +116,18 @@ extension FeedbackView {
     }
 }
 
-#Preview {
+#Preview("登录用户") {
     NavigationStack {
-        FeedbackView(user: .init(uid: UUID().uuidString, displayName: "xxx", photoUrl: ""))
+        FeedbackView(
+            user: .init(uid: UUID().uuidString, displayName: "xxx", photoUrl: "https%3A%2F%2Ftxc.qq.com%2Fstatic%2Fdesktop%2Fimg%2Fproducts%2Fdef-product-logo.png")
+        )
+    }
+}
+
+#Preview("未登录用户") {
+    NavigationStack {
+        FeedbackView(
+            user: nil
+        )
     }
 }

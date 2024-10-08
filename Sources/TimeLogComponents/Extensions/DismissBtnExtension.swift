@@ -16,15 +16,29 @@ public struct DismissModifier: ViewModifier {
     @Environment(\.dismiss) private var dismiss
     let cancelText: CancelText
     let showDismissBtn: Bool
+    var cancelAction: Optional<() -> Void> = nil
     
     public init() {
         self.showDismissBtn = true
         self.cancelText = .back
     }
     
-    public init(showDismissBtn: Bool, cancelText: CancelText) {
+    public init(
+        showDismissBtn: Bool,
+        cancelText: CancelText
+    ) {
         self.showDismissBtn = showDismissBtn
         self.cancelText = cancelText
+    }
+    
+    public init(
+        showDismissBtn: Bool,
+        cancelText: CancelText,
+        cancelAction: @escaping () -> Void
+    ) {
+        self.showDismissBtn = showDismissBtn
+        self.cancelText = cancelText
+        self.cancelAction = cancelAction
     }
     
     public func body(content: Content) -> some View {
@@ -33,11 +47,15 @@ public struct DismissModifier: ViewModifier {
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button {
-                            dismiss()
+                            if let cancelAction {
+                                cancelAction()
+                            } else {
+                                dismiss()
+                            }
                         } label: {
                             HStack {
                                 Image(systemName: "chevron.left")
-                                Text("返回")
+                                Text(self.cancelText.rawValue)
                                 Spacer()
                             }
                         }
@@ -50,8 +68,23 @@ public struct DismissModifier: ViewModifier {
 }
 
 extension View {
-    public func dismissBtn(show: Bool = true, cancelText: DismissModifier.CancelText = .back) -> some View {
-        modifier(DismissModifier(showDismissBtn: show, cancelText: cancelText))
+    public func dismissBtn(
+        show: Bool = true,
+        cancelText: DismissModifier.CancelText = .back,
+        cancelAction: Optional<() -> Void> = nil
+    ) -> some View {
+        if let cancelAction {
+            modifier(DismissModifier(
+                showDismissBtn: show,
+                cancelText: cancelText,
+                cancelAction: cancelAction
+            ))
+        } else {
+            modifier(DismissModifier(
+                showDismissBtn: show,
+                cancelText: cancelText
+            ))
+        }
     }
 }
 

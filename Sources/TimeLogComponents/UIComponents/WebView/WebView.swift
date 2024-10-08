@@ -11,6 +11,7 @@ import WebKit
 struct WebView: UIViewRepresentable {
     let request: URLRequest
     let navigationActionPolicyResolver: (String) async -> WKNavigationActionPolicy
+    @Binding var level: Int
     @Binding var isLoading: Bool
     @Binding var error: Error?
     
@@ -29,6 +30,18 @@ struct WebView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
+        let coordinator = context.coordinator
+        if uiView.backForwardList.backList.count > level {
+            // 如果当前后退列表的数量大于绑定的 level，则后退到指定的级别
+            for _ in 0..<uiView.backForwardList.backList.count - level {
+                uiView.goBack()
+            }
+        } else if uiView.backForwardList.backList.count < level {
+            // 如果当前后退列表的数量小于绑定的 level，则尝试前进到指定的级别
+            for _ in uiView.backForwardList.backList.count..<level {
+                uiView.goForward()
+            }
+        }
     }
 
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
@@ -50,6 +63,7 @@ struct WebView: UIViewRepresentable {
             didFinish navigation: WKNavigation!
         ) {
             parent.isLoading = false
+            updateParentLevel(webView)
         }
 
         func webView(
@@ -76,13 +90,29 @@ struct WebView: UIViewRepresentable {
             parent.isLoading = false
             parent.error = error
         }
+
+        func webView(_ webView: WKWebView, didGoBack navigation: WKNavigation!) {
+            // 网页后退，更新当前级别
+            updateParentLevel(webView)
+        }
+
+        func webView(_ webView: WKWebView, didGoForward navigation: WKNavigation!) {
+            // 网页前进，更新当前级别
+            updateParentLevel(webView)
+        }
+        
+        private func updateParentLevel(_ webView: WKWebView) {
+            parent.level = webView.backForwardList.backList.count + 1
+        }
     }
 }
 
 extension WebView {
     struct Loading: View {
+        @State private var level: Int = 0
         @State private var isLoading = true
         @State private var error: Error? = nil
+        
         let request: URLRequest
         let navigationActionPolicyResolver: (String) async -> WKNavigationActionPolicy
         
@@ -95,9 +125,16 @@ extension WebView {
                     WebView(
                         request: request,
                         navigationActionPolicyResolver: navigationActionPolicyResolver,
+                        level: $level,
                         isLoading: $isLoading,
                         error: $error
-                    )
+                    ).dismissBtn {
+                        
+                    }.toolbar {
+                        Button("level: \(level)") {
+                            level -= 1
+                        }
+                    }
 
                     if isLoading {
                         ProgressView()
@@ -110,6 +147,7 @@ extension WebView {
 
 #Preview {
     struct WebViewPlayground: View {
+        @State private var level = 0
         @State private var isLoading = true
         @State private var error: Error? = nil
         let request: URLRequest = {
