@@ -48,9 +48,12 @@ public struct TaskLogList: View {
                                         onCellTapped(timeLineState)
                                     }
                                     .transition(
-                                        .move(edge: .trailing)
-                                        .combined(
-                                            with: .scale(scale: 0.1).animation(.bouncy)
+                                        .asymmetric(
+                                            insertion: .move(edge: .trailing)
+                                                .combined(
+                                                    with: .scale(scale: 0.1).animation(.bouncy)
+                                                ),
+                                            removal: .opacity
                                         )
                                     )
                                 
@@ -177,24 +180,31 @@ extension TaskLogList {
         
         var body: some View {
             VStack {
-                Button("添加") {
-                    withAnimation {
-                        rows.append(.TimeLine(.init(
-                            id: UUID().uuidString,
-                            startTime: .now,
-                            endTime: .now,
-                            title: "log-\(rows.count)",
-                            color: .init(
-                                uiColor: .init(
-                                    red: .random(in: 0...1),
-                                    green: .random(in: 0...1),
-                                    blue: .random(in: 0...1),
-                                    alpha: .random(in: 0...1)
+                HStack {
+                    Button("+") {
+                        withAnimation {
+                            rows.append(.TimeLine(.init(
+                                id: UUID().uuidString,
+                                startTime: .now,
+                                endTime: .now,
+                                title: "log-\(rows.count)",
+                                color: .init(
+                                    uiColor: .init(
+                                        red: .random(in: 0...1),
+                                        green: .random(in: 0...1),
+                                        blue: .random(in: 0...1),
+                                        alpha: .random(in: 0...1)
+                                    )
                                 )
-                            )
-                        )))
+                            )))
+                        }
                     }
                     
+                    Button("-") {
+                        withAnimation {
+                            _ = rows.removeLast()
+                        }
+                    }
                 }
                 
                 TaskLogList(rows: rows) { _ in
