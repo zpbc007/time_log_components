@@ -12,13 +12,15 @@ public struct TaskLogList: View {
     
     let rows: [TaskLogCellViewState]
     let onCellTapped: (TimeLine.State) -> Void
-    @State private var canTransition = false
+    let disableTransition: Bool
     
     public init(
         rows: [TaskLogCellViewState],
+        disableTransition: Bool,
         onCellTapped: @escaping (TimeLine.State) -> Void
     ) {
         self.rows = rows
+        self.disableTransition = disableTransition
         self.onCellTapped = onCellTapped
     }
     
@@ -38,15 +40,15 @@ public struct TaskLogList: View {
                                             onCellTapped(timeLineState)
                                         }
                                         .transition(
-                                            canTransition 
-                                                ? .asymmetric(
+                                            disableTransition
+                                                ? .identity
+                                                : .asymmetric(
                                                     insertion: .move(edge: .trailing)
                                                         .combined(
                                                             with: .scale(scale: 0.1).animation(.bouncy)
                                                         ),
                                                     removal: .opacity
                                                 )
-                                                : .identity
                                         )
                                     
                                     HStack {
@@ -71,8 +73,6 @@ public struct TaskLogList: View {
                     }
                 }
             }
-        }.task {
-            canTransition = true
         }
     }
     
@@ -167,13 +167,13 @@ extension TaskLogList {
             title: "未结束任务",
             color: .blue
         ))
-    ]) { cell in
+    ], disableTransition: false) { cell in
         print("cell tapped: \(cell.id)")
     }
 }
 
 #Preview("无数据") {
-    TaskLogList(rows: []) { cell in
+    TaskLogList(rows: [], disableTransition: false) { cell in
         print("cell tapped: \(cell.id)")
     }
 }
@@ -189,6 +189,7 @@ extension TaskLogList {
                 color: .blue
             ))
         ]
+        @State private var disableTransition = false
         
         var body: some View {
             VStack {
@@ -217,9 +218,11 @@ extension TaskLogList {
                             _ = rows.removeLast()
                         }
                     }
-                }
+                    
+                    Toggle("disableTransition", isOn: $disableTransition)
+                }.padding()
                 
-                TaskLogList(rows: rows) { _ in
+                TaskLogList(rows: rows, disableTransition: disableTransition) { _ in
                     
                 }
             }
@@ -276,7 +279,7 @@ extension TaskLogList {
                     }
                 }
                 
-                TaskLogList(rows: rows) { _ in
+                TaskLogList(rows: rows, disableTransition: false) { _ in
                     
                 }
             }
