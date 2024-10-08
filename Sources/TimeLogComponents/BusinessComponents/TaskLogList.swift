@@ -64,15 +64,13 @@ public struct TaskLogList: View {
                             }
                         }
                         
-                        HStack {}
+                        HStack {}.frame(height: 80)
                             .background(.clear)
                             .id(Self.BottomId)
                     }
                     .onChange(of: rows) { oldValue, newValue in
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            withAnimation {
-                                proxy.scrollTo(Self.BottomId, anchor: .bottom)
-                            }
+                        withAnimation {
+                            proxy.scrollTo(Self.BottomId, anchor: .bottom)
                         }
                     }
                 }
