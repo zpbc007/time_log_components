@@ -11,16 +11,20 @@ public struct TaskLogList: View {
     static let BottomId = "bottom"
     
     let rows: [TaskLogCellViewState]
-    let onCellTapped: (TimeLine.State) -> Void
     let disableTransition: Bool
+    let scrollToBottom: Bool
+    let onCellTapped: (TimeLine.State) -> Void
+    
     
     public init(
         rows: [TaskLogCellViewState],
         disableTransition: Bool,
+        scrollToBottom: Bool = false,
         onCellTapped: @escaping (TimeLine.State) -> Void
     ) {
         self.rows = rows
         self.disableTransition = disableTransition
+        self.scrollToBottom = scrollToBottom
         self.onCellTapped = onCellTapped
     }
     
@@ -68,7 +72,7 @@ public struct TaskLogList: View {
                             .background(.clear)
                             .id(Self.BottomId)
                     }
-                    .onChange(of: rows) { oldValue, newValue in
+                    .onChange(of: scrollToBottom) { oldValue, newValue in
                         withAnimation {
                             proxy.scrollTo(Self.BottomId, anchor: .bottom)
                         }
@@ -192,26 +196,33 @@ extension TaskLogList {
             ))
         ]
         @State private var disableTransition = false
+        @State private var scrollToBottom = false
         
         var body: some View {
             VStack {
                 HStack {
                     Button("+") {
                         withAnimation {
-                            rows.append(.TimeLine(.init(
-                                id: UUID().uuidString,
-                                startTime: .now,
-                                endTime: .now,
-                                title: "log-\(rows.count)",
-                                color: .init(
-                                    uiColor: .init(
-                                        red: .random(in: 0...1),
-                                        green: .random(in: 0...1),
-                                        blue: .random(in: 0...1),
-                                        alpha: .random(in: 0...1)
-                                    )
-                                )
-                            )))
+                            scrollToBottom.toggle()
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                withAnimation {
+                                    rows.append(.TimeLine(.init(
+                                        id: UUID().uuidString,
+                                        startTime: .now,
+                                        endTime: .now,
+                                        title: "log-\(rows.count)",
+                                        color: .init(
+                                            uiColor: .init(
+                                                red: .random(in: 0...1),
+                                                green: .random(in: 0...1),
+                                                blue: .random(in: 0...1),
+                                                alpha: .random(in: 0...1)
+                                            )
+                                        )
+                                    )))
+                                }
+                            }
                         }
                     }
                     
@@ -224,7 +235,11 @@ extension TaskLogList {
                     Toggle("disableTransition", isOn: $disableTransition)
                 }.padding()
                 
-                TaskLogList(rows: rows, disableTransition: disableTransition) { _ in
+                TaskLogList(
+                    rows: rows,
+                    disableTransition: disableTransition,
+                    scrollToBottom: scrollToBottom
+                ) { _ in
                     
                 }
             }
