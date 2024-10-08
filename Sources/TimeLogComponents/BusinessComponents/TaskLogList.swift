@@ -43,20 +43,17 @@ public struct TaskLogList: View {
                         ForEach(rows) { taskLogState in
                             if let timeLineState = taskLogState.timeLineState {
                                 TimeLine(timeLineState)
+                                    .id(timeLineState.id)
                                     .listRowSeparator(.hidden)
                                     .onTapGesture {
                                         onCellTapped(timeLineState)
                                     }
                                     .transition(
-                                        .scale(scale: 0.1)
-                                        .animation(.bouncy(extraBounce: 0.1))
+                                        .move(edge: .trailing)
+                                        .combined(
+                                            with: .scale(scale: 0.1).animation(.bouncy)
+                                        )
                                     )
-//                                    .transition(
-//                                        .move(edge: .trailing)
-//                                        .combined(
-//                                            with: .scale(scale: 0.1).animation(.bouncy)
-//                                        )
-//                                    )
                                 
                                 HStack {
                                     VDashedLine.RealLine()
@@ -211,6 +208,62 @@ extension TaskLogList {
                 }
             }
             
+        }
+    }
+    
+    return Playground()
+}
+
+#Preview("替换") {
+    struct Playground: View {
+        @State private var rows: [TaskLogList.TaskLogCellViewState] = []
+        let first: TaskLogList.TaskLogCellViewState = .TimeLine(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            endTime: .now,
+            title: "log-first",
+            color: .init(
+                uiColor: .init(
+                    red: .random(in: 0...1),
+                    green: .random(in: 0...1),
+                    blue: .random(in: 0...1),
+                    alpha: .random(in: 0...1)
+                )
+            )
+        ))
+        let second: TaskLogList.TaskLogCellViewState = .TimeLine(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            endTime: .now,
+            title: "log-second",
+            color: .init(
+                uiColor: .init(
+                    red: .random(in: 0...1),
+                    green: .random(in: 0...1),
+                    blue: .random(in: 0...1),
+                    alpha: .random(in: 0...1)
+                )
+            )
+        ))
+        
+        var body: some View {
+            VStack {
+                Button("toggle") {
+                    withAnimation {
+                        if rows.isEmpty {
+                            rows = [first]
+                        } else if rows.count == 1 {
+                            rows = [first, second]
+                        } else {
+                            rows = []
+                        }
+                    }
+                }
+                
+                TaskLogList(rows: rows) { _ in
+                    
+                }
+            }
         }
     }
     
