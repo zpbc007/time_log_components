@@ -12,6 +12,7 @@ public struct TaskLogList: View {
     
     let rows: [TaskLogCellViewState]
     let onCellTapped: (TimeLine.State) -> Void
+    @State private var canTransition = false
     
     public init(
         rows: [TaskLogCellViewState],
@@ -22,62 +23,73 @@ public struct TaskLogList: View {
     }
     
     public var body: some View {
-        if rows.isEmpty {
-            VStack {
-                Spacer()
-                
-                HStack(alignment: .center) {
-                    Spacer()
-                    
-                    Text("无记录数据")
-                        
-                    Spacer()
-                }
-                
-                Spacer()
-            }
-        } else {
-            ScrollViewReader{ proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading) {
-                        ForEach(rows) { taskLogState in
-                            if let timeLineState = taskLogState.timeLineState {
-                                TimeLine(timeLineState)
-                                    .id(timeLineState.id)
-                                    .onTapGesture {
-                                        onCellTapped(timeLineState)
-                                    }
-                                    .transition(
-                                        .asymmetric(
-                                            insertion: .move(edge: .trailing)
-                                                .combined(
-                                                    with: .scale(scale: 0.1).animation(.bouncy)
-                                                ),
-                                            removal: .opacity
+        Group {
+            if rows.isEmpty {
+                self.EmptyRowView
+            } else {
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading) {
+                            ForEach(rows) { taskLogState in
+                                if let timeLineState = taskLogState.timeLineState {
+                                    TimeLine(timeLineState)
+                                        .id(timeLineState.id)
+                                        .onTapGesture {
+                                            onCellTapped(timeLineState)
+                                        }
+                                        .transition(
+                                            canTransition 
+                                                ? .asymmetric(
+                                                    insertion: .move(edge: .trailing)
+                                                        .combined(
+                                                            with: .scale(scale: 0.1).animation(.bouncy)
+                                                        ),
+                                                    removal: .opacity
+                                                )
+                                                : .identity
                                         )
-                                    )
+                                    
+                                    HStack {
+                                        VDashedLine.RealLine()
+                                            .frame(height: VDashedLine.EndTimeMinHeight)
+                                        Spacer()
+                                    }.padding(.leading, 25)
+                                }
                                 
-                                HStack {
-                                    VDashedLine.RealLine()
-                                        .frame(height: VDashedLine.EndTimeMinHeight)
-                                    Spacer()
-                                }.padding(.leading, 25)
-                            }
-                            
-                            if let dashedLineState = taskLogState.dashedLineState {
-                                VDashedLine.WithDate(date: dashedLineState.date)
+                                if let dashedLineState = taskLogState.dashedLineState {
+                                    VDashedLine.WithDate(date: dashedLineState.date)
+                                }
                             }
                         }
+                        
+                        HStack {}
+                            .background(.clear)
+                            .id(Self.BottomId)
                     }
-                    
-                    HStack {}
-                        .background(.clear)
-                        .id(Self.BottomId)
-                }
-                .onChange(of: rows) { oldValue, newValue in
-                    proxy.scrollTo(Self.BottomId, anchor: .bottom)
+                    .onChange(of: rows) { oldValue, newValue in
+                        proxy.scrollTo(Self.BottomId, anchor: .bottom)
+                    }
                 }
             }
+        }.task {
+            canTransition = true
+        }
+    }
+    
+    @ViewBuilder
+    private var EmptyRowView: some View {
+        VStack {
+            Spacer()
+            
+            HStack(alignment: .center) {
+                Spacer()
+                
+                Text("无记录数据")
+                    
+                Spacer()
+            }
+            
+            Spacer()
         }
     }
 }
