@@ -68,7 +68,7 @@ public struct TaskLogList: View {
                             }
                         }
                         
-                        HStack {}.frame(height: 30)
+                        HStack {}.frame(height: 60)
                             .background(.clear)
                             .id(Self.BottomId)
                     }
