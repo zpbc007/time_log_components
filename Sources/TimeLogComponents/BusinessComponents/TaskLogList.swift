@@ -39,7 +39,7 @@ public struct TaskLogList: View {
         } else {
             ScrollViewReader{ proxy in
                 List {
-                    LazyVStack(alignment: .leading) {
+                    VStack(alignment: .leading) {
                         ForEach(rows) { taskLogState in
                             if let timeLineState = taskLogState.timeLineState {
                                 TimeLine(timeLineState)
@@ -48,11 +48,15 @@ public struct TaskLogList: View {
                                         onCellTapped(timeLineState)
                                     }
                                     .transition(
-                                        .move(edge: .trailing)
-                                        .combined(
-                                            with: .scale(scale: 0.1)
-                                        )
+                                        .scale(scale: 0.1)
+                                        .animation(.bouncy(extraBounce: 0.1))
                                     )
+//                                    .transition(
+//                                        .move(edge: .trailing)
+//                                        .combined(
+//                                            with: .scale(scale: 0.1).animation(.bouncy)
+//                                        )
+//                                    )
                                 
                                 HStack {
                                     VDashedLine.RealLine()
@@ -74,7 +78,6 @@ public struct TaskLogList: View {
                         .listRowSeparator(.hidden)
                         .id(Self.BottomId)
                 }
-                .defaultScrollAnchor(.bottom)
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .onChange(of: rows) { oldValue, newValue in
@@ -171,7 +174,15 @@ extension TaskLogList {
 
 #Preview("动态") {
     struct Playground: View {
-        @State private var rows: [TaskLogList.TaskLogCellViewState] = []
+        @State private var rows: [TaskLogList.TaskLogCellViewState] = [
+            .TimeLine(.init(
+                id: UUID().uuidString,
+                startTime: .now.addingTimeInterval(-600),
+                endTime: .now.addingTimeInterval(-180) ,
+                title: "已结束任务",
+                color: .blue
+            ))
+        ]
         
         var body: some View {
             VStack {
@@ -180,6 +191,7 @@ extension TaskLogList {
                         rows.append(.TimeLine(.init(
                             id: UUID().uuidString,
                             startTime: .now,
+                            endTime: .now,
                             title: "log-\(rows.count)",
                             color: .init(
                                 uiColor: .init(
