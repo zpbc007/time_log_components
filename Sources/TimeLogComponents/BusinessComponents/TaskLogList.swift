@@ -38,13 +38,12 @@ public struct TaskLogList: View {
             }
         } else {
             ScrollViewReader{ proxy in
-                List {
-                    VStack(alignment: .leading) {
+                ScrollView {
+                    LazyVStack(alignment: .leading) {
                         ForEach(rows) { taskLogState in
                             if let timeLineState = taskLogState.timeLineState {
                                 TimeLine(timeLineState)
                                     .id(timeLineState.id)
-                                    .listRowSeparator(.hidden)
                                     .onTapGesture {
                                         onCellTapped(timeLineState)
                                     }
@@ -64,19 +63,14 @@ public struct TaskLogList: View {
                             
                             if let dashedLineState = taskLogState.dashedLineState {
                                 VDashedLine.WithDate(date: dashedLineState.date)
-                                    .listRowSeparator(.hidden)
                             }
                         }
                     }
-                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     
                     HStack {}
                         .background(.clear)
-                        .listRowSeparator(.hidden)
                         .id(Self.BottomId)
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
                 .onChange(of: rows) { oldValue, newValue in
                     proxy.scrollTo(Self.BottomId, anchor: .bottom)
                 }
