@@ -69,7 +69,11 @@ public struct TaskLogList: View {
                             .id(Self.BottomId)
                     }
                     .onChange(of: rows) { oldValue, newValue in
-                        proxy.scrollTo(Self.BottomId, anchor: .bottom)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation {
+                                proxy.scrollTo(Self.BottomId, anchor: .bottom)
+                            }
+                        }
                     }
                 }
             }
