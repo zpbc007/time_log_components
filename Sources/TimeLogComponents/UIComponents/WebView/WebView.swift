@@ -30,16 +30,32 @@ struct WebView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        let coordinator = context.coordinator
-        if uiView.backForwardList.backList.count > level {
+        let backListGetter = {
+            uiView.backForwardList.backList
+        }
+        let forwardListGetter = {
+            uiView.backForwardList.forwardList
+        }
+        
+        if backListGetter().count > level {
+            let needBack = backListGetter().count - level
             // 如果当前后退列表的数量大于绑定的 level，则后退到指定的级别
-            for _ in 0..<uiView.backForwardList.backList.count - level {
+            for _ in 0..<needBack {
                 uiView.goBack()
+                // 到头了
+                if backListGetter().isEmpty {
+                    break
+                }
             }
-        } else if uiView.backForwardList.backList.count < level {
+        } else if backListGetter().count < level {
+            let needForward = level - backListGetter().count
             // 如果当前后退列表的数量小于绑定的 level，则尝试前进到指定的级别
-            for _ in uiView.backForwardList.backList.count..<level {
+            for _ in 0..<needForward {
                 uiView.goForward()
+                // 到头了
+                if forwardListGetter().isEmpty {
+                    break
+                }
             }
         }
     }
@@ -102,7 +118,7 @@ struct WebView: UIViewRepresentable {
         }
         
         private func updateParentLevel(_ webView: WKWebView) {
-            parent.level = webView.backForwardList.backList.count + 1
+            parent.level = webView.backForwardList.backList.count
         }
     }
 }
