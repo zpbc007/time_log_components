@@ -221,6 +221,7 @@ extension TaskLogList {
                                             )
                                         )
                                     )))
+                                    scrollToBottom.toggle()
                                 }
                             }
                         }
