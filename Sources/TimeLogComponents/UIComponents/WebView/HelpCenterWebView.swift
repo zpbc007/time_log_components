@@ -32,5 +32,7 @@ public struct HelpCenterWebView: View {
 }
 
 #Preview {
-    HelpCenterWebView()
+    NavigationStack {
+        HelpCenterWebView()
+    }
 }

@@ -131,6 +131,7 @@ extension WebView {
         @State private var isLoading = true
         @State private var canGoBack = false
         @State private var error: Error? = nil
+        @Environment(\.dismiss) private var dismiss
         
         let request: URLRequest
         let navigationActionPolicyResolver: (String) async -> WKNavigationActionPolicy
@@ -149,12 +150,10 @@ extension WebView {
                         isLoading: $isLoading,
                         error: $error
                     ).dismissBtn {
-                        
-                    }.toolbar {
-                        HStack {
-                            Button("back \(direction == .back ? "back" : (direction == .idle) ? "idle" : "forward")") {
-                                direction = .back
-                            }.disabled(!canGoBack)
+                        if canGoBack {
+                            direction = .back
+                        } else {
+                            dismiss()
                         }
                     }
 
