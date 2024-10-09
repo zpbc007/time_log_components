@@ -23,7 +23,6 @@ public struct SettingPage: View {
         Form {
             NavigationLink {
                 HelpCenterWebView()
-                    .navigationBarBackButtonHidden()
                     .toolbar(.hidden, for: .tabBar)
             } label: {
                 Label("新手指南", systemImage: "questionmark.circle")
@@ -31,7 +30,6 @@ public struct SettingPage: View {
             
             NavigationLink {
                 FeedbackView(user: nil)
-                    .navigationBarBackButtonHidden()
                     .toolbar(.hidden, for: .tabBar)
             } label: {
                 Label("联系我们", systemImage: "phone.circle")

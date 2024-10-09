@@ -149,7 +149,9 @@ extension WebView {
                         canGoBack: $canGoBack,
                         isLoading: $isLoading,
                         error: $error
-                    ).dismissBtn {
+                    )
+                    .navigationBarBackButtonHidden()
+                    .dismissBtn(cancelText: .empty) {
                         if canGoBack {
                             direction = .back
                         } else {

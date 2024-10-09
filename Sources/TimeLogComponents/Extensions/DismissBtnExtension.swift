@@ -11,6 +11,7 @@ public struct DismissModifier: ViewModifier {
     public enum CancelText: String {
         case cancel = "取消"
         case back = "返回"
+        case empty = ""
     }
     
     @Environment(\.dismiss) private var dismiss
@@ -55,7 +56,9 @@ public struct DismissModifier: ViewModifier {
                         } label: {
                             HStack {
                                 Image(systemName: "chevron.left")
-                                Text(self.cancelText.rawValue)
+                                if self.cancelText != .empty {
+                                    Text(self.cancelText.rawValue)
+                                }
                                 Spacer()
                             }
                         }
