@@ -35,11 +35,12 @@ struct WebView: UIViewRepresentable {
             return
         }
         
-        if direction == .forward && uiView.canGoForward {
+        let coordinator = context.coordinator
+        if direction == .forward && uiView.canGoForward && coordinator.canNavigate {
             uiView.goForward()
         }
         
-        if direction == .back && uiView.canGoBack {
+        if direction == .back && uiView.canGoBack && coordinator.canNavigate {
             uiView.goBack()
         }
         context.coordinator.resetDirection()
@@ -47,6 +48,7 @@ struct WebView: UIViewRepresentable {
 
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         var parent: WebView
+        var canNavigate = true
         
         init(_ parent: WebView) {
             self.parent = parent
@@ -57,23 +59,24 @@ struct WebView: UIViewRepresentable {
             didCommit navigation: WKNavigation!
         ) {
             parent.isLoading = true
+            updateParentCanGoBack(webView)
         }
-
+        
         func webView(
             _ webView: WKWebView,
             didFinish navigation: WKNavigation!
         ) {
             parent.isLoading = false
-            parent.canGoBack = webView.canGoBack
+            updateParentCanGoBack(webView)
         }
-
+        
         func webView(
             _ webView: WKWebView,
             didFail navigation: WKNavigation!,
             withError error: Error
         ) {
             parent.isLoading = false
-//            parent.error = error
+            updateParentCanGoBack(webView)
         }
         
         func webView(
@@ -93,11 +96,23 @@ struct WebView: UIViewRepresentable {
             withError error: Error
         ) {
             parent.isLoading = false
-//            parent.error = error
+            updateParentCanGoBack(webView)
         }
         
         func resetDirection() {
-            parent.direction = .idle
+            guard canNavigate == true else {
+                canNavigate = false
+                return
+            }
+            
+            DispatchQueue.main.async {[weak self] in
+                self?.parent.direction = .idle
+                self?.canNavigate = true
+            }
+        }
+        
+        private func updateParentCanGoBack(_ webView: WKWebView) {
+            parent.canGoBack = webView.canGoBack
         }
     }
 }
