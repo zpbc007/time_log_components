@@ -71,6 +71,7 @@ struct WebView: UIViewRepresentable {
             _ webView: WKWebView,
             didCommit navigation: WKNavigation!
         ) {
+            parent.level += 1
             parent.isLoading = true
         }
 
@@ -102,23 +103,33 @@ struct WebView: UIViewRepresentable {
             return await parent.navigationActionPolicyResolver(reqUrl)
         }
         
-        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        func webView(
+            _ webView: WKWebView,
+            didFailProvisionalNavigation navigation: WKNavigation!,
+            withError error: Error
+        ) {
             parent.isLoading = false
             parent.error = error
         }
 
-        func webView(_ webView: WKWebView, didGoBack navigation: WKNavigation!) {
+        func webView(
+            _ webView: WKWebView,
+            didGoBack navigation: WKNavigation!
+        ) {
             // 网页后退，更新当前级别
             updateParentLevel(webView)
         }
 
-        func webView(_ webView: WKWebView, didGoForward navigation: WKNavigation!) {
+        func webView(
+            _ webView: WKWebView,
+            didGoForward navigation: WKNavigation!
+        ) {
             // 网页前进，更新当前级别
             updateParentLevel(webView)
         }
         
         private func updateParentLevel(_ webView: WKWebView) {
-            parent.level = webView.backForwardList.backList.count
+            parent.level = webView.backForwardList.backList.count + 1
         }
     }
 }
