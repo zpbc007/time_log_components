@@ -42,6 +42,7 @@ struct WebView: UIViewRepresentable {
         if direction == .back && uiView.canGoBack {
             uiView.goBack()
         }
+        context.coordinator.resetDirection()
     }
 
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
@@ -64,7 +65,6 @@ struct WebView: UIViewRepresentable {
         ) {
             parent.isLoading = false
             parent.canGoBack = webView.canGoBack
-            parent.direction = .idle
         }
 
         func webView(
@@ -86,14 +86,6 @@ struct WebView: UIViewRepresentable {
             
             return await parent.navigationActionPolicyResolver(reqUrl)
         }
-                
-        func webView(
-            _ webView: WKWebView,
-            didGoBack navigation: WKNavigation!
-        ) {
-            // 网页后退，更新当前级别
-            parent.direction = .idle
-        }
         
         func webView(
             _ webView: WKWebView,
@@ -102,6 +94,10 @@ struct WebView: UIViewRepresentable {
         ) {
             parent.isLoading = false
 //            parent.error = error
+        }
+        
+        func resetDirection() {
+            parent.direction = .idle
         }
     }
 }
