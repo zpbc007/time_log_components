@@ -11,7 +11,8 @@ import WebKit
 struct WebView: UIViewRepresentable {
     let request: URLRequest
     let navigationActionPolicyResolver: (String) async -> WKNavigationActionPolicy
-    @Binding var level: Int
+    @Binding var direction: Direction
+    @Binding var canGoBack: Bool
     @Binding var isLoading: Bool
     @Binding var error: Error?
     
@@ -30,33 +31,16 @@ struct WebView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        let backListGetter = {
-            uiView.backForwardList.backList
-        }
-        let forwardListGetter = {
-            uiView.backForwardList.forwardList
+        guard direction != .idle else {
+            return
         }
         
-        if backListGetter().count > level {
-            let needBack = backListGetter().count - level
-            // 如果当前后退列表的数量大于绑定的 level，则后退到指定的级别
-            for _ in 0..<needBack {
-                uiView.goBack()
-                // 到头了
-                if backListGetter().isEmpty {
-                    break
-                }
-            }
-        } else if backListGetter().count < level {
-            let needForward = level - backListGetter().count
-            // 如果当前后退列表的数量小于绑定的 level，则尝试前进到指定的级别
-            for _ in 0..<needForward {
-                uiView.goForward()
-                // 到头了
-                if forwardListGetter().isEmpty {
-                    break
-                }
-            }
+        if direction == .forward && uiView.canGoForward {
+            uiView.goForward()
+        }
+        
+        if direction == .back && uiView.canGoBack {
+            uiView.goBack()
         }
     }
 
@@ -71,7 +55,6 @@ struct WebView: UIViewRepresentable {
             _ webView: WKWebView,
             didCommit navigation: WKNavigation!
         ) {
-            parent.level += 1
             parent.isLoading = true
         }
 
@@ -80,7 +63,8 @@ struct WebView: UIViewRepresentable {
             didFinish navigation: WKNavigation!
         ) {
             parent.isLoading = false
-            updateParentLevel(webView)
+            parent.canGoBack = webView.canGoBack
+            parent.direction = .idle
         }
 
         func webView(
@@ -89,7 +73,7 @@ struct WebView: UIViewRepresentable {
             withError error: Error
         ) {
             parent.isLoading = false
-            parent.error = error
+//            parent.error = error
         }
         
         func webView(
@@ -102,6 +86,14 @@ struct WebView: UIViewRepresentable {
             
             return await parent.navigationActionPolicyResolver(reqUrl)
         }
+                
+        func webView(
+            _ webView: WKWebView,
+            didGoBack navigation: WKNavigation!
+        ) {
+            // 网页后退，更新当前级别
+            parent.direction = .idle
+        }
         
         func webView(
             _ webView: WKWebView,
@@ -109,35 +101,24 @@ struct WebView: UIViewRepresentable {
             withError error: Error
         ) {
             parent.isLoading = false
-            parent.error = error
-        }
-
-        func webView(
-            _ webView: WKWebView,
-            didGoBack navigation: WKNavigation!
-        ) {
-            // 网页后退，更新当前级别
-            updateParentLevel(webView)
-        }
-
-        func webView(
-            _ webView: WKWebView,
-            didGoForward navigation: WKNavigation!
-        ) {
-            // 网页前进，更新当前级别
-            updateParentLevel(webView)
-        }
-        
-        private func updateParentLevel(_ webView: WKWebView) {
-            parent.level = webView.backForwardList.backList.count + 1
+//            parent.error = error
         }
     }
 }
 
 extension WebView {
+    enum Direction {
+        case forward
+        case back
+        case idle
+    }
+}
+
+extension WebView {
     struct Loading: View {
-        @State private var level: Int = 0
+        @State private var direction: WebView.Direction = .idle
         @State private var isLoading = true
+        @State private var canGoBack = false
         @State private var error: Error? = nil
         
         let request: URLRequest
@@ -152,14 +133,17 @@ extension WebView {
                     WebView(
                         request: request,
                         navigationActionPolicyResolver: navigationActionPolicyResolver,
-                        level: $level,
+                        direction: $direction,
+                        canGoBack: $canGoBack,
                         isLoading: $isLoading,
                         error: $error
                     ).dismissBtn {
                         
                     }.toolbar {
-                        Button("level: \(level)") {
-                            level -= 1
+                        HStack {
+                            Button("back \(direction == .back ? "back" : (direction == .idle) ? "idle" : "forward")") {
+                                direction = .back
+                            }.disabled(!canGoBack)
                         }
                     }
 
