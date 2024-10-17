@@ -38,18 +38,8 @@ struct InfiniteTab<Content: View>: View {
             .updating($translation) { value, state, _ in
                 let translation = min(width, max(-width, value.translation.width))
                 
-                // 不能再向右滑动了
-                if let minPage, currentPage == minPage {
-                    guard translation < 0 else {
-                        return
-                    }
-                }
-                
-                // 不能再向左滑动了
-                if let maxPage, currentPage == maxPage {
-                    guard translation > 0 else {
-                        return
-                    }
+                guard canTranslation(translation) else {
+                    return
                 }
                 
                 state = translation
@@ -57,17 +47,8 @@ struct InfiniteTab<Content: View>: View {
             .onEnded { value in
                 let translation = min(width, max(-width, value.translation.width))
                 
-                // 不能再向右滑动了
-                if let minPage, currentPage == minPage {
-                    guard translation < 0 else {
-                        return
-                    }
-                }
-                // 不能再向左滑动了
-                if let maxPage, currentPage == maxPage {
-                    guard translation > 0 else {
-                        return
-                    }
+                guard canTranslation(translation) else {
+                    return
                 }
                 
                 offset = translation
@@ -109,8 +90,7 @@ struct InfiniteTab<Content: View>: View {
                 .offset(x: CGFloat(1 - offsetIndex(currentPage)) * width)
         }
         .contentShape(Rectangle())
-        .offset(x: translation)
-        .offset(x: offset)
+        .offset(x: translation + offset)
         .gesture(dragGesture)
         .clipped()
     }
@@ -131,9 +111,26 @@ struct InfiniteTab<Content: View>: View {
             return (x + 1) % 3 + 2
         }
     }
+    
+    private func canTranslation(_ translation: CGFloat) -> Bool {
+        // 不能再向右滑动了
+        if let minPage, currentPage == minPage {
+            guard translation < 0 else {
+                return false
+            }
+        }
+        // 不能再向左滑动了
+        if let maxPage, currentPage == maxPage {
+            guard translation > 0 else {
+                return false
+            }
+        }
+        
+        return true
+    }
 }
 
-#Preview {
+#Preview("range") {
     struct Playground: View {
         @State var selected = Date.now.todayStartPoint
         @State var page = 0
@@ -162,6 +159,74 @@ struct InfiniteTab<Content: View>: View {
                 }
             }.onChange(of: page) { _, newValue in
                 self.selected = calculatePageDate(newValue)
+            }
+        }
+    }
+    
+    return Playground()
+}
+
+#Preview("infinite") {
+    struct Playground: View {
+        @State var page = 0
+        @State var expand = false
+        @State var offsetY: CGFloat = 0
+        
+        var height: CGFloat {
+            expand ? 150 : 50
+        }
+        
+        var realOffsetY: CGFloat {
+            expand ? 0 : offsetY
+        }
+        
+        var body: some View {
+            GeometryReader { geometry in
+                VStack{
+                    InfiniteTab(
+                        width: geometry.size.width,
+                        page: $page
+                    ) { page in
+                        VStack {
+                            Text("page top: \(page)")
+                                .frame(height: 50)
+                                .clipped()
+                            
+                            Text("page mid: \(page)")
+                                .frame(height: 50)
+                                .clipped()
+                            
+                            Text("page bottom: \(page)")
+                                .frame(height: 50)
+                                .clipped()
+                        }
+                        .padding(.vertical)
+                        .frame(width: geometry.size.width - 20, height: height)
+                        .offset(y: realOffsetY)
+                        .animation(.easeInOut, value: realOffsetY)
+                        .background(.yellow.opacity(0.5))
+                        .clipped()
+                    }
+                    .frame(height: height)
+                    .animation(.easeInOut, value: height)
+                    
+                    HStack {
+                        Button("top") {
+                            expand.toggle()
+                            offsetY = 50
+                        }
+                        
+                        Button("mid") {
+                            expand.toggle()
+                            offsetY = 0
+                        }
+                        
+                        Button("bottom") {
+                            expand.toggle()
+                            offsetY = -50
+                        }
+                    }.animation(.easeInOut, value: height)
+                }
             }
         }
     }

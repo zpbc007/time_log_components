@@ -47,7 +47,6 @@ extension WeekDatePicker {
                                 .offset(y: -4)
                                 .foregroundColor(bottomColor)
                         }
-                        
                     }.onTapGesture {
                         if !weekDay.disabled {
                             date = weekDay.day

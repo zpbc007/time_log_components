@@ -53,6 +53,24 @@ extension Date {
         return result
     }
     
+    public func monthDaysByWeek(calendar: Calendar = .current) -> [[Date]] {
+        let monthFirstDay = Date.from(year: self.year, month: self.month)
+        var result: [[Date]] = .init()
+        
+        // 生成 6 周
+        (0...5).forEach { distance in
+            if let date = calendar.date(
+                byAdding: .weekOfYear,
+                value: distance,
+                to: monthFirstDay
+            ) {
+                result.append(date.weekDays(calendar: calendar))
+            }
+        }
+        
+        return result
+    }
+    
     public var thisMonthStartPoint: Date {
         Date.from(year: self.year, month: self.month).todayStartPoint
     }
