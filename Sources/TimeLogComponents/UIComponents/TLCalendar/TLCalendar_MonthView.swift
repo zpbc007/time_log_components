@@ -18,7 +18,7 @@ extension TLCalendar {
         @Binding var selected: Date?
         
         var body: some View {
-            VStack {
+            VStack(spacing: 0) {
                 ForEach(days, id: \.first?.0) { weekDays in
                     TLCalendar.WeekView(
                         foreground: foreground,

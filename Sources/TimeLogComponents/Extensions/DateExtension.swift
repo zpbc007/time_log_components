@@ -52,25 +52,7 @@ extension Date {
 
         return result
     }
-    
-    public func monthDaysByWeek(calendar: Calendar = .current) -> [[Date]] {
-        let monthFirstDay = Date.from(year: self.year, month: self.month)
-        var result: [[Date]] = .init()
         
-        // 生成 6 周
-        (0...5).forEach { distance in
-            if let date = calendar.date(
-                byAdding: .weekOfYear,
-                value: distance,
-                to: monthFirstDay
-            ) {
-                result.append(date.weekDays(calendar: calendar))
-            }
-        }
-        
-        return result
-    }
-    
     public var thisMonthStartPoint: Date {
         Date.from(year: self.year, month: self.month).todayStartPoint
     }
@@ -132,5 +114,49 @@ extension Date {
     
     public var year: Int {
         Calendar.current.component(.year, from: self)
+    }
+}
+
+// MARK: - 内部使用
+extension Date {
+    func monthDaysByWeek(calendar: Calendar = .current) -> [[Date]] {
+        let monthFirstDay = Date.from(year: self.year, month: self.month)
+        var result: [[Date]] = .init()
+        
+        // 生成 6 周
+        (0...5).forEach { distance in
+            if let date = calendar.date(
+                byAdding: .weekOfYear,
+                value: distance,
+                to: monthFirstDay
+            ) {
+                result.append(date.weekDays(calendar: calendar))
+            }
+        }
+        
+        return result
+    }
+    
+    func weekIndexInMonth(calendar: Calendar = .current) -> Int {
+        // 找到1号所在周的第一天
+        let monthFirstDay = Date.from(year: self.year, month: self.month)
+        var firstWeekDay = monthFirstDay.weekFirstDay(calendar: calendar)
+        var result = 0
+        
+        while(result < 7 && firstWeekDay < self) {
+            result += 1
+            firstWeekDay = firstWeekDay.add(7)
+        }
+        
+        if (firstWeekDay == self) {
+            return result
+        }
+        
+        return result - 1
+    }
+    
+    func daysBetween(from: Date, to: Date) -> Int {
+        let components = Calendar.current.dateComponents([.day], from: from, to: to)
+        return components.day ?? 0
     }
 }

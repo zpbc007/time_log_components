@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TLCalendar: View {
     static let dayViewHeight: CGFloat = 35
+    static let weekHeaderHeight: CGFloat = 30
     
     let foreground: Color
     let disabledForeground: Color
@@ -20,14 +21,23 @@ struct TLCalendar: View {
     @State private var open = false
     @State private var page: Int = 0
     
+    private var height: CGFloat {
+        open ? Self.dayViewHeight * 6 : Self.dayViewHeight
+    }
+    
     var body: some View {
-        GeometryReader { geometry in
-            InfiniteTab(
-                width: geometry.size.width,
-//                maxPage: 0, // 不能选择未来的时间
-                page: $page
-            ) { pageNumber in
-                if open {
+        VStack(spacing: 0) {
+            WeekHeader(calendar: calendar)
+                .frame(height: 30)
+                .clipped()
+                .border(.black)
+            
+            GeometryReader { geometry in
+                InfiniteTab(
+                    width: geometry.size.width,
+    //                maxPage: 0, // 不能选择未来的时间
+                    page: $page
+                ) { pageNumber in
                     MonthView(
                         foreground: foreground,
                         disabledForeground: disabledForeground,
@@ -35,20 +45,21 @@ struct TLCalendar: View {
                         selectionBG: selectionBG,
                         dayViewHeight: Self.dayViewHeight,
                         days: self.calculateMonthDays(pageNumber),
-                        selected: $selected
+                        selected: pageNumber == page ? $selected : .constant(nil)
                     )
-                } else {
-                    WeekView(
-                        foreground: foreground,
-                        disabledForeground: disabledForeground,
-                        selectionForeground: selectionForeground,
-                        selectionBG: selectionBG,
-                        dayViewHeight: Self.dayViewHeight,
-                        days: self.calculateWeekDays(pageNumber),
-                        selected: $selected
-                    )
+                    .offset(y: calculateOffsetByPage(page))
+                    .clipped()
                 }
             }
+            .frame(height: height)
+            .clipped()
+        }
+        .overlay(alignment: .bottom) {
+            Button("toggle") {
+                withAnimation {
+                    open.toggle()
+                }
+            }.offset(y: 20)
         }
         .onChange(of: page) { oldValue, newValue in
             if open {
@@ -62,6 +73,14 @@ struct TLCalendar: View {
                 )
             }
         }
+    }
+    
+    private func calculateOffsetByPage(_ page: Int) -> CGFloat {
+        if open {
+            return 0
+        }
+        
+        return -CGFloat((selected?.weekIndexInMonth(calendar: calendar) ?? 0)) * Self.dayViewHeight
     }
     
     private func calculateWeekDays(_ page: Int) -> [(Date, Bool)] {
@@ -119,6 +138,10 @@ struct TLCalendar: View {
         
         var body: some View {
             VStack {
+                if let selected {
+                    Text("\(selected)")
+                }
+                
                 TLCalendar(
                     foreground: .black,
                     disabledForeground: .gray,
@@ -127,8 +150,6 @@ struct TLCalendar: View {
                     calendar: .current,
                     selected: $selected
                 )
-                .frame(height: TLCalendar.dayViewHeight * 8)
-                .clipped()
                 
                 Spacer()
             }

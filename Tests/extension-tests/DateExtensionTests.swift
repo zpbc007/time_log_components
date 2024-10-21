@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable 
 import TimeLogComponents
 
 final class DateExtensionTests: XCTestCase {
@@ -34,5 +35,25 @@ final class DateExtensionTests: XCTestCase {
                 XCTAssert(targetString == expectString)
             }
         }
+    }
+    
+    // 使用自定义的第一天
+    func testWeekIndexInMonthDifferentCalendar() {
+        let date1 = Date.from(year: 2024, month: 9, day: 2)
+        
+        // 默认周日为第一天
+        XCTAssert(date1.weekIndexInMonth() == 0)
+        
+        // 周一为第一天
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2
+        XCTAssert(date1.weekIndexInMonth(calendar: calendar) == 1)
+        
+        let date2 = Date.from(year: 2025, month: 2, day: 2)
+        XCTAssert(date2.weekIndexInMonth() == 1)
+        
+        // 周六为第一天
+        calendar.firstWeekday = 7
+        XCTAssert(date2.weekIndexInMonth(calendar: calendar) == 0)
     }
 }
