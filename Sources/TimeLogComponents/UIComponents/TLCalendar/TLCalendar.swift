@@ -30,7 +30,6 @@ struct TLCalendar: View {
             WeekHeader(calendar: calendar)
                 .frame(height: 30)
                 .clipped()
-                .border(.black)
             
             GeometryReader { geometry in
                 InfiniteTab(

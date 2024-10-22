@@ -16,7 +16,7 @@ extension TLCalendar {
         }
         
         var body: some View {
-            HStack {
+            HStack(spacing: 0) {
                 ForEach(weekDays, id: \.self) { day in
                     Text(day.toString(format: "EEE"))
                         .fontWeight(.light)
