@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TLCalendar: View {
+public struct TLCalendar: View {
     static let dayViewHeight: CGFloat = 35
     static let weekHeaderHeight: CGFloat = 30
     
@@ -17,6 +17,22 @@ struct TLCalendar: View {
     let selectionBG: Color
     let calendar: Calendar
     @Binding var selected: Date?
+    
+    public init(
+        foreground: Color,
+        disabledForeground: Color,
+        selectionForeground: Color,
+        selectionBG: Color,
+        calendar: Calendar,
+        selected: Binding<Date?>
+    ) {
+        self.foreground = foreground
+        self.disabledForeground = disabledForeground
+        self.selectionForeground = selectionForeground
+        self.selectionBG = selectionBG
+        self.calendar = calendar
+        self._selected = selected
+    }
     
     @State private var open = false
     @State private var page: Int = 0
@@ -44,7 +60,7 @@ struct TLCalendar: View {
         }
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             WeekHeader(calendar: calendar)
                 .frame(height: 30)
