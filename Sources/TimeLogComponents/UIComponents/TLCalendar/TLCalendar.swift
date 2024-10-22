@@ -25,6 +25,25 @@ struct TLCalendar: View {
         open ? Self.dayViewHeight * 6 : Self.dayViewHeight
     }
     
+    private var maxPage: Int {
+        let isSameMonth = selected?.month == Date.now.month
+        
+        // 可以翻到下一页
+        if !isSameMonth {
+            return page + 1
+        }
+        
+        if open {
+            return page
+        } else {
+            if selected?.weekIndexInMonth(calendar: calendar) == Date.now.weekIndexInMonth(calendar: calendar) {
+                return page
+            } else {
+                return page + 1
+            }
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             WeekHeader(calendar: calendar)
@@ -34,7 +53,7 @@ struct TLCalendar: View {
             GeometryReader { geometry in
                 InfiniteTab(
                     width: geometry.size.width,
-    //                maxPage: 0, // 不能选择未来的时间
+                    maxPage: maxPage, // 不能选择未来的时间
                     page: $page
                 ) { pageNumber in
                     MonthView(
@@ -44,7 +63,15 @@ struct TLCalendar: View {
                         selectionBG: selectionBG,
                         dayViewHeight: Self.dayViewHeight,
                         days: self.calculateMonthDays(pageNumber),
-                        selected: pageNumber == page ? $selected : .constant(nil)
+                        selected: pageNumber == page ? .init(get: {
+                            selected
+                        }, set: { newDate in
+                            guard let newDate, newDate < .now else {
+                                return
+                            }
+                            
+                            selected = newDate
+                        }) : .constant(nil)
                     )
                     .offset(y: calculateOffsetByPage(page))
                     .clipped()
@@ -107,7 +134,7 @@ struct TLCalendar: View {
             .monthDaysByWeek(calendar: calendar)
             .map { weekDays in
                 weekDays.map { date in
-                    (date, date.month != targetMonth)
+                    (date, date.month != targetMonth || date > .now)
                 }
             }
     }
