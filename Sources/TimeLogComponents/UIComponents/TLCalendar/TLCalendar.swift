@@ -16,7 +16,7 @@ public struct TLCalendar: View {
     let selectionForeground: Color
     let selectionBG: Color
     let calendar: Calendar
-    @Binding var selected: Date?
+    @Binding var selected: Date
     
     public init(
         foreground: Color,
@@ -24,7 +24,7 @@ public struct TLCalendar: View {
         selectionForeground: Color,
         selectionBG: Color,
         calendar: Calendar,
-        selected: Binding<Date?>
+        selected: Binding<Date>
     ) {
         self.foreground = foreground
         self.disabledForeground = disabledForeground
@@ -42,7 +42,7 @@ public struct TLCalendar: View {
     }
     
     private var maxPage: Int {
-        let isSameMonth = selected?.month == Date.now.month
+        let isSameMonth = selected.month == Date.now.month
         
         // 可以翻到下一页
         if !isSameMonth {
@@ -52,7 +52,7 @@ public struct TLCalendar: View {
         if open {
             return page
         } else {
-            if selected?.weekIndexInMonth(calendar: calendar) == Date.now.weekIndexInMonth(calendar: calendar) {
+            if selected.weekIndexInMonth(calendar: calendar) == Date.now.weekIndexInMonth(calendar: calendar) {
                 return page
             } else {
                 return page + 1
@@ -131,7 +131,7 @@ public struct TLCalendar: View {
             return 0
         }
         
-        return -CGFloat((selected?.weekIndexInMonth(calendar: calendar) ?? 0)) * Self.dayViewHeight
+        return -CGFloat((selected.weekIndexInMonth(calendar: calendar))) * Self.dayViewHeight
     }
     
     private func calculateWeekDays(_ page: Int) -> [(Date, Bool)] {
@@ -156,10 +156,6 @@ public struct TLCalendar: View {
     }
     
     private func calculatePageFirstDateForWeek(_ page: Int, target: (Date?, Int)? = nil) -> Date {
-        guard let selected else {
-            return .now
-        }
-        
         let targetDate = target?.0 ?? selected
         let targetPage = target?.1 ?? self.page
         
@@ -171,10 +167,6 @@ public struct TLCalendar: View {
     }
     
     private func calculatePageFirstDateForMonth(_ page: Int, target: (Date?, Int)? = nil) -> Date {
-        guard let selected else {
-            return .now
-        }
-        
         let targetDate = target?.0 ?? selected
         let targetPage = target?.1 ?? self.page
         
@@ -188,13 +180,11 @@ public struct TLCalendar: View {
 
 #Preview {
     struct Playground: View {
-        @State private var selected: Date? = .now
+        @State private var selected: Date = .now
         
         var body: some View {
             VStack {
-                if let selected {
-                    Text("\(selected)")
-                }
+                Text("\(selected)")
                 
                 TLCalendar(
                     foreground: .black,
