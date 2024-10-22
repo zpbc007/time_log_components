@@ -24,9 +24,7 @@ extension TLCalendar {
             }
             .animation(.easeInOut, value: isSelected)
             .onTapGesture {
-                if !disabled {
-                    selected = date
-                }
+                selected = date
             }
         }
         

@@ -55,11 +55,7 @@ struct TLCalendar: View {
             .clipped()
         }
         .overlay(alignment: .bottom) {
-            Button("toggle") {
-                withAnimation {
-                    open.toggle()
-                }
-            }.offset(y: 20)
+            ToggleButton
         }
         .onChange(of: page) { oldValue, newValue in
             if open {
@@ -73,6 +69,19 @@ struct TLCalendar: View {
                 )
             }
         }
+    }
+    
+    @ViewBuilder
+    private var ToggleButton: some View {
+        Button {
+            withAnimation {
+                open.toggle()
+            }
+        } label: {
+            Image(systemName: open ? "chevron.compact.up" : "chevron.compact.down")
+                .padding()
+        }
+        .offset(y: 30)
     }
     
     private func calculateOffsetByPage(_ page: Int) -> CGFloat {
@@ -92,11 +101,14 @@ struct TLCalendar: View {
     }
     
     private func calculateMonthDays(_ page: Int) -> [[(Date, Bool)]] {
-        self.calculatePageFirstDateForMonth(page)
+        let pageDate = self.calculatePageFirstDateForMonth(page)
+        let targetMonth = pageDate.month
+        
+        return pageDate
             .monthDaysByWeek(calendar: calendar)
             .map { weekDays in
                 weekDays.map { date in
-                    (date, date > .now)
+                    (date, date.month != targetMonth)
                 }
             }
     }
