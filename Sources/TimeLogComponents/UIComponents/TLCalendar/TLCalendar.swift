@@ -95,8 +95,7 @@ public struct TLCalendar: View {
             }
             .frame(height: height)
             .clipped()
-        }
-        .overlay(alignment: .bottom) {
+            
             ToggleButton
         }
         .onChange(of: page) { oldValue, newValue in
@@ -123,7 +122,6 @@ public struct TLCalendar: View {
             Image(systemName: open ? "chevron.compact.up" : "chevron.compact.down")
                 .padding()
         }
-        .offset(y: 30)
     }
     
     private func calculateOffsetByPage(_ page: Int) -> CGFloat {
@@ -194,6 +192,7 @@ public struct TLCalendar: View {
                     calendar: .current,
                     selected: $selected
                 )
+                .border(.black)
                 
                 Spacer()
             }
