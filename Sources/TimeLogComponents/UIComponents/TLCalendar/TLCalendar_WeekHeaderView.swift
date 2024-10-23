@@ -20,6 +20,7 @@ extension TLCalendar {
                 ForEach(weekDays, id: \.self) { day in
                     Text(day.toString(format: "EEE"))
                         .fontWeight(.light)
+                        .font(.caption2)
                         .frame(maxWidth:.infinity)
                 }
             }
