@@ -15,7 +15,7 @@ extension TLCalendar {
         let selectionBG: Color
         let dayViewHeight: CGFloat
         let days: [[(Date, Bool)]]
-        @Binding var selected: Date?
+        @Binding var selected: Date
         
         var body: some View {
             VStack(spacing: 0) {
@@ -37,7 +37,7 @@ extension TLCalendar {
 
 #Preview {
     struct Playground: View {
-        @State private var selected: Date? = .now
+        @State private var selected: Date = .now
         
         var body: some View {
             TLCalendar.MonthView(

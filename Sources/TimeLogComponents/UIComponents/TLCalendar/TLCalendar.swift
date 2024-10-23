@@ -79,15 +79,7 @@ public struct TLCalendar: View {
                         selectionBG: selectionBG,
                         dayViewHeight: Self.dayViewHeight,
                         days: self.calculateMonthDays(pageNumber),
-                        selected: pageNumber == page ? .init(get: {
-                            selected
-                        }, set: { newDate in
-                            guard let newDate, newDate < .now else {
-                                return
-                            }
-                            
-                            selected = newDate
-                        }) : .constant(nil)
+                        selected: pageNumber == page ? curPageSelected : .constant(.distantPast)
                     )
                     .offset(y: calculateOffsetByPage(page))
                     .clipped()
@@ -109,6 +101,16 @@ public struct TLCalendar: View {
                     target: (selected, oldValue)
                 )
             }
+        }
+    }
+    
+    private var curPageSelected: Binding<Date> {
+        .init(get: { selected }) { newDate in
+            if newDate > .now {
+                return
+            }
+
+            selected = newDate
         }
     }
     

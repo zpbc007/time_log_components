@@ -15,7 +15,7 @@ extension TLCalendar {
         let selectionForeground: Color
         let selectionBG: Color
         let disabled: Bool
-        @Binding var selected: Date?
+        @Binding var selected: Date
         
         var body: some View {
             ZStack(alignment: .center) {
@@ -29,11 +29,7 @@ extension TLCalendar {
         }
         
         private var isSelected: Bool {
-            guard let selected else {
-                return false
-            }
-            
-            return date.isSame(day: selected)
+            date.isSame(day: selected)
         }
         
         private var foregroundColor: Color {
@@ -70,7 +66,7 @@ extension TLCalendar {
 
 #Preview {
     struct Playground: View {
-        @State private var selected: Date? = nil
+        @State private var selected: Date = .now
         
         var body: some View {
             VStack {
@@ -87,11 +83,7 @@ extension TLCalendar {
 //                .animation(.easeInOut, value: selected)
                                 
                 Button("toggle") {
-                    if selected != nil {
-                        self.selected = nil
-                    } else {
-                        self.selected = .now
-                    }
+                    self.selected = self.selected.add(1)
                 }
             }
         }
