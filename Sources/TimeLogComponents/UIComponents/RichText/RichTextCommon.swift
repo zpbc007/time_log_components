@@ -116,11 +116,14 @@ extension RichTextCommon {
                         color: #a4a4a5;
                     }
                 }
-                html::-webkit-scrollbar {
-                    display: none;
+                html {
+                    background: red;
                 }
-                body::-webkit-scrollbar {
-                    display: none;
+                body {
+                    background: green;
+                }
+                #editor {
+                    background: gray;
                 }
                 body {
                     margin: 0;
