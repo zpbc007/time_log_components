@@ -289,7 +289,7 @@ extension RichTextEditor {
         }
         
         private func injectBundleScript(_ userContentController: WKUserContentController) {
-            let bundleJsURL = Bundle.module.url(forResource: "bundle", withExtension: "js")
+            let bundleJsURL = Bundle.module.url(forResource: "bundle.min", withExtension: "js")
             
             guard
                 let bundleJsURL,
