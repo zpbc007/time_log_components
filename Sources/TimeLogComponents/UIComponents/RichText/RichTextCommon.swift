@@ -269,7 +269,12 @@ extension RichTextCommon {
             // 避免键盘打开时出现多余的空白
             if let keyboardHeight = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height {
                 self.webview?.scrollView.contentInset = .init(
-                    top: 0, left: 0, bottom: 0 - keyboardHeight, right: 0)
+                    top: 0, 
+                    left: 0,
+                    // 100 为两个 toolbar 的高度
+                    bottom: 100 - keyboardHeight,
+                    right: 0
+                )
             }
         }
         
