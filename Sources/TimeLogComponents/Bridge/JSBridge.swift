@@ -54,9 +54,6 @@ public class JSBridge {
     }
     
     func updateWebview(_ webview: WKWebView) {
-        if webview == self.webview {
-            return
-        }
         self.removeJSBMessageHandler()
         self.webview = webview
         self.addJSBMessageHandler()

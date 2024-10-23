@@ -182,7 +182,7 @@ extension RichTextEditor {
             // 这里需要与 Binding 建立关联关系，不然不会更新
             let _ = viewModel.content
             let _ = viewModel.fetchContentId
-            context.coordinator.bridge.updateWebview(webView)
+            context.coordinator.updateWebview(webView)
             context.coordinator.syncContent(viewModel.content)
             context.coordinator.fetchContent()
         }
@@ -242,6 +242,9 @@ extension RichTextEditor {
                     
                     RichTextEditor()
                         .environmentObject(editorVM)
+                        .frame(height: 200)
+                        .border(.black)
+                        .padding()
                 }
             }
         }

@@ -159,6 +159,7 @@ extension RichTextCommon {
     class Coordinator: NSObject, WKNavigationDelegate {
         var parent: RichTextWebView
         var bridge: JSBridge
+        private weak var webview: WKWebView?
         private var cancellable: AnyCancellable?
         private var webViewFinished: Bool = false
         private var latestData: String?
@@ -189,6 +190,20 @@ extension RichTextCommon {
                         await parent.viewModel.updateContent(data)
                     }
                 })
+            
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(self.keyboardWillShow(notification:)),
+                name: UIResponder.keyboardWillShowNotification,
+                object: nil
+            )
+                    
+            NotificationCenter.default.addObserver(
+                self, 
+                selector: #selector(self.keyboardWillHide(notification:)),
+                name: UIResponder.keyboardWillHideNotification,
+                object: nil
+            )
         }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -239,6 +254,33 @@ extension RichTextCommon {
                 self.latestData = result
                 self.parent.viewModel.finishSync(result)
             }
+        }
+        
+        func updateWebview(_ webview: WKWebView) {
+            if webview == self.webview {
+                return
+            }
+            self.webview = webview
+            self.bridge.updateWebview(webview)
+        }
+        
+        // https://stackoverflow.com/questions/72516559/extra-space-on-wkwebview-when-keyboard-is-opened
+        @objc func keyboardWillShow(notification: NSNotification) {
+            // 避免键盘打开时出现多余的空白
+            if let keyboardHeight = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height {
+                self.webview?.scrollView.contentInset = .init(
+                    top: 0, left: 0, bottom: 0 - keyboardHeight, right: 0)
+            }
+        }
+        
+        @objc func keyboardWillHide(notification: NSNotification) {
+            UIView.animate(withDuration: 0.2, animations: {
+                self.webview?.scrollView.contentInset = .init(top: 0, left: 0, bottom: 0, right: 0)
+            })
+        }
+        
+        deinit {
+            NotificationCenter.default.removeObserver(self)
         }
     }
 }
