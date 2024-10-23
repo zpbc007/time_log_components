@@ -116,6 +116,12 @@ extension RichTextCommon {
                         color: #a4a4a5;
                     }
                 }
+                html::-webkit-scrollbar {
+                    display: none;
+                }
+                body::-webkit-scrollbar {
+                    display: none;
+                }
                 body {
                     margin: 0;
                 }
