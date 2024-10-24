@@ -25,11 +25,11 @@ public struct TodayTarget: View {
                 }
             } else {
                 RichTextViewer(content: comment)
+                    .frame(maxHeight: 180)
             }
         }
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .frame(maxHeight: 180)
     }
 }
 
@@ -40,6 +40,13 @@ public struct TodayTarget: View {
 }
 
 #Preview("empty") {
-    TodayTarget(comment: "")
-        .padding()
+    VStack(spacing: 0) {
+        Text("123")
+        
+        TodayTarget(comment: "")
+            .padding()
+        
+        Text("456")
+    }
+    
 }
