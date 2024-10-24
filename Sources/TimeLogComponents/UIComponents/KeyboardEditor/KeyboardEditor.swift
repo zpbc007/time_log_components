@@ -23,9 +23,14 @@ public struct KeyboardEditor<ContentView: View>: View {
                 .fill(Color.black.opacity(0.6))
                 .onTapGesture(perform: dismiss)
                 .ignoresSafeArea()
+                .transition(.opacity)
             
             content()
-                .background(bgColor, in: .rect(topLeadingRadius: 10, topTrailingRadius: 10))
+                .background(
+                    bgColor,
+                    in: .rect(topLeadingRadius: 10, topTrailingRadius: 10)
+                )
+                .transition(.move(edge: .bottom))
         }
     }
 }
@@ -44,7 +49,10 @@ public struct KeyboardEditor<ContentView: View>: View {
                     }
                 }.overlay(alignment: .bottomTrailing) {
                     Button {
-                        showAdd = true
+                        withAnimation {
+                            showAdd = true
+                        }
+                        
                     } label: {
                         Image(systemName: "plus")
                             .padding()
