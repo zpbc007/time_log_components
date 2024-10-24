@@ -152,12 +152,10 @@ public class JSBridge {
     }
     
     private func handleJSMessage(_ msgJSONString: String?){
-        guard let data = msgJSONString?.data(using: .utf8) else {
+        guard let msgJSONString else {
             return
         }
-        let decoder = JSONDecoder()
-        
-        guard let msg = try? decoder.decode(JSBMessageFromJS.self, from: data) else {
+        guard let msg = JSONUtils.decode(msgJSONString, type: JSBMessageFromJS.self) else {
             return
         }
         

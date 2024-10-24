@@ -116,15 +116,6 @@ extension RichTextCommon {
                         color: #a4a4a5;
                     }
                 }
-                html {
-                    background: red;
-                }
-                body {
-                    background: green;
-                }
-                #editor {
-                    background: gray;
-                }
                 body {
                     margin: 0;
                 }
@@ -184,26 +175,29 @@ extension RichTextCommon {
                 }
                 .receive(on: DispatchQueue.main)
                 .sink(receiveValue: {[weak self] data in
-                    self?.latestData = data
+                    guard let msg = JSONUtils.decode(data, type: ContentChangeMessageFromJS.self) else {
+                        return
+                    }
+                    
+                    self?.latestData = msg.content
                     
                     Task {
                         await parent.viewModel.updateContent(data)
                     }
                 })
+        }
+        
+        private func parseContentChangeMessage(_ jsonString: String?) -> ContentChangeMessageFromJS? {
+            guard let data = jsonString?.data(using: .utf8) else {
+                return nil
+            }
+            let decoder = JSONDecoder()
             
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(self.keyboardWillShow(notification:)),
-                name: UIResponder.keyboardWillShowNotification,
-                object: nil
-            )
-                    
-            NotificationCenter.default.addObserver(
-                self, 
-                selector: #selector(self.keyboardWillHide(notification:)),
-                name: UIResponder.keyboardWillHideNotification,
-                object: nil
-            )
+            guard let msg = try? decoder.decode(ContentChangeMessageFromJS.self, from: data) else {
+                return nil
+            }
+            
+            return msg
         }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -263,30 +257,6 @@ extension RichTextCommon {
             self.webview = webview
             self.bridge.updateWebview(webview)
         }
-        
-        // https://stackoverflow.com/questions/72516559/extra-space-on-wkwebview-when-keyboard-is-opened
-        @objc func keyboardWillShow(notification: NSNotification) {
-            // 避免键盘打开时出现多余的空白
-            if let keyboardHeight = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height {
-                self.webview?.scrollView.contentInset = .init(
-                    top: 0, 
-                    left: 0,
-                    // 100 为两个 toolbar 的高度
-                    bottom: 100 - keyboardHeight,
-                    right: 0
-                )
-            }
-        }
-        
-        @objc func keyboardWillHide(notification: NSNotification) {
-            UIView.animate(withDuration: 0.2, animations: {
-                self.webview?.scrollView.contentInset = .init(top: 0, left: 0, bottom: 0, right: 0)
-            })
-        }
-        
-        deinit {
-            NotificationCenter.default.removeObserver(self)
-        }
     }
 }
 
@@ -309,6 +279,11 @@ extension RichTextCommon {
     
     enum NativeCallWebEvent: String {
         case editorFetchContent = "editor.fetchContent"
+    }
+    
+    struct ContentChangeMessageFromJS: Codable {
+        let content: String
+        let lines: Int
     }
 }
 

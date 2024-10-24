@@ -242,7 +242,7 @@ extension RichTextEditor {
                     
                     RichTextEditor()
                         .environmentObject(editorVM)
-                        .frame(height: 200)
+                        .frame(maxHeight: 200)
                         .border(.black)
                         .padding()
                 }
