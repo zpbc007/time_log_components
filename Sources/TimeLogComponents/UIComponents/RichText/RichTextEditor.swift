@@ -10,10 +10,14 @@ import WebKit
 import Combine
 
 public struct RichTextEditor: View {
-    public init() {}
+    let maxHeight: CGFloat?
+    
+    public init(maxHeight: CGFloat? = nil) {
+        self.maxHeight = maxHeight
+    }
     
     public var body: some View {
-        WebView()
+        WebView(maxHeight: maxHeight)
     }
 }
 
@@ -162,6 +166,11 @@ extension RichTextEditor {
 extension RichTextEditor {
     struct WebView: UIViewRepresentable, RichTextWebView {
         @EnvironmentObject var viewModel: RichTextCommon.ViewModel
+        var maxHeight: CGFloat?
+        
+        init(maxHeight: CGFloat? = nil) {
+            self.maxHeight = maxHeight
+        }
         
         func makeUIView(context: Context) -> WKWebView {
             let wkConfig = RichTextCommon.makeWKConfig()
@@ -182,9 +191,20 @@ extension RichTextEditor {
             // 这里需要与 Binding 建立关联关系，不然不会更新
             let _ = viewModel.content
             let _ = viewModel.fetchContentId
+            
+            self.updateWebViewHeight(webView)
             context.coordinator.updateWebview(webView)
             context.coordinator.syncContent(viewModel.content)
             context.coordinator.fetchContent()
+        }
+        
+        private func updateWebViewHeight(_ webView: WKWebView) {
+            guard let maxHeight else {
+                return
+            }
+            
+            let webViewContentHeight = webView.scrollView.contentSize.height
+            webView.frame.size.height = min(webViewContentHeight, maxHeight)
         }
         
         func makeCoordinator() -> RichTextCommon.Coordinator {
@@ -218,7 +238,7 @@ extension RichTextEditor {
     }
 }
 
-#Preview {
+#Preview("normal") {
     struct Playground: View {
         @StateObject 
         private var editorVM = RichTextEditor.ViewModel(
@@ -243,6 +263,29 @@ extension RichTextEditor {
                     RichTextEditor()
                         .environmentObject(editorVM)
                         .frame(maxHeight: 200)
+                        .border(.black)
+                        .padding()
+                }
+            }
+        }
+    }
+    
+    return Playground()
+}
+
+#Preview("maxHeight") {
+    struct Playground: View {
+        @StateObject
+        private var editorVM = RichTextEditor.ViewModel(
+            "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}"
+        )
+        
+        var body: some View {
+            NavigationStack {
+                VStack {
+                    RichTextEditor(maxHeight: 300)
+                        .frame(maxHeight: 300)
+                        .environmentObject(editorVM)
                         .border(.black)
                         .padding()
                 }

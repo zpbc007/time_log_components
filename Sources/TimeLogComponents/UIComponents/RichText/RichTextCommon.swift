@@ -180,7 +180,6 @@ extension RichTextCommon {
                     }
                     
                     self?.latestData = msg.content
-                    
                     Task {
                         await parent.viewModel.updateContent(msg.content)
                     }
