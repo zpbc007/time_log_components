@@ -11,13 +11,19 @@ import Combine
 
 public struct RichTextEditor: View {
     let maxHeight: CGFloat?
+    @State private var height: CGFloat = .infinity
     
     public init(maxHeight: CGFloat? = nil) {
         self.maxHeight = maxHeight
     }
     
     public var body: some View {
-        WebView(maxHeight: maxHeight)
+        if let maxHeight {
+            WebView(maxHeight: maxHeight, height: $height)
+                .frame(height: height)
+        } else {
+            WebView()
+        }
     }
 }
 
@@ -166,10 +172,17 @@ extension RichTextEditor {
 extension RichTextEditor {
     struct WebView: UIViewRepresentable, RichTextWebView {
         @EnvironmentObject var viewModel: RichTextCommon.ViewModel
+        @Binding var height: CGFloat
         var maxHeight: CGFloat?
         
-        init(maxHeight: CGFloat? = nil) {
+        init() {
+            self.maxHeight = nil
+            self._height = .constant(.infinity)
+        }
+        
+        init(maxHeight: CGFloat, height: Binding<CGFloat>) {
             self.maxHeight = maxHeight
+            self._height = height
         }
         
         func makeUIView(context: Context) -> WKWebView {
@@ -204,7 +217,9 @@ extension RichTextEditor {
             }
             
             let webViewContentHeight = webView.scrollView.contentSize.height
-            webView.frame.size.height = min(webViewContentHeight, maxHeight)
+            let realHeight = min(webViewContentHeight, maxHeight)
+//            webView.frame.size.height = min(webViewContentHeight, maxHeight)
+            self.height = realHeight
         }
         
         func makeCoordinator() -> RichTextCommon.Coordinator {
@@ -284,7 +299,6 @@ extension RichTextEditor {
             NavigationStack {
                 VStack {
                     RichTextEditor(maxHeight: 300)
-                        .frame(maxHeight: 300)
                         .environmentObject(editorVM)
                         .border(.black)
                         .padding()
