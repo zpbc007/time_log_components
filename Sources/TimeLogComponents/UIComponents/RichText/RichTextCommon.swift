@@ -259,7 +259,14 @@ extension RichTextCommon {
                 return
             }
             self.webview = webview
+            self.removeKeyboardObserver()
             self.bridge.updateWebview(webview)
+        }
+        
+        private func removeKeyboardObserver() {
+            NotificationCenter.default.removeObserver(self.webView, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+            NotificationCenter.default.removeObserver(self.webView, name: UIResponder.keyboardWillShowNotification, object: nil)
+            NotificationCenter.default.removeObserver(self.webView, name: UIResponder.keyboardWillHideNotification, object: nil)
         }
     }
 }
