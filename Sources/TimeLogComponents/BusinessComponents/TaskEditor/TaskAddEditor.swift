@@ -66,7 +66,7 @@ public struct TaskAddEditor: View {
         KeyboardEditor(
             bgColor: bgColor,
             dismiss: dismiss
-        ) {
+        ) { size in 
             VStack {
                 TextField("任务名称", text: $title)
                     .focused($focusedField, equals: .title)

@@ -22,6 +22,8 @@ public struct TaskLogEditor: View {
     let dismiss: () -> Void
     let onDeleteButtonTapped: (() -> Void)?
     
+    @State private var bottomSize: CGSize = .zero
+    
     public init(
         fontColor: Color,
         activeFontColor: Color,
@@ -54,7 +56,7 @@ public struct TaskLogEditor: View {
         KeyboardEditor(
             bgColor: bgColor,
             dismiss: dismiss
-        ) {
+        ) { size in
             VStack {
                 if let onDeleteButtonTapped {
                     HStack {
@@ -66,38 +68,46 @@ public struct TaskLogEditor: View {
                     }
                 }
                 
-                RichTextEditor(maxHeight: 230)
+                RichTextEditor(maxHeight: size.height - bottomSize.height)
+                    .border(.black)
                 
-                DatePicker(
-                    "开始时间",
-                    selection: $startTime
-                )
-                DatePicker(
-                    "结束时间",
-                    selection: $endTime
-                )
-                
-                HStack {
-                    Button(
-                        action: onSelectTaskButtonTapped,
-                        label: {
-                            HStack(alignment: .center) {
-                                Text(selectedTaskName ?? "选择任务")
-                                Image(systemName: "chevron.down")
-                            }
-                        }
-                    ).tint(selectedTaskName == nil ? fontColor : activeFontColor)
-                    
-                    Spacer()
-                    
-                    TaskEditor_Common.ConfirmButton(
-                        fontColor: fontColor,
-                        activeFontColor: activeFontColor,
-                        action: onSendButtonTapped,
-                        isValid: isValid
+                VStack {
+                    DatePicker(
+                        "开始时间",
+                        selection: $startTime
                     )
+                    DatePicker(
+                        "结束时间",
+                        selection: $endTime
+                    )
+                    
+                    HStack {
+                        Button(
+                            action: onSelectTaskButtonTapped,
+                            label: {
+                                HStack(alignment: .center) {
+                                    Text(selectedTaskName ?? "选择任务")
+                                    Image(systemName: "chevron.down")
+                                }
+                            }
+                        ).tint(selectedTaskName == nil ? fontColor : activeFontColor)
+                        
+                        Spacer()
+                        
+                        TaskEditor_Common.ConfirmButton(
+                            fontColor: fontColor,
+                            activeFontColor: activeFontColor,
+                            action: onSendButtonTapped,
+                            isValid: isValid
+                        )
+                    }
+                    .padding(.top)
                 }
-                .padding(.top)
+                .contentSize()
+                .onPreferenceChange(SizePreferenceKey.self, perform: { value in
+                    bottomSize = value
+                })
+                
             }.padding()
         }
     }

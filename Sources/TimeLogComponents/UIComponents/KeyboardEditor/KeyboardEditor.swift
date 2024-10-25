@@ -4,13 +4,14 @@ import SwiftUI
 
 public struct KeyboardEditor<ContentView: View>: View {
     let bgColor: Color
-    let content: () -> ContentView
+    let content: (_ size: CGSize) -> ContentView
     let dismiss: () -> Void
+    @State private var contentSize: CGSize = .zero
     
     public init(
         bgColor: Color,
         dismiss: @escaping () -> Void,
-        content: @escaping () -> ContentView
+        content: @escaping (_ size: CGSize) -> ContentView
     ) {
         self.bgColor = bgColor
         self.dismiss = dismiss
@@ -19,13 +20,27 @@ public struct KeyboardEditor<ContentView: View>: View {
     
     public var body: some View {
         ZStack(alignment: .bottom) {
+            GeometryReader { proxy in
+                // 获取可用空间
+                Color.clear
+                    .onAppear {
+                        DispatchQueue.main.async {
+                            contentSize = .init(
+                                width: proxy.size.width,
+                                height: proxy.size.height - proxy.safeAreaInsets.bottom - proxy.safeAreaInsets.top
+                            )
+                        }
+                    }
+            }
+            
+            
             Rectangle()
                 .fill(Color.black.opacity(0.6))
                 .onTapGesture(perform: dismiss)
                 .ignoresSafeArea()
                 .transition(.opacity)
             
-            content()
+            content(contentSize)
                 .background(
                     bgColor,
                     in: .rect(topLeadingRadius: 10, topTrailingRadius: 10)
@@ -73,7 +88,7 @@ public struct KeyboardEditor<ContentView: View>: View {
                         dismiss: {
                             showAdd = false
                         }
-                    ) {
+                    ) { size in
                         VStack {
                             TextField("任务名称", text: $title)
                                 .font(.title3)

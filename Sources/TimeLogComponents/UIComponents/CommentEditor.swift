@@ -29,7 +29,7 @@ public struct CommentEditor: View {
     }
     
     public var body: some View {
-        KeyboardEditor(bgColor: bgColor, dismiss: dismiss) {
+        KeyboardEditor(bgColor: bgColor, dismiss: dismiss) { size in
             VStack {
                 RichTextEditor()
                     .frame(maxHeight: 200)

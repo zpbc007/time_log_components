@@ -32,7 +32,7 @@ public struct TaskCommentEditor: View {
         KeyboardEditor(
             bgColor: bgColor,
             dismiss: dismiss
-        ) {
+        ) { size in
             VStack {
                 RichTextEditor()
                     .frame(maxHeight: 200)
