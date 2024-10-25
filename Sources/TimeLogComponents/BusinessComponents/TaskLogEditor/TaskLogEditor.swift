@@ -66,7 +66,7 @@ public struct TaskLogEditor: View {
                     }
                 }
                 
-                RichTextEditor()
+                RichTextEditor(maxHeight: 200)
                     .frame(maxHeight: 200)
                 
                 DatePicker(
