@@ -66,7 +66,7 @@ public struct TaskLogEditor: View {
                     }
                 }
                 
-                RichTextEditor(maxHeight: 300)
+                RichTextEditor(maxHeight: 260)
                 
                 DatePicker(
                     "开始时间",
