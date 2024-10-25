@@ -29,7 +29,7 @@ public struct KeyboardEditor<ContentView: View>: View {
                         DispatchQueue.main.async {
                             contentSize = .init(
                                 width: proxy.size.width,
-                                height: proxy.size.height - proxy.safeAreaInsets.top - keyboardHeight
+                                height: proxy.size.height - proxy.safeAreaInsets.top
                             )
                         }
                     }
@@ -42,7 +42,7 @@ public struct KeyboardEditor<ContentView: View>: View {
                 .ignoresSafeArea()
                 .transition(.opacity)
             
-            content(contentSize)
+            content(.init(width: contentSize.width, height: contentSize.height - keyboardHeight))
                 .background(
                     bgColor,
                     in: .rect(topLeadingRadius: 10, topTrailingRadius: 10)
