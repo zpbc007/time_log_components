@@ -1,12 +1,14 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 import SwiftUI
+import Combine
 
 public struct KeyboardEditor<ContentView: View>: View {
     let bgColor: Color
     let content: (_ size: CGSize) -> ContentView
     let dismiss: () -> Void
     @State private var contentSize: CGSize = .zero
+    @State private var keyboardHeight: CGFloat = .zero
     
     public init(
         bgColor: Color,
@@ -27,7 +29,7 @@ public struct KeyboardEditor<ContentView: View>: View {
                         DispatchQueue.main.async {
                             contentSize = .init(
                                 width: proxy.size.width,
-                                height: proxy.size.height - proxy.safeAreaInsets.bottom - proxy.safeAreaInsets.top
+                                height: proxy.size.height - proxy.safeAreaInsets.top - keyboardHeight
                             )
                         }
                     }
@@ -46,7 +48,18 @@ public struct KeyboardEditor<ContentView: View>: View {
                     in: .rect(topLeadingRadius: 10, topTrailingRadius: 10)
                 )
                 .transition(.move(edge: .bottom))
-        }
+        }.onReceive(keyboardHeightPublisher, perform: { height in
+            keyboardHeight = height
+        })
+    }
+    
+    private var keyboardHeightPublisher: AnyPublisher<CGFloat, Never> {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            .map {
+                ($0.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height ?? 0
+            }
+            .merge(with: NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification).map { _ in 0 })
+            .eraseToAnyPublisher()
     }
 }
 
