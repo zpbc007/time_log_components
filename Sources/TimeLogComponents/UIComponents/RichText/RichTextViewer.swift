@@ -59,6 +59,10 @@ extension RichTextViewer {
         func makeCoordinator() -> RichTextCommon.Coordinator {
             RichTextCommon.Coordinator(self)
         }
+        
+        func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) {
+            
+        }
     }
 }
 

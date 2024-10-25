@@ -195,7 +195,7 @@ extension RichTextEditor {
             webView.myAccessoryView = self.setupToolbar(context.coordinator)
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
             // bridge
-            context.coordinator.bridge.updateWebview(webView)
+            context.coordinator.updateWebview(webView)
             
             return webView
         }
@@ -204,22 +204,36 @@ extension RichTextEditor {
             // 这里需要与 Binding 建立关联关系，不然不会更新
             let _ = viewModel.content
             let _ = viewModel.fetchContentId
-            
-            self.updateWebViewHeight(webView)
+                        
+            self.updateWebViewHeight(webView, bridge: context.coordinator.bridge)
             context.coordinator.updateWebview(webView)
             context.coordinator.syncContent(viewModel.content)
             context.coordinator.fetchContent()
         }
         
-        private func updateWebViewHeight(_ webView: WKWebView) {
+        func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) {
             guard let maxHeight else {
                 return
             }
             
-            let webViewContentHeight = webView.scrollView.contentSize.height
-            let realHeight = min(webViewContentHeight, maxHeight)
-//            webView.frame.size.height = min(webViewContentHeight, maxHeight)
-            self.height = realHeight
+            Task {
+                guard let height = await bridge.getConentHeight() else {
+                    return
+                }
+                let realHeight = min(height + 20, maxHeight)
+                
+                DispatchQueue.main.async {
+                    UIView.animate(withDuration: 0.5, animations: {
+                        if webView.scrollView.contentSize.height != realHeight {
+                            webView.scrollView.contentSize.height = realHeight
+                            
+                        }
+                        if self.height != realHeight {
+                            self.height = realHeight
+                        }
+                    })
+                }
+            }
         }
         
         func makeCoordinator() -> RichTextCommon.Coordinator {
@@ -298,7 +312,7 @@ extension RichTextEditor {
         var body: some View {
             NavigationStack {
                 VStack {
-                    RichTextEditor(maxHeight: 300)
+                    RichTextEditor(maxHeight: 200)
                         .environmentObject(editorVM)
                         .border(.black)
                         .padding()

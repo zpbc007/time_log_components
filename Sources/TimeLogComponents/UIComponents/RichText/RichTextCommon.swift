@@ -118,6 +118,8 @@ extension RichTextCommon {
                 }
                 body {
                     margin: 0;
+                    height: 100%;
+                    overflow: scroll;
                 }
                 #editor.ql-container.ql-snow {
                     border: none;
@@ -143,6 +145,7 @@ extension RichTextCommon {
 
 protocol RichTextWebView {
     var viewModel: RichTextCommon.ViewModel { get }
+    func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) -> Void
 }
 
 // MARK: - Coordinator
@@ -201,7 +204,9 @@ extension RichTextCommon {
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webViewFinished = true
+            self.updateWebview(webView)
             self.syncContent(parent.viewModel.content)
+            self.parent.updateWebViewHeight(webView, bridge: self.bridge)
         }
         
         /**

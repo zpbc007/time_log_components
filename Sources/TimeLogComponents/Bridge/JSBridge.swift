@@ -76,19 +76,14 @@ public class JSBridge {
         }
         
         let jsCommand = "window.timeLineBridge._handleEventFromNative('\(msgJSON)')"
+        let jsResult = await self.evaluateJavaScript(jsCommand)
         
-        return await withCheckedContinuation { continuation in
-            DispatchQueue.main.async { [weak self] in
-                self?.webview?.evaluateJavaScript(jsCommand, completionHandler: { resultString, _ in
-                    guard let jsonString = resultString as? String else {
-                        continuation.resume(returning: nil)
-                        return
-                    }
-                    
-                    continuation.resume(returning: jsonString)
-                })
-            }
-        }
+        return jsResult as? String
+    }
+    
+    func getConentHeight() async -> CGFloat? {
+        let jsResult = await self.evaluateJavaScript("document.body.scrollHeight")
+        return jsResult as? CGFloat
     }
     
     func response<D: Codable>(eventName: String, callbackID: String, data: D) {
@@ -160,5 +155,15 @@ public class JSBridge {
         }
         
         eventBus.send(msg)
+    }
+    
+    private func evaluateJavaScript(_ jsCommand: String) async -> Any? {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { [weak self] in
+                self?.webview?.evaluateJavaScript(jsCommand, completionHandler: { result, _ in
+                    continuation.resume(returning: result)
+                })
+            }
+        }
     }
 }
