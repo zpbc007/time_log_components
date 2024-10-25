@@ -126,7 +126,7 @@ extension RichTextCommon {
                     font-size: 16px;
                 }
                 #editor .ql-editor {
-                    padding: 0;
+                    padding: 10px 0;
                 }
             </style>
             <script>

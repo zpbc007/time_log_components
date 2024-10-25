@@ -11,7 +11,7 @@ import Combine
 
 public struct RichTextEditor: View {
     let maxHeight: CGFloat?
-    @State private var height: CGFloat = .infinity
+    @State private var height: CGFloat = 10
     
     public init(maxHeight: CGFloat? = nil) {
         self.maxHeight = maxHeight
@@ -21,6 +21,7 @@ public struct RichTextEditor: View {
         if let maxHeight {
             WebView(maxHeight: maxHeight, height: $height)
                 .frame(height: height)
+                .animation(.linear, value: height)
         } else {
             WebView()
         }
@@ -220,18 +221,12 @@ extension RichTextEditor {
                 guard let height = await bridge.getConentHeight() else {
                     return
                 }
-                let realHeight = min(height + 20, maxHeight)
+                let realHeight = min(height, maxHeight)
                 
                 DispatchQueue.main.async {
-                    UIView.animate(withDuration: 0.5, animations: {
-                        if webView.scrollView.contentSize.height != realHeight {
-                            webView.scrollView.contentSize.height = realHeight
-                            
-                        }
-                        if self.height != realHeight {
-                            self.height = realHeight
-                        }
-                    })
+                    if self.height != realHeight {
+                        self.height = realHeight
+                    }
                 }
             }
         }
@@ -311,11 +306,19 @@ extension RichTextEditor {
         
         var body: some View {
             NavigationStack {
-                VStack {
-                    RichTextEditor(maxHeight: 200)
+                VStack(spacing: 0) {
+                    VStack {
+                        Text("top")
+                    }
+                    Spacer()
+                    
+                    RichTextEditor(maxHeight: 300)
                         .environmentObject(editorVM)
-                        .border(.black)
-                        .padding()
+//                        .padding()
+//                        .border(.black)
+//                        .padding()
+                    
+                    Text("Buttom")
                 }
             }
         }
