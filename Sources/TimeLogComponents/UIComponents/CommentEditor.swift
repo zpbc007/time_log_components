@@ -14,6 +14,8 @@ public struct CommentEditor: View {
     let onSendButtonTapped: () -> Void
     let dismiss: () -> Void
     
+    @State private var bottomSize: CGSize = .zero
+    
     public init(
         fontColor: Color,
         activeFontColor: Color,
@@ -31,8 +33,7 @@ public struct CommentEditor: View {
     public var body: some View {
         KeyboardEditor(bgColor: bgColor, dismiss: dismiss) { size in
             VStack {
-                RichTextEditor()
-                    .frame(maxHeight: 200)
+                RichTextEditor(maxHeight: size.height - bottomSize.height)
                 
                 HStack {
                     Spacer()
@@ -43,7 +44,12 @@ public struct CommentEditor: View {
                         action: onSendButtonTapped,
                         isValid: true
                     )
-                }.padding(.top)
+                }
+                .padding(.top)
+                .contentSize()
+                .onPreferenceChange(SizePreferenceKey.self, perform: { value in
+                    bottomSize = value
+                })
             }.padding()
         }
     }
