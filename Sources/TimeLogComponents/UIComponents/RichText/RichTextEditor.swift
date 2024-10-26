@@ -202,7 +202,6 @@ extension RichTextEditor {
             let _ = viewModel.content
             let _ = viewModel.fetchContentId
                         
-            self.updateWebViewHeight(webView, bridge: context.coordinator.bridge)
             context.coordinator.updateWebview(webView)
             context.coordinator.syncContent(viewModel.content)
             context.coordinator.fetchContent()

@@ -12,6 +12,8 @@ public struct RichTextViewer: View {
     let content: String
     @StateObject
     private var viewModel: ViewModel
+    @State
+    private var height: CGFloat = 10
     
     public init(content: String) {
         self.content = content
@@ -19,7 +21,8 @@ public struct RichTextViewer: View {
     }
     
     public var body: some View {
-        WebView()
+        WebView(height: $height)
+            .frame(height: height)
             .onChange(of: content, { oldValue, newValue in
                 viewModel.updateContent(newValue)
             })
@@ -34,6 +37,7 @@ extension RichTextViewer {
 extension RichTextViewer {
     struct WebView: UIViewRepresentable, RichTextWebView {
         @EnvironmentObject var viewModel: RichTextViewer.ViewModel
+        @Binding var height: CGFloat
         
         func makeUIView(context: Context) -> WKWebView {
             let wkConfig = RichTextCommon.makeWKConfig()
@@ -51,7 +55,8 @@ extension RichTextViewer {
             // 这里需要与 Binding 建立关联关系，不然不会更新
             let _ = viewModel.content
             let _ = viewModel.fetchContentId
-            context.coordinator.bridge.updateWebview(webView)
+            
+            context.coordinator.updateWebview(webView)
             context.coordinator.syncContent(viewModel.content)
             context.coordinator.fetchContent()
         }
@@ -61,7 +66,17 @@ extension RichTextViewer {
         }
         
         func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) {
-            
+            Task {
+                guard let height = await bridge.getConentHeight() else {
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    if self.height != height {
+                        self.height = height
+                    }
+                }
+            }
         }
     }
 }

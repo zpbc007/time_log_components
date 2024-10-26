@@ -255,6 +255,7 @@ extension RichTextCommon {
         }
         
         func updateWebview(_ webview: WKWebView) {
+            self.parent.updateWebViewHeight(webview, bridge: self.bridge)
             if webview == self.webview {
                 return
             }
