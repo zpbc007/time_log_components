@@ -7,34 +7,40 @@
 
 import SwiftUI
 
-public struct TaskLogList: View {
+public struct TaskLogList {
     static let BottomId = "bottom"
-    
-    let rows: [TaskLogCellViewState]
-    let disableTransition: Bool
-    let scrollToBottom: Bool
-    let onCellTapped: (TimeLine.State) -> Void
-    
-    
-    public init(
-        rows: [TaskLogCellViewState],
-        disableTransition: Bool,
-        scrollToBottom: Bool = false,
-        onCellTapped: @escaping (TimeLine.State) -> Void
-    ) {
-        self.rows = rows
-        self.disableTransition = disableTransition
-        self.scrollToBottom = scrollToBottom
-        self.onCellTapped = onCellTapped
-    }
-    
-    public var body: some View {
-        Group {
-            if rows.isEmpty {
-                self.EmptyRowView
-            } else {
-                ScrollViewReader { proxy in
-                    ScrollView {
+}
+
+extension TaskLogList {
+    public struct MainView<Header: View>: View {
+        let rows: [TaskLogCellViewState]
+        let disableTransition: Bool
+        let scrollToBottom: Bool
+        let header: () -> Header
+        let onCellTapped: (TimeLine.State) -> Void
+        
+        public init(
+            rows: [TaskLogList.TaskLogCellViewState],
+            disableTransition: Bool,
+            scrollToBottom: Bool = false,
+            header: @escaping () -> Header,
+            onCellTapped: @escaping (TimeLine.State) -> Void
+        ) {
+            self.rows = rows
+            self.disableTransition = disableTransition
+            self.scrollToBottom = scrollToBottom
+            self.header = header
+            self.onCellTapped = onCellTapped
+        }
+        
+        public var body: some View {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    header()
+                    
+                    if rows.isEmpty {
+                        self.EmptyRowView
+                    } else {
                         LazyVStack(alignment: .leading) {
                             ForEach(rows) { taskLogState in
                                 if let timeLineState = taskLogState.timeLineState {
@@ -67,35 +73,35 @@ public struct TaskLogList: View {
                                 }
                             }
                         }
-                        
-                        HStack {}.frame(height: 60)
-                            .background(.clear)
-                            .id(Self.BottomId)
                     }
-                    .onChange(of: scrollToBottom) { oldValue, newValue in
-                        withAnimation {
-                            proxy.scrollTo(Self.BottomId, anchor: .bottom)
-                        }
+                    
+                    HStack {}.frame(height: 60)
+                        .background(.clear)
+                        .id(TaskLogList.BottomId)
+                }
+                .onChange(of: scrollToBottom) { oldValue, newValue in
+                    withAnimation {
+                        proxy.scrollTo(TaskLogList.BottomId, anchor: .bottom)
                     }
                 }
             }
         }
-    }
-    
-    @ViewBuilder
-    private var EmptyRowView: some View {
-        VStack {
-            Spacer()
-            
-            HStack(alignment: .center) {
+        
+        @ViewBuilder
+        private var EmptyRowView: some View {
+            VStack {
                 Spacer()
                 
-                Text("无记录数据")
+                HStack(alignment: .center) {
+                    Spacer()
                     
+                    Text("无记录数据")
+                        
+                    Spacer()
+                }
+                
                 Spacer()
             }
-            
-            Spacer()
         }
     }
 }
@@ -151,7 +157,7 @@ extension TaskLogList {
 }
 
 #Preview("正常") {
-    TaskLogList(rows: [
+    TaskLogList.MainView(rows: [
         .DashedLine(.init(.now)),
         .TimeLine(.init(
             id: UUID().uuidString,
@@ -173,13 +179,19 @@ extension TaskLogList {
             title: "未结束任务",
             color: .blue
         ))
-    ], disableTransition: false) { cell in
+    ], disableTransition: false, header: {
+        Text("Header")
+            .font(.title)
+    }) { cell in
         print("cell tapped: \(cell.id)")
     }
 }
 
 #Preview("无数据") {
-    TaskLogList(rows: [], disableTransition: false) { cell in
+    TaskLogList.MainView(rows: [], disableTransition: false, header: {
+        Text("Header")
+            .font(.title)
+    }) { cell in
         print("cell tapped: \(cell.id)")
     }
 }
@@ -236,10 +248,14 @@ extension TaskLogList {
                     Toggle("disableTransition", isOn: $disableTransition)
                 }.padding()
                 
-                TaskLogList(
+                TaskLogList.MainView(
                     rows: rows,
                     disableTransition: disableTransition,
-                    scrollToBottom: scrollToBottom
+                    scrollToBottom: scrollToBottom,
+                    header: {
+                        Text("Header")
+                            .font(.title)
+                    }
                 ) { _ in
                     
                 }
@@ -297,7 +313,14 @@ extension TaskLogList {
                     }
                 }
                 
-                TaskLogList(rows: rows, disableTransition: false) { _ in
+                TaskLogList.MainView(
+                    rows: rows,
+                    disableTransition: false,
+                    header: {
+                        Text("Header")
+                            .font(.title)
+                    }
+                ) { _ in
                     
                 }
             }
