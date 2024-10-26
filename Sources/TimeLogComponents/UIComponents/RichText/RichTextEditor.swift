@@ -23,7 +23,7 @@ public struct RichTextEditor: View {
     
     public var body: some View {
         WebView(height: $height)
-            .frame(height: height)
+            .frame(height: webViewHeight)
             .animation(.linear, value: height)
     }
 }
