@@ -19,7 +19,7 @@ public struct RichTextViewer: View {
         self.content = content
         self._viewModel = StateObject(wrappedValue: .init(content))
     }
-    
+        
     public var body: some View {
         WebView(height: $height)
             .frame(height: height)
@@ -62,21 +62,7 @@ extension RichTextViewer {
         }
         
         func makeCoordinator() -> RichTextCommon.Coordinator {
-            RichTextCommon.Coordinator(self)
-        }
-        
-        func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) {
-            Task {
-                guard let height = await bridge.getConentHeight() else {
-                    return
-                }
-                
-                DispatchQueue.main.async {
-                    if self.height != height {
-                        self.height = height
-                    }
-                }
-            }
+            RichTextCommon.Coordinator(viewModel: self.viewModel, height: $height)
         }
     }
 }

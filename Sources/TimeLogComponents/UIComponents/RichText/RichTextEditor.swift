@@ -17,8 +17,12 @@ public struct RichTextEditor: View {
         self.maxHeight = maxHeight
     }
     
+    private var webViewHeight: CGFloat {
+        min(height, maxHeight)
+    }
+    
     public var body: some View {
-        WebView(maxHeight: maxHeight, height: $height)
+        WebView(height: $height)
             .frame(height: height)
             .animation(.linear, value: height)
     }
@@ -170,15 +174,8 @@ extension RichTextEditor {
     struct WebView: UIViewRepresentable, RichTextWebView {
         @EnvironmentObject var viewModel: RichTextCommon.ViewModel
         @Binding var height: CGFloat
-        var maxHeight: CGFloat
         
-        init() {
-            self.maxHeight = .infinity
-            self._height = .constant(.infinity)
-        }
-        
-        init(maxHeight: CGFloat, height: Binding<CGFloat>) {
-            self.maxHeight = maxHeight
+        init(height: Binding<CGFloat>) {
             self._height = height
         }
         
@@ -207,23 +204,8 @@ extension RichTextEditor {
             context.coordinator.fetchContent()
         }
         
-        func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) {
-            Task {
-                guard let height = await bridge.getConentHeight() else {
-                    return
-                }
-                let realHeight = min(height, maxHeight)
-                
-                DispatchQueue.main.async {
-                    if self.height != realHeight {
-                        self.height = realHeight
-                    }
-                }
-            }
-        }
-        
         func makeCoordinator() -> RichTextCommon.Coordinator {
-            RichTextCommon.Coordinator(self)
+            RichTextCommon.Coordinator(viewModel: self.viewModel, height: $height)
         }
         
         private func setupToolbar(_ coordinator: Coordinator) -> KeyboardToolbar {
@@ -257,7 +239,7 @@ extension RichTextEditor {
     struct Playground: View {
         @StateObject 
         private var editorVM = RichTextEditor.ViewModel(
-            "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}"
+//            "{\"ops\":[{\"insert\":\"Gandalf\",\"attributes\":{\"bold\":true}}]}"
         )
         
         var body: some View {
@@ -304,9 +286,7 @@ extension RichTextEditor {
                     
                     RichTextEditor(maxHeight: 300)
                         .environmentObject(editorVM)
-//                        .padding()
-//                        .border(.black)
-//                        .padding()
+                        .border(.black)
                     
                     Text("Buttom")
                 }

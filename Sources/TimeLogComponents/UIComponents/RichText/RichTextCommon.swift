@@ -145,24 +145,25 @@ extension RichTextCommon {
 
 protocol RichTextWebView {
     var viewModel: RichTextCommon.ViewModel { get }
-    func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) -> Void
 }
 
 // MARK: - Coordinator
 extension RichTextCommon {
     class Coordinator: NSObject, WKNavigationDelegate {
-        var parent: RichTextWebView
         var bridge: JSBridge
+        private weak var viewModel: ViewModel?
         private weak var webview: WKWebView?
         private var cancellable: AnyCancellable?
         private var webViewFinished: Bool = false
         private var latestData: String?
         private var lastFetchId: String?
+        private var webViewHeight: Binding<CGFloat>
 
-        init(_ parent: RichTextWebView) {
+        init(viewModel: ViewModel, height: Binding<CGFloat>) {
             let bridge = JSBridge()
             
-            self.parent = parent
+            self.viewModel = viewModel
+            self.webViewHeight = height
             self.bridge = bridge
             
             super.init()
@@ -184,7 +185,7 @@ extension RichTextCommon {
                     
                     self?.latestData = msg.content
                     Task {
-                        await parent.viewModel.updateContent(msg.content)
+                        await viewModel.updateContent(msg.content)
                     }
                 })
         }
@@ -205,8 +206,10 @@ extension RichTextCommon {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webViewFinished = true
             self.updateWebview(webView)
-            self.syncContent(parent.viewModel.content)
-            self.parent.updateWebViewHeight(webView, bridge: self.bridge)
+            if let viewModel {
+                self.syncContent(viewModel.content)
+            }
+            self.updateWebViewHeight()
         }
         
         /**
@@ -227,41 +230,40 @@ extension RichTextCommon {
         
         func fetchContent() {
             Task { @MainActor [weak self] in
-                guard let self else {
+                guard let self, let viewModel else {
                     return
                 }
                 
                 // 首次执行，不需要获取内容
                 if self.lastFetchId == nil {
-                    self.lastFetchId = self.parent.viewModel.fetchContentId
+                    self.lastFetchId = viewModel.fetchContentId
                     return
                 }
                 
                 // 没有请求过
-                guard self.lastFetchId != self.parent.viewModel.fetchContentId else {
+                guard self.lastFetchId != viewModel.fetchContentId else {
                     return
                 }
-                self.lastFetchId = self.parent.viewModel.fetchContentId
+                self.lastFetchId = viewModel.fetchContentId
                 guard let result = await self.bridge.callJS(
                     eventName: NativeCallWebEvent.editorFetchContent.rawValue
                 ) else {
-                    self.parent.viewModel.finishSync(nil)
+                    viewModel.finishSync(nil)
                     return
                 }
                 
                 self.latestData = result
-                self.parent.viewModel.finishSync(result)
+                viewModel.finishSync(result)
             }
         }
         
         func updateWebview(_ webview: WKWebView) {
-            self.parent.updateWebViewHeight(webview, bridge: self.bridge)
-            if webview == self.webview {
-                return
+            if webview != self.webview {
+                self.webview = webview
+                self.removeKeyboardObserver()
+                self.bridge.updateWebview(webview)
             }
-            self.webview = webview
-            self.removeKeyboardObserver()
-            self.bridge.updateWebview(webview)
+            self.updateWebViewHeight()
         }
         
         private func removeKeyboardObserver() {
@@ -271,6 +273,20 @@ extension RichTextCommon {
             NotificationCenter.default.removeObserver(webview, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
             NotificationCenter.default.removeObserver(webview, name: UIResponder.keyboardWillShowNotification, object: nil)
             NotificationCenter.default.removeObserver(webview, name: UIResponder.keyboardWillHideNotification, object: nil)
+        }
+        
+        private func updateWebViewHeight() {
+            Task {
+                guard let height = await bridge.getConentHeight() else {
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    if self.webViewHeight.wrappedValue != height {
+                        self.webViewHeight.wrappedValue = height
+                    }
+                }
+            }
         }
     }
 }
