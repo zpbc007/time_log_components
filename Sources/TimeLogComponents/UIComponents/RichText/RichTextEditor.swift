@@ -18,7 +18,7 @@ public struct RichTextEditor: View {
     }
     
     private var webViewHeight: CGFloat {
-        min(height, maxHeight)
+        max(15, min(height, maxHeight))
     }
     
     public var body: some View {
