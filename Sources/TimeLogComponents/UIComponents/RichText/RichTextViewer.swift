@@ -73,6 +73,7 @@ extension RichTextViewer {
         var body: some View {
             VStack {
                 RichTextViewer(content: content)
+                    .border(.black)
                 
                 Button("update") {
                     content = "{\"ops\":[{\"insert\":\"new content\",\"attributes\":{\"bold\":true}}]}"

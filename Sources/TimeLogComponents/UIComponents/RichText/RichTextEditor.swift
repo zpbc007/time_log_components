@@ -10,21 +10,17 @@ import WebKit
 import Combine
 
 public struct RichTextEditor: View {
-    let maxHeight: CGFloat?
+    let maxHeight: CGFloat
     @State private var height: CGFloat = 10
     
-    public init(maxHeight: CGFloat? = nil) {
+    public init(maxHeight: CGFloat = .infinity) {
         self.maxHeight = maxHeight
     }
     
     public var body: some View {
-        if let maxHeight {
-            WebView(maxHeight: maxHeight, height: $height)
-                .frame(height: height)
-                .animation(.linear, value: height)
-        } else {
-            WebView()
-        }
+        WebView(maxHeight: maxHeight, height: $height)
+            .frame(height: height)
+            .animation(.linear, value: height)
     }
 }
 
@@ -174,10 +170,10 @@ extension RichTextEditor {
     struct WebView: UIViewRepresentable, RichTextWebView {
         @EnvironmentObject var viewModel: RichTextCommon.ViewModel
         @Binding var height: CGFloat
-        var maxHeight: CGFloat?
+        var maxHeight: CGFloat
         
         init() {
-            self.maxHeight = nil
+            self.maxHeight = .infinity
             self._height = .constant(.infinity)
         }
         
@@ -213,10 +209,6 @@ extension RichTextEditor {
         }
         
         func updateWebViewHeight(_ webView: WKWebView, bridge: JSBridge) {
-            guard let maxHeight else {
-                return
-            }
-            
             Task {
                 guard let height = await bridge.getConentHeight() else {
                     return
@@ -286,7 +278,6 @@ extension RichTextEditor {
                     
                     RichTextEditor()
                         .environmentObject(editorVM)
-                        .frame(maxHeight: 200)
                         .border(.black)
                         .padding()
                 }

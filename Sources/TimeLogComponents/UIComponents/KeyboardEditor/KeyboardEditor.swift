@@ -35,7 +35,6 @@ public struct KeyboardEditor<ContentView: View>: View {
                     }
             }
             
-            
             Rectangle()
                 .fill(Color.black.opacity(0.6))
                 .onTapGesture(perform: dismiss)
