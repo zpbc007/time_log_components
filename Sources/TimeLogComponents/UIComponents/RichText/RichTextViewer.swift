@@ -84,7 +84,7 @@ extension RichTextViewer {
                     .border(.black)
                 
                 Button("update") {
-                    content = "{\"ops\":[{\"insert\":\"new content\",\"attributes\":{\"bold\":true}}]}"
+                    content = "{\"ops\":[{\"insert\":\"new contentnew contentnew contentnew contentnew contentnew contentnew content\",\"attributes\":{\"bold\":true}}]}"
                 }
             }.padding()
         }

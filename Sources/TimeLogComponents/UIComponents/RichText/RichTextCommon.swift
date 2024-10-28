@@ -237,6 +237,7 @@ extension RichTextCommon {
                 eventName: Native2WebEvent.editorSetContent.rawValue,
                 data: newContent
             )
+            self.updateWebViewHeight()
         }
         
         func fetchContent() {
