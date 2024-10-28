@@ -23,12 +23,15 @@ public struct TodayTarget: View {
                     Text("设置今日目标")
                     Spacer()
                 }
+                .padding()
+                
             } else {
                 RichTextViewer(content: comment)
+                    .padding(.horizontal)
             }
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .shadow(radius: 10)
     }
 }
 
