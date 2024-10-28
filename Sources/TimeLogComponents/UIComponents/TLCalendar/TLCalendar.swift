@@ -121,7 +121,8 @@ public struct TLCalendar: View {
                 open.toggle()
             }
         } label: {
-            Image(systemName: open ? "chevron.compact.up" : "chevron.compact.down")
+            Image(systemName: "chevron.compact.up")
+                .rotationEffect(open ? .zero : .degrees(180))
                 .padding()
         }
     }
