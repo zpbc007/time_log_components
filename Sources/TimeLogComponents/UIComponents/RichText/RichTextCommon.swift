@@ -229,6 +229,7 @@ extension RichTextCommon {
          */
         func syncContent(_ newContent: String) {
             guard webViewFinished, latestData != newContent else {
+                self.updateWebViewHeight()
                 return
             }
             
@@ -275,7 +276,6 @@ extension RichTextCommon {
                 self.removeKeyboardObserver()
                 self.bridge.updateWebview(webview)
             }
-            self.updateWebViewHeight()
         }
         
         private func removeKeyboardObserver() {
