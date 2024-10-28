@@ -10,10 +10,12 @@ import WebKit
 import Combine
 
 public struct RichTextEditor: View {
+    let placeholder: String
     let maxHeight: CGFloat
     @State private var height: CGFloat = 10
     
-    public init(maxHeight: CGFloat = .infinity) {
+    public init(placeholder: String, maxHeight: CGFloat = .infinity) {
+        self.placeholder = placeholder
         self.maxHeight = maxHeight
     }
     
@@ -22,7 +24,7 @@ public struct RichTextEditor: View {
     }
     
     public var body: some View {
-        WebView(height: $height)
+        WebView(placeholder: placeholder, height: $height)
             .frame(height: webViewHeight)
             .animation(.linear, value: height)
     }
@@ -172,10 +174,12 @@ extension RichTextEditor {
 
 extension RichTextEditor {
     struct WebView: UIViewRepresentable, RichTextWebView {
+        let placeholder: String
         @EnvironmentObject var viewModel: RichTextCommon.ViewModel
         @Binding var height: CGFloat
         
-        init(height: Binding<CGFloat>) {
+        init(placeholder: String, height: Binding<CGFloat>) {
+            self.placeholder = placeholder
             self._height = height
         }
         
@@ -184,7 +188,11 @@ extension RichTextEditor {
             let webView = CustomAccessoryWebView(frame: .zero, configuration: wkConfig)
             
             // webview config
-            RichTextCommon.updateWebView(webView, readOnly: false, navDelegate: context.coordinator)
+            RichTextCommon.updateWebView(
+                webView,
+                editorOptions: .init(readOnly: false, placeholder: placeholder),
+                navDelegate: context.coordinator
+            )
             // tool bar
             webView.myAccessoryView = self.setupToolbar(context.coordinator)
             webView.myAccessoryView?.frame = .init(x: 0, y: 0, width: 50, height: 50)
@@ -257,7 +265,7 @@ extension RichTextEditor {
                         }
                     }
                     
-                    RichTextEditor()
+                    RichTextEditor(placeholder: "xxx")
                         .environmentObject(editorVM)
                         .border(.black)
                         .padding()
@@ -284,7 +292,7 @@ extension RichTextEditor {
                     }
                     Spacer()
                     
-                    RichTextEditor(maxHeight: 300)
+                    RichTextEditor(placeholder: "yyy", maxHeight: 300)
                         .environmentObject(editorVM)
                         .border(.black)
                     

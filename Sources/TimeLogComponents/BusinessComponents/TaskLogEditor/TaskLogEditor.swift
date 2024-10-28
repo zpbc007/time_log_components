@@ -68,7 +68,7 @@ public struct TaskLogEditor: View {
                     }
                 }
                 
-                RichTextEditor(maxHeight: size.height - bottomSize.height)
+                RichTextEditor(placeholder: "备注", maxHeight: size.height - bottomSize.height)
                     .border(.black)
                 
                 VStack {

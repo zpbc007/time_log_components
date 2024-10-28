@@ -31,7 +31,7 @@ public struct TaskLogUpdator: View {
                 selection: $startTime
             )
             
-            RichTextEditor()
+            RichTextEditor(placeholder: "备注")
         }
     }
 }

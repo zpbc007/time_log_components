@@ -53,7 +53,7 @@ public struct TaskEditor: View {
                 .font(.title)
                 .focused($titleFocused)
             
-            RichTextEditor()
+            RichTextEditor(placeholder: "备注")
             
             TaskEditor_Common.TaskToolbar(
                 fontColor: fontColor,

@@ -10,18 +10,20 @@ import WebKit
 
 public struct RichTextViewer: View {
     let content: String
+    let placeholder: String
     @StateObject
     private var viewModel: ViewModel
     @State
     private var height: CGFloat = 10
     
-    public init(content: String) {
+    public init(content: String, placeholder: String) {
         self.content = content
+        self.placeholder = placeholder
         self._viewModel = StateObject(wrappedValue: .init(content))
     }
         
     public var body: some View {
-        WebView(height: $height)
+        WebView(placeholder: placeholder, height: $height)
             .frame(height: height)
             .onChange(of: content, { oldValue, newValue in
                 viewModel.updateContent(newValue)
@@ -37,6 +39,7 @@ extension RichTextViewer {
 extension RichTextViewer {
     struct WebView: UIViewRepresentable, RichTextWebView {
         @EnvironmentObject var viewModel: RichTextViewer.ViewModel
+        let placeholder: String
         @Binding var height: CGFloat
         
         func makeUIView(context: Context) -> WKWebView {
@@ -44,7 +47,11 @@ extension RichTextViewer {
             let webView = WKWebView(frame: .zero, configuration: wkConfig)
             
             // webview config
-            RichTextCommon.updateWebView(webView, readOnly: true, navDelegate: context.coordinator)
+            RichTextCommon.updateWebView(
+                webView,
+                editorOptions: .init(readOnly: true, placeholder: placeholder),
+                navDelegate: context.coordinator
+            )
             // bridge
             context.coordinator.bridge.updateWebview(webView)
             
@@ -73,7 +80,7 @@ extension RichTextViewer {
         
         var body: some View {
             VStack {
-                RichTextViewer(content: content)
+                RichTextViewer(content: content, placeholder: "xxx")
                     .border(.black)
                 
                 Button("update") {

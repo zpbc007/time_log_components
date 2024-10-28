@@ -34,7 +34,7 @@ public struct TaskCommentEditor: View {
             dismiss: dismiss
         ) { size in
             VStack {
-                RichTextEditor()
+                RichTextEditor(placeholder: "备注")
                     .frame(maxHeight: 200)
                 
                 HStack {

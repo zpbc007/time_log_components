@@ -32,8 +32,21 @@ public struct CommentEditor: View {
     
     public var body: some View {
         KeyboardEditor(bgColor: bgColor, dismiss: dismiss) { size in
-            VStack {
-                RichTextEditor(maxHeight: size.height - bottomSize.height)
+            VStack(spacing: 0) {
+                RichTextEditor(placeholder: "今日的目标是：", maxHeight: size.height - bottomSize.height)
+                    .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 10))
+               
+                HStack {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("- 今天最重要的事情是什么？")
+                        Text("- 准备做什么让自己更健康？")
+                        Text("- 准备做什么让自己开心？")
+                        Text("- 今天有要学习或者探索的新事物吗？")
+                    }.font(.footnote)
+                    .fontWeight(.light)
+                    
+                    Spacer()
+                }.padding(.top, 5)
                 
                 HStack {
                     Spacer()
@@ -57,7 +70,7 @@ public struct CommentEditor: View {
 
 #Preview {
     struct Playground: View {
-        @State private var showEditor = false
+        @State private var showEditor = true
         @StateObject var editorVM: RichTextEditor.ViewModel = .init()
         
         var body: some View {

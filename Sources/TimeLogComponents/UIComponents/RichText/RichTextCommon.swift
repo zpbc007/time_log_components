@@ -85,19 +85,29 @@ extension RichTextCommon {
 
 // MARK: - webview
 extension RichTextCommon {
+    struct EditorOptions {
+        let readOnly: Bool
+        let placeholder: String
+        
+        init(readOnly: Bool = false, placeholder: String = "备注") {
+            self.readOnly = readOnly
+            self.placeholder = placeholder
+        }
+    }
+    
     static func updateWebView(
         _ webView: WKWebView,
-        readOnly: Bool,
+        editorOptions: EditorOptions,
         navDelegate: WKNavigationDelegate
     ) {
         webView.navigationDelegate = navDelegate
-        webView.loadHTMLString(self.genInitHTML(readOnly), baseURL: nil)
+        webView.loadHTMLString(self.genInitHTML(editorOptions), baseURL: nil)
         webView.isInspectable = true
         webView.isOpaque = false
         webView.backgroundColor = .clear
     }
     
-    private static func genInitHTML(_ readOnly: Bool) -> String {
+    private static func genInitHTML(_ options: EditorOptions) -> String {
         return """
         <!DOCTYPE html>
         <html>
@@ -131,7 +141,8 @@ extension RichTextCommon {
             </style>
             <script>
                 window.tl_editor_config = {
-                    readOnly: \(readOnly ? "true" : "false")
+                    readOnly: \(options.readOnly ? "true" : "false"),
+                    placeholder: "\(options.placeholder)"
                 }
             </script>
         </head>

@@ -26,7 +26,7 @@ public struct TodayTarget: View {
                 .padding()
                 
             } else {
-                RichTextViewer(content: comment)
+                RichTextViewer(content: comment, placeholder: "今日目标：")
                     .padding(.horizontal)
             }
         }
