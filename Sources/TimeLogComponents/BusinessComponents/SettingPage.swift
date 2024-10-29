@@ -87,11 +87,8 @@ public struct SettingPage: View {
                 }
                 
                 if !hasNotifyAuth {
-                    HStack(spacing: 0) {
-                        Text("未授权通知权限，")
-                        Button(action: requestNotifyAuthAction) {
-                            Text("设置通知权限")
-                        }
+                    Button(action: requestNotifyAuthAction) {
+                        Text("前往设置通知权限")
                     }
                 }
             }
