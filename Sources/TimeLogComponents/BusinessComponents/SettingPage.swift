@@ -13,19 +13,22 @@ public struct SettingPage: View {
     @Binding var isDemoMode: Bool
     @Binding var isMorningOn: Bool
     @Binding var isEveningOn: Bool
+    let requestNotifyAuthAction: () -> Void
     
     public init(
         hasNotifyAuth: Bool,
         syncByICloud: Binding<Bool>,
         isDemoMode: Binding<Bool>,
         isMorningOn: Binding<Bool>,
-        isEveningOn: Binding<Bool>
+        isEveningOn: Binding<Bool>,
+        requestNotifyAuthAction: @escaping () -> Void
     ) {
         self.hasNotifyAuth = hasNotifyAuth
         self._syncByICloud = syncByICloud
         self._isDemoMode = isDemoMode
         self._isMorningOn = isMorningOn
         self._isEveningOn = isEveningOn
+        self.requestNotifyAuthAction = requestNotifyAuthAction
     }
     
     public var body: some View {
@@ -86,8 +89,9 @@ public struct SettingPage: View {
                 if !hasNotifyAuth {
                     HStack(spacing: 0) {
                         Text("未授权通知权限，")
-                        self.SystemSettingPageButton
-                        
+                        Button(action: requestNotifyAuthAction) {
+                            Text("设置通知权限")
+                        }
                     }
                 }
             }
@@ -103,22 +107,6 @@ public struct SettingPage: View {
                 )
             }
         }
-    }
-    
-    @ViewBuilder
-    private var SystemSettingPageButton: some View {
-        Button {
-            guard let url = URL(string: UIApplication.openNotificationSettingsURLString) else {
-                return
-            }
-            
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url   )
-            }
-        } label: {
-            Text("设置通知权限")
-        }
-
     }
 }
 
@@ -222,7 +210,9 @@ extension SettingPage {
                         isDemoMode: $isDemoMode,
                         isMorningOn: $isMorningOn,
                         isEveningOn: $isEveningOn
-                    )
+                    ) {
+                        hasAuth.toggle()
+                    }
                 }
                 
             }
