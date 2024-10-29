@@ -8,17 +8,20 @@
 import SwiftUI
 
 public struct SettingPage: View {
+    let hasNotifyAuth: Bool
     @Binding var syncByICloud: Bool
     @Binding var isDemoMode: Bool
     @Binding var isMorningOn: Bool
     @Binding var isEveningOn: Bool
     
     public init(
+        hasNotifyAuth: Bool,
         syncByICloud: Binding<Bool>,
         isDemoMode: Binding<Bool>,
         isMorningOn: Binding<Bool>,
         isEveningOn: Binding<Bool>
     ) {
+        self.hasNotifyAuth = hasNotifyAuth
         self._syncByICloud = syncByICloud
         self._isDemoMode = isDemoMode
         self._isMorningOn = isMorningOn
@@ -79,6 +82,14 @@ public struct SettingPage: View {
                         .font(.footnote)
                         .fontWeight(.light)
                 }
+                
+                if !hasNotifyAuth {
+                    HStack(spacing: 0) {
+                        Text("未授权通知权限，")
+                        self.SystemSettingPageButton
+                        
+                    }
+                }
             }
             
             Section(footer: Text("重启后，演示模式中的数据会被重置！")) {
@@ -92,6 +103,22 @@ public struct SettingPage: View {
                 )
             }
         }
+    }
+    
+    @ViewBuilder
+    private var SystemSettingPageButton: some View {
+        Button {
+            guard let url = URL(string: UIApplication.openNotificationSettingsURLString) else {
+                return
+            }
+            
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url   )
+            }
+        } label: {
+            Text("设置通知权限")
+        }
+
     }
 }
 
@@ -180,15 +207,24 @@ extension SettingPage {
         @State private var isDemoMode = false
         @State private var isMorningOn = false
         @State private var isEveningOn = false
+        @State private var hasAuth = false
 
         var body: some View {
             NavigationStack {
-                SettingPage(
-                    syncByICloud: $syncByICloud,
-                    isDemoMode: $isDemoMode,
-                    isMorningOn: $isMorningOn,
-                    isEveningOn: $isEveningOn
-                )
+                VStack {
+                    Button("toggle auth") {
+                        hasAuth.toggle()
+                    }
+                    
+                    SettingPage(
+                        hasNotifyAuth: hasAuth,
+                        syncByICloud: $syncByICloud,
+                        isDemoMode: $isDemoMode,
+                        isMorningOn: $isMorningOn,
+                        isEveningOn: $isEveningOn
+                    )
+                }
+                
             }
         }
     }
