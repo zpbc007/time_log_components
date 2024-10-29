@@ -10,13 +10,19 @@ import SwiftUI
 public struct SettingPage: View {
     @Binding var syncByICloud: Bool
     @Binding var isDemoMode: Bool
+    @Binding var isMorningOn: Bool
+    @Binding var isEveningOn: Bool
     
     public init(
         syncByICloud: Binding<Bool>,
-        isDemoMode: Binding<Bool>
+        isDemoMode: Binding<Bool>,
+        isMorningOn: Binding<Bool>,
+        isEveningOn: Binding<Bool>
     ) {
         self._syncByICloud = syncByICloud
         self._isDemoMode = isDemoMode
+        self._isMorningOn = isMorningOn
+        self._isEveningOn = isEveningOn
     }
     
     public var body: some View {
@@ -45,6 +51,34 @@ public struct SettingPage: View {
                         }
                     }
                 )
+            }
+            
+            Section {
+                VStack(alignment: .leading) {
+                    Toggle(
+                        isOn: $isMorningOn,
+                        label: {
+                            Label("今日目标", systemImage: "sun.horizon")
+                        }
+                    )
+                    
+                    Text("每天早上8点提醒设定今日目标")
+                        .font(.footnote)
+                        .fontWeight(.light)
+                }
+                
+                VStack(alignment: .leading) {
+                    Toggle(
+                        isOn: $isEveningOn,
+                        label: {
+                            Label("晚间回顾", systemImage: "moon.haze")
+                        }
+                    )
+                    
+                    Text("每天晚上22点提醒回顾")
+                        .font(.footnote)
+                        .fontWeight(.light)
+                }
             }
             
             Section(footer: Text("重启后，演示模式中的数据会被重置！")) {
@@ -144,12 +178,16 @@ extension SettingPage {
     struct Playground: View {
         @State private var syncByICloud = false
         @State private var isDemoMode = false
-        
+        @State private var isMorningOn = false
+        @State private var isEveningOn = false
+
         var body: some View {
             NavigationStack {
                 SettingPage(
                     syncByICloud: $syncByICloud,
-                    isDemoMode: $isDemoMode
+                    isDemoMode: $isDemoMode,
+                    isMorningOn: $isMorningOn,
+                    isEveningOn: $isEveningOn
                 )
             }
         }
