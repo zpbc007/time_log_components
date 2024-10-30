@@ -16,6 +16,7 @@ public struct TLCalendar: View {
     let selectionForeground: Color
     let selectionBG: Color
     let calendar: Calendar
+    @Binding var open: Bool
     @Binding var selected: Date
     
     public init(
@@ -24,6 +25,7 @@ public struct TLCalendar: View {
         selectionForeground: Color,
         selectionBG: Color,
         calendar: Calendar,
+        open: Binding<Bool>,
         selected: Binding<Date>
     ) {
         self.foreground = foreground
@@ -31,10 +33,10 @@ public struct TLCalendar: View {
         self.selectionForeground = selectionForeground
         self.selectionBG = selectionBG
         self.calendar = calendar
+        self._open = open
         self._selected = selected
     }
     
-    @State private var open = false
     @State private var page: Int = 0
     
     private var height: CGFloat {
@@ -86,9 +88,8 @@ public struct TLCalendar: View {
                 }
             }
             .frame(height: height)
+            .animation(.easeInOut, value: height)
             .clipped()
-            
-            ToggleButton
         }
         .onChange(of: page) { oldValue, newValue in
             if open {
@@ -114,19 +115,6 @@ public struct TLCalendar: View {
         }
     }
     
-    @ViewBuilder
-    private var ToggleButton: some View {
-        Button {
-            withAnimation {
-                open.toggle()
-            }
-        } label: {
-            Image(systemName: "chevron.compact.up")
-                .rotationEffect(open ? .zero : .degrees(180))
-                .padding()
-        }
-    }
-    
     private func calculateOffsetByPage(_ page: Int) -> CGFloat {
         if open {
             return 0
@@ -135,25 +123,24 @@ public struct TLCalendar: View {
         return -CGFloat((selected.weekIndexInMonth(calendar: calendar))) * Self.dayViewHeight
     }
     
-    private func calculateWeekDays(_ page: Int) -> [(Date, Bool)] {
-        self.calculatePageFirstDateForWeek(page)
-            .weekDays(calendar: calendar)
-            .map { date in
-                (date, date > .now)
-            }
-    }
-    
     private func calculateMonthDays(_ page: Int) -> [[(Date, Bool)]] {
         let pageDate = self.calculatePageFirstDateForMonth(page)
         let targetMonth = pageDate.month
+        let monthDays = pageDate.monthDaysByWeek(calendar: calendar)
         
-        return pageDate
-            .monthDaysByWeek(calendar: calendar)
-            .map { weekDays in
+        if open {
+            return monthDays.map { weekDays in
                 weekDays.map { date in
                     (date, date.month != targetMonth || date > .now)
                 }
             }
+        } else {
+            return monthDays.map { weekDays in
+                weekDays.map { date in
+                    (date, false)
+                }
+            }
+        }
     }
     
     private func calculatePageFirstDateForWeek(_ page: Int, target: (Date?, Int)? = nil) -> Date {
@@ -182,10 +169,15 @@ public struct TLCalendar: View {
 #Preview {
     struct Playground: View {
         @State private var selected: Date = .now
+        @State private var open: Bool = false
         
         var body: some View {
             VStack {
                 Text("\(selected)")
+                
+                Button("toggle open") {
+                    open.toggle()
+                }
                 
                 TLCalendar(
                     foreground: .black,
@@ -193,6 +185,7 @@ public struct TLCalendar: View {
                     selectionForeground: .white,
                     selectionBG: .green.opacity(0.6),
                     calendar: .current,
+                    open: $open,
                     selected: $selected
                 )
                 .border(.black)
