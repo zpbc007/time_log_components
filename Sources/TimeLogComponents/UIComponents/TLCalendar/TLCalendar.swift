@@ -137,7 +137,7 @@ public struct TLCalendar: View {
         } else {
             return monthDays.map { weekDays in
                 weekDays.map { date in
-                    (date, false)
+                    (date, date > .now)
                 }
             }
         }
