@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-struct VDashedLine { 
+struct TLLine { 
     // 日期下面的 padding
     static let DateBottomPadding: CGFloat = 15
     static let StartTimeMinHeight: CGFloat = 5
     static let EndTimeMinHeight: CGFloat = 30
 }
 
-extension VDashedLine {
+extension TLLine {
     struct WithDate: View {
         let date: Date
         
@@ -41,8 +41,8 @@ extension VDashedLine {
                         .foregroundStyle(.primary)
                         .bold()
                     
-                    RealLine()
-                        .frame(minHeight: VDashedLine.DateBottomPadding)
+                    Vertical()
+                        .frame(minHeight: TLLine.DateBottomPadding)
                 }
                 .frame(width: 50)
                 
@@ -57,7 +57,7 @@ extension VDashedLine {
     }
 }
 
-extension VDashedLine {
+extension TLLine {
     struct WithTime: View {
         let startTime: Date
         let endTime: Date?
@@ -73,8 +73,8 @@ extension VDashedLine {
             VStack {
                 timeText(startTime)
                 
-                RealLine()
-                    .frame(minHeight: VDashedLine.StartTimeMinHeight)
+                Vertical()
+                    .frame(minHeight: TLLine.StartTimeMinHeight)
                 
                 if let endTime = endTime {
                     timeText(endTime)
@@ -91,33 +91,121 @@ extension VDashedLine {
     }
 }
 
-extension VDashedLine {
-    struct RealLine: View {
+extension TLLine {
+    struct Vertical: View {
         var body: some View {
-            Line()
-                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+            VerticalLineShape()
+                .stroke(style: StrokeStyle(lineWidth: 1))
                 .frame(width: 1)
         }
     }
 }
 
-extension VDashedLine {
-    struct Line: Shape {
+extension TLLine {
+    struct Horizental: View {
+        var body: some View {
+            HorizentalLineShape()
+                .stroke(style: StrokeStyle(lineWidth: 1))
+                .frame(height: 1)
+        }
+    }
+}
+
+extension TLLine {
+    struct Active: View {
+        var body: some View {
+            ActiveLineShape()
+                .stroke(style: StrokeStyle(lineWidth: 2))
+                .frame(height: 10)
+        }
+    }
+}
+
+extension TLLine {
+    struct VerticalLineShape: Shape {
         func path(in rect: CGRect) -> Path {
             var path = Path()
-            path.move(to: CGPoint(x: 0, y: 0))
-            path.addLine(to: CGPoint(x: 0, y: rect.height))
+            path.move(to: CGPoint(x: rect.width / 2, y: 0))
+            path.addLine(to: CGPoint(x: rect.width / 2, y: rect.height))
+            
             return path
         }
     }
 }
 
-#Preview {
-    ScrollView {
-        VDashedLine.WithDate(date: .now)
+extension TLLine {
+    struct HorizentalLineShape: Shape {
+        func path(in rect: CGRect) -> Path {
+            var path = Path()
+            path.move(to: CGPoint(x: 0, y: rect.height / 2))
+            path.addLine(to: CGPoint(x: rect.width, y: rect.height / 2))
+            
+            return path
+        }
+    }
+}
+
+extension TLLine {
+    struct ActiveLineShape: Shape {
+        func path(in rect: CGRect) -> Path {
+            var path = Path()
+            // 绘制横线
+            path.move(to: CGPoint(x: 0, y: rect.height / 2))
+            path.addLine(to: CGPoint(x: rect.width, y: rect.height / 2))
+            
+            // 绘制竖线
+            path.move(to: .init(x: 0, y: 0))
+            path.addLine(to: .init(x: 0, y: rect.height))
+            
+            return path
+        }
+    }
+}
+
+#Preview("active line") {
+    TLLine.Active()
+        .padding()
+}
+
+#Preview("line") {
+    VStack(spacing: 0) {
+        HStack {
+            VStack(alignment: .trailing) {
+                Spacer()
+                Text("1")
+            }.frame(width: 50, height: 100)
+            
+            TLLine.Vertical()
+            
+            Spacer()
+        }
+        
+        TLLine.Horizental()
+            .frame(height: 1)
         
         HStack {
-            VDashedLine.WithTime(startTime: .now, endTime: .now.addingTimeInterval(60))
+            VStack(alignment: .trailing) {
+                Spacer()
+                Text("2")
+            }.frame(width: 50, height: 100)
+            
+            TLLine.Vertical()
+            
+            Spacer()
+        }
+        
+    }
+}
+
+#Preview {
+    ScrollView {
+        Text("real line")
+        
+        
+        TLLine.WithDate(date: .now)
+        
+        HStack {
+            TLLine.WithTime(startTime: .now, endTime: .now.addingTimeInterval(60))
             
             RoundedRectangle(cornerSize: CGSize(width: 10, height: 10))
                 .fill(.black)
@@ -126,7 +214,7 @@ extension VDashedLine {
         }
         
         HStack {
-            VDashedLine.WithTime(startTime: .now.addingTimeInterval(180), endTime: nil)
+            TLLine.WithTime(startTime: .now.addingTimeInterval(180), endTime: nil)
             
             RoundedRectangle(cornerSize: CGSize(width: 10, height: 10))
                 .fill(.black)

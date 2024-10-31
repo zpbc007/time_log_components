@@ -17,14 +17,14 @@ extension TaskLogList {
         let disableTransition: Bool
         let scrollToBottom: Bool
         let header: () -> Header
-        let onCellTapped: (TimeLine.State) -> Void
+        let onCellTapped: (TimeLine.CardState) -> Void
         
         public init(
             rows: [TaskLogList.TaskLogCellViewState],
             disableTransition: Bool,
             scrollToBottom: Bool = false,
             header: @escaping () -> Header,
-            onCellTapped: @escaping (TimeLine.State) -> Void
+            onCellTapped: @escaping (TimeLine.CardState) -> Void
         ) {
             self.rows = rows
             self.disableTransition = disableTransition
@@ -62,14 +62,14 @@ extension TaskLogList {
                                         )
                                     
                                     HStack {
-                                        VDashedLine.RealLine()
-                                            .frame(height: VDashedLine.EndTimeMinHeight)
+                                        TLLine.Vertical()
+                                            .frame(height: TLLine.EndTimeMinHeight)
                                         Spacer()
                                     }.padding(.leading, 25)
                                 }
                                 
                                 if let dashedLineState = taskLogState.dashedLineState {
-                                    VDashedLine.WithDate(date: dashedLineState.date)
+                                    TLLine.WithDate(date: dashedLineState.date)
                                 }
                             }
                         }
@@ -124,7 +124,7 @@ extension TaskLogList {
             }
         }
         
-        case TimeLine(TimeLine.State)
+        case TimeLine(TimeLine.CardState)
         case DashedLine(DashedLineState)
         
         public var id: String {
@@ -136,7 +136,7 @@ extension TaskLogList {
             }
         }
         
-        public var timeLineState: TimeLine.State? {
+        public var timeLineState: TimeLine.CardState? {
             switch self {
             case .TimeLine(let timeLineState):
                 return timeLineState
