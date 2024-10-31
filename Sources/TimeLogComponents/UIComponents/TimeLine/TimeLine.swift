@@ -148,11 +148,10 @@ extension TimeLine {
         @GestureState private var dragState = DragState.inactive
         
         var body: some View {
-            ZStack {
+            ZStack(alignment: .top) {
                 VStack(spacing: 0) {
                     ForEach(0..<24, id: \.self) { hour in
                         HourView(hour: hour)
-                            .gesture(gesture)
                     }
                 }
                 
@@ -160,21 +159,24 @@ extension TimeLine {
                     Spacer(minLength: TimeLine.TimeWidth)
                     
                     Color.blue.opacity(0.3)
-                        .frame(height: dragState.translation.height)
+                        .frame(height: dragState.rectInfo.height)
+                        .offset(y: dragState.rectInfo.offsetY)
                 }
-                
             }
         }
         
         private var gesture: some Gesture {
-            LongPressGesture(minimumDuration: 0.1)
+            LongPressGesture(minimumDuration: 0.01)
                 .sequenced(before: DragGesture(minimumDistance: 0))
                 .updating($dragState) { value, state, transaction in
                     switch value {
                     case .first:
                         state = .pressing
                     case .second(_, let dragState):
-                        state = .dragging(translation: dragState?.translation ?? .zero)
+                        state = .dragging(
+                            startY: dragState?.startLocation.y ?? 0,
+                            endY: dragState?.location.y ?? 0
+                        )
                     }
                 }
         }
@@ -186,9 +188,13 @@ extension TimeLine {
                     .frame(width: TimeLine.TimeWidth)
                     .offset(CGSize(width: 0, height: -10.0))
                 
-                TLLine.Vertical()
-                
-                TLLine.Horizental()
+                HStack(spacing: 0) {
+                    TLLine.Vertical()
+                    
+                    TLLine.Horizental()
+                }
+                .clipShape(Rectangle())
+                .gesture(gesture)
             }
             .frame(height: oneHourHeight)
             .foregroundStyle(.gray)
@@ -200,14 +206,14 @@ extension TimeLine.GridBG {
     enum DragState {
         case inactive
         case pressing
-        case dragging(translation: CGSize)
+        case dragging(startY: CGFloat, endY: CGFloat)
         
-        var translation: CGSize {
+        var rectInfo: (offsetY: CGFloat, height: CGFloat) {
             switch self {
-            case .dragging(let translation):
-                return translation
+            case .dragging(startY: let startY, endY: let endY):
+                return (min(startY, endY), abs(startY - endY))
             default:
-                return .zero
+                return (0, 0)
             }
         }
         
