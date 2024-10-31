@@ -188,7 +188,7 @@ extension TimeLine {
                 
                 if dragState.dragDirection == .up {
                     // 到达上边界 向上移动 1 小时
-                    if dragInfo.endY - 20 < scrollOffset && scrollOffset != 0 {
+                    if dragInfo.endY - 20 < abs(scrollOffset) && scrollOffset != 0 {
                         scrollViewProxy?.scrollTo(Int(floor((scrollOffset - oneHourHeight) / oneHourHeight)))
                     }
                 } else {
