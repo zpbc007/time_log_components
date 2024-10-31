@@ -166,7 +166,7 @@ extension TimeLine {
         }
         
         private var gesture: some Gesture {
-            LongPressGesture(minimumDuration: 0.01)
+            LongPressGesture(minimumDuration: 0.3)
                 .sequenced(before: DragGesture(minimumDistance: 0))
                 .updating($dragState) { value, state, transaction in
                     switch value {
@@ -188,12 +188,12 @@ extension TimeLine {
                     .frame(width: TimeLine.TimeWidth)
                     .offset(CGSize(width: 0, height: -10.0))
                 
-                HStack(spacing: 0) {
+                HStack(alignment: .top, spacing: 0) {
                     TLLine.Vertical()
                     
                     TLLine.Horizental()
                 }
-                .clipShape(Rectangle())
+                .contentShape(Rectangle())
                 .gesture(gesture)
             }
             .frame(height: oneHourHeight)
