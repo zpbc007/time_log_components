@@ -146,10 +146,14 @@ extension TimeLine {
     struct GridBG: View {
         static let FullHeightCoordinateSpaceName = "grid_bg_full_height"
         static let ScrollCoordinateSpaceName = "grid_bg_scroll"
+        // 拖拽检测边界
+        private static let DragEdgePadding: CGFloat = 30
         
         let oneHourHeight: CGFloat
         let scrollViewHeight: CGFloat
         let scrollOffset: CGFloat
+        let absScrollOffset: CGFloat
+        let maxAbsScrollOffset: CGFloat
         let scrollViewProxy: ScrollViewProxy?
         @GestureState private var dragState = DragState.inactive
         
@@ -163,6 +167,9 @@ extension TimeLine {
             self.scrollViewHeight = scrollViewHeight
             self.scrollOffset = scrollOffset
             self.scrollViewProxy = scrollViewProxy
+            
+            self.absScrollOffset = abs(scrollOffset)
+            self.maxAbsScrollOffset = oneHourHeight * 24 - scrollViewHeight
         }
         
         var body: some View {
@@ -182,22 +189,43 @@ extension TimeLine {
                         .offset(y: dragState.dragRectInfo.offsetY)
                 }
             }.onChange(of: dragState) { _, newValue in
-                guard let dragInfo = dragState.dragInfo else {
-                    return
-                }
-                
-                if dragState.dragDirection == .up {
-                    // 到达上边界 向上移动 1 小时
-                    if dragInfo.endY - 20 < abs(scrollOffset) && scrollOffset != 0 {
-                        scrollViewProxy?.scrollTo(Int(floor((scrollOffset - oneHourHeight) / oneHourHeight)))
-                    }
-                } else {
-                    
-                }
+                updateScrollViewPos()
             }
         }
         
-        
+        private func updateScrollViewPos() {
+            guard let dragInfo = dragState.dragInfo else {
+                return
+            }
+            
+            
+            if dragState.dragDirection == .up {
+                let dragTopEdge = dragInfo.endY - Self.DragEdgePadding
+                // 到达上边界 向上移动 1 小时
+                if dragTopEdge < absScrollOffset && absScrollOffset != 0 {
+                    let nextTopId = Int(floor((absScrollOffset - oneHourHeight) / oneHourHeight))
+                    
+                    withAnimation {
+                        scrollViewProxy?.scrollTo(
+                            max(0, nextTopId)
+                        )
+                    }
+                }
+            } else {
+                let dragBottomEdge = dragInfo.endY + Self.DragEdgePadding
+                let bottomEdge = absScrollOffset + scrollViewHeight
+                // 到达下边界，向下移动 1 小时
+                if dragBottomEdge > bottomEdge && scrollOffset != maxAbsScrollOffset {
+                    let nextBottomId = Int(ceil(abs(scrollOffset) + oneHourHeight + scrollViewHeight) / oneHourHeight)
+                    
+                    withAnimation {
+                        scrollViewProxy?.scrollTo(
+                            min(23, nextBottomId)
+                        )
+                    }
+                }
+            }
+        }
         
         private var gesture: some Gesture {
             LongPressGesture(minimumDuration: 0.3)
@@ -210,9 +238,19 @@ extension TimeLine {
                     case .first:
                         state = .pressing
                     case .second(_, let dragState):
+                        var rangedY: CGFloat? = nil
+                        if let locationY = dragState?.location.y {
+                            // 不能超出下边界
+                            rangedY = min(
+                                24 * oneHourHeight,
+                                // 不能超出上边界
+                                max(0, locationY)
+                            )
+                        }
+                        
                         state = .dragging(
-                            startY: dragState?.startLocation.y ?? 0,
-                            endY: dragState?.location.y ?? 0
+                            startY: dragState?.startLocation.y,
+                            endY: rangedY
                         )
                     }
                 }
@@ -249,11 +287,15 @@ extension TimeLine.GridBG {
         }
         case inactive
         case pressing
-        case dragging(startY: CGFloat, endY: CGFloat)
+        case dragging(startY: CGFloat?, endY: CGFloat?)
         
         var dragRectInfo: (offsetY: CGFloat, height: CGFloat) {
             switch self {
             case .dragging(startY: let startY, endY: let endY):
+                guard let startY, let endY else {
+                    return (0, 0)
+                }
+                
                 return (min(startY, endY), abs(startY - endY))
             default:
                 return (0, 0)
@@ -263,6 +305,10 @@ extension TimeLine.GridBG {
         var dragDirection: Direction {
             switch self {
             case .dragging(startY: let startY, endY: let endY):
+                guard let startY, let endY else {
+                    return .up
+                }
+                
                 return endY > startY ? .down : .up
             default:
                 return .up
@@ -272,6 +318,10 @@ extension TimeLine.GridBG {
         var dragInfo: (startY: CGFloat, endY: CGFloat)? {
             switch self {
             case .dragging(startY: let startY, endY: let endY):
+                guard let startY, let endY else {
+                    return nil
+                }
+                
                 return (startY, endY)
             default:
                 return nil
