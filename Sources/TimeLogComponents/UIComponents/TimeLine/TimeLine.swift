@@ -144,30 +144,67 @@ extension TimeLine {
 
 extension TimeLine {
     struct GridBG: View {
+        static let FullHeightCoordinateSpaceName = "grid_bg_full_height"
+        static let ScrollCoordinateSpaceName = "grid_bg_scroll"
+        
         let oneHourHeight: CGFloat
+        let scrollViewHeight: CGFloat
+        let scrollOffset: CGFloat
+        let scrollViewProxy: ScrollViewProxy?
         @GestureState private var dragState = DragState.inactive
+        
+        init(
+            oneHourHeight: CGFloat,
+            scrollViewHeight: CGFloat,
+            scrollOffset: CGFloat,
+            scrollViewProxy: ScrollViewProxy? = nil
+        ) {
+            self.oneHourHeight = oneHourHeight
+            self.scrollViewHeight = scrollViewHeight
+            self.scrollOffset = scrollOffset
+            self.scrollViewProxy = scrollViewProxy
+        }
         
         var body: some View {
             ZStack(alignment: .top) {
                 VStack(spacing: 0) {
                     ForEach(0..<24, id: \.self) { hour in
                         HourView(hour: hour)
+                            .id(hour)
                     }
-                }
+                }.coordinateSpace(name: Self.FullHeightCoordinateSpaceName)
                 
                 HStack {
                     Spacer(minLength: TimeLine.TimeWidth)
                     
                     Color.blue.opacity(0.3)
-                        .frame(height: dragState.rectInfo.height)
-                        .offset(y: dragState.rectInfo.offsetY)
+                        .frame(height: dragState.dragRectInfo.height)
+                        .offset(y: dragState.dragRectInfo.offsetY)
+                }
+            }.onChange(of: dragState) { _, newValue in
+                guard let dragInfo = dragState.dragInfo else {
+                    return
+                }
+                
+                if dragState.dragDirection == .up {
+                    // 到达上边界 向上移动 1 小时
+                    if dragInfo.endY - 20 < scrollOffset && scrollOffset != 0 {
+                        scrollViewProxy?.scrollTo(Int(floor((scrollOffset - oneHourHeight) / oneHourHeight)))
+                    }
+                } else {
+                    
                 }
             }
         }
         
+        
+        
         private var gesture: some Gesture {
             LongPressGesture(minimumDuration: 0.3)
-                .sequenced(before: DragGesture(minimumDistance: 0))
+                .sequenced(before: DragGesture(
+                    minimumDistance: 0,
+                    coordinateSpace: .named(Self.FullHeightCoordinateSpaceName)
+                ))
                 .updating($dragState) { value, state, transaction in
                     switch value {
                     case .first:
@@ -194,6 +231,8 @@ extension TimeLine {
                     TLLine.Horizental()
                 }
                 .contentShape(Rectangle())
+                // fix: 避免 scrollView 无法滚动
+                .onTapGesture {}
                 .gesture(gesture)
             }
             .frame(height: oneHourHeight)
@@ -203,17 +242,39 @@ extension TimeLine {
 }
 
 extension TimeLine.GridBG {
-    enum DragState {
+    enum DragState: Equatable {
+        enum Direction {
+            case up
+            case down
+        }
         case inactive
         case pressing
         case dragging(startY: CGFloat, endY: CGFloat)
         
-        var rectInfo: (offsetY: CGFloat, height: CGFloat) {
+        var dragRectInfo: (offsetY: CGFloat, height: CGFloat) {
             switch self {
             case .dragging(startY: let startY, endY: let endY):
                 return (min(startY, endY), abs(startY - endY))
             default:
                 return (0, 0)
+            }
+        }
+        
+        var dragDirection: Direction {
+            switch self {
+            case .dragging(startY: let startY, endY: let endY):
+                return endY > startY ? .down : .up
+            default:
+                return .up
+            }
+        }
+        
+        var dragInfo: (startY: CGFloat, endY: CGFloat)? {
+            switch self {
+            case .dragging(startY: let startY, endY: let endY):
+                return (startY, endY)
+            default:
+                return nil
             }
         }
         
@@ -306,19 +367,41 @@ extension TimeLine {
 extension TimeLine {
     public struct GridBGWithActive: View {
         let oneHourHeight: CGFloat
+        @State private var scrollOffset: CGFloat = 0
+        @State private var scrollViewHeight: CGFloat = 0
         
         public init(oneHourHeight: CGFloat = 100) {
             self.oneHourHeight = oneHourHeight
         }
         
         public var body: some View {
-            ScrollView {
-                ZStack(alignment: .top) {
-                    GridBG(oneHourHeight: oneHourHeight)
-                    
-                    Active(oneHourHeight: oneHourHeight)
+            ScrollViewReader(content: { proxy in
+                ScrollView {
+                    ZStack(alignment: .top) {
+                        GridBG(
+                            oneHourHeight: oneHourHeight,
+                            scrollViewHeight: scrollViewHeight,
+                            scrollOffset: scrollOffset,
+                            scrollViewProxy: proxy
+                        )
+                        
+                        Active(oneHourHeight: oneHourHeight)
+                    }.scrollOffset(
+                        coordinateSpace: .named(TimeLine.GridBG.ScrollCoordinateSpaceName)
+                    )
                 }
-            }
+                .coordinateSpace(name: TimeLine.GridBG.ScrollCoordinateSpaceName)
+                .onPreferenceChange(
+                    ScrollOffsetPreferenceKey.self,
+                    perform: { value in
+                        scrollOffset = value
+                    }
+                )
+            })
+            .contentSize()
+            .onPreferenceChange(SizePreferenceKey.self, perform: { value in
+                scrollViewHeight = value.height
+            })
         }
     }
 }
@@ -327,17 +410,17 @@ extension TimeLine {
     TimeLine.GridBGWithActive()
 }
 
-#Preview("GridBGWithActive static") {
-    ScrollView {
-        ZStack(alignment: .top) {
-            TimeLine.GridBG(oneHourHeight: 100)
-            
-            TimeLine.ActiveDumpView(oneHourHeight: 100, now: {
-                Calendar.current.date(from: .init(hour: 1, minute: 8)) ?? .now
-            }())
-        }
-    }
-}
+//#Preview("GridBGWithActive static") {
+//    ScrollView {
+//        ZStack(alignment: .top) {
+//            TimeLine.GridBG(oneHourHeight: 100)
+//            
+//            TimeLine.ActiveDumpView(oneHourHeight: 100, now: {
+//                Calendar.current.date(from: .init(hour: 1, minute: 8)) ?? .now
+//            }())
+//        }
+//    }
+//}
 
 #Preview {
     List {
