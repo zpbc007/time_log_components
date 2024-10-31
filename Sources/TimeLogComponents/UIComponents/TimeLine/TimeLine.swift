@@ -215,8 +215,10 @@ extension TimeLine {
                 let dragBottomEdge = dragInfo.endY + Self.DragEdgePadding
                 let bottomEdge = absScrollOffset + scrollViewHeight
                 // 到达下边界，向下移动 1 小时
-                if dragBottomEdge > bottomEdge && scrollOffset != maxAbsScrollOffset {
-                    let nextBottomId = Int(ceil(abs(scrollOffset) + oneHourHeight + scrollViewHeight) / oneHourHeight)
+                if dragBottomEdge > bottomEdge 
+                    && abs(absScrollOffset - maxAbsScrollOffset) > 5 // maxAbsScrollOffset 有小数部分
+                {
+                    let nextBottomId = Int(ceil(absScrollOffset + oneHourHeight + scrollViewHeight) / oneHourHeight)
                     
                     withAnimation {
                         scrollViewProxy?.scrollTo(
