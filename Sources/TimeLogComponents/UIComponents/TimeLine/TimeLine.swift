@@ -145,13 +145,38 @@ extension TimeLine {
 extension TimeLine {
     struct GridBG: View {
         let oneHourHeight: CGFloat
+        @GestureState private var dragState = DragState.inactive
         
         var body: some View {
-            VStack(spacing: 0) {
-                ForEach(0..<24, id: \.self) { hour in
-                    HourView(hour: hour)
+            ZStack {
+                VStack(spacing: 0) {
+                    ForEach(0..<24, id: \.self) { hour in
+                        HourView(hour: hour)
+                            .gesture(gesture)
+                    }
                 }
+                
+                HStack {
+                    Spacer(minLength: TimeLine.TimeWidth)
+                    
+                    Color.blue.opacity(0.3)
+                        .frame(height: dragState.translation.height)
+                }
+                
             }
+        }
+        
+        private var gesture: some Gesture {
+            LongPressGesture(minimumDuration: 0.1)
+                .sequenced(before: DragGesture(minimumDistance: 0))
+                .updating($dragState) { value, state, transaction in
+                    switch value {
+                    case .first:
+                        state = .pressing
+                    case .second(_, let dragState):
+                        state = .dragging(translation: dragState?.translation ?? .zero)
+                    }
+                }
         }
         
         @ViewBuilder
@@ -167,6 +192,41 @@ extension TimeLine {
             }
             .frame(height: oneHourHeight)
             .foregroundStyle(.gray)
+        }
+    }
+}
+
+extension TimeLine.GridBG {
+    enum DragState {
+        case inactive
+        case pressing
+        case dragging(translation: CGSize)
+        
+        var translation: CGSize {
+            switch self {
+            case .dragging(let translation):
+                return translation
+            default:
+                return .zero
+            }
+        }
+        
+        var isDragging: Bool {
+            switch self {
+            case .dragging:
+                return true
+            default:
+                return false
+            }
+        }
+        
+        var isPressing: Bool {
+            switch self {
+            case .inactive:
+                return false
+            default:
+                return true
+            }
         }
     }
 }
