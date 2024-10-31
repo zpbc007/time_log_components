@@ -298,10 +298,14 @@ extension TimeLine {
 }
 
 extension TimeLine {
-    struct GridBGWithActive: View {
-        let oneHourHeight: CGFloat = 100
+    public struct GridBGWithActive: View {
+        let oneHourHeight: CGFloat
         
-        var body: some View {
+        public init(oneHourHeight: CGFloat = 100) {
+            self.oneHourHeight = oneHourHeight
+        }
+        
+        public var body: some View {
             ScrollView {
                 ZStack(alignment: .top) {
                     GridBG(oneHourHeight: oneHourHeight)
