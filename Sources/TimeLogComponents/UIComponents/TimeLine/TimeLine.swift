@@ -146,6 +146,7 @@ extension TimeLine {
     struct GridBG: View {
         static let FullHeightCoordinateSpaceName = "grid_bg_full_height"
         static let ScrollCoordinateSpaceName = "grid_bg_scroll"
+        static let ContainerVerticalPadding: CGFloat = 10
         // 拖拽检测边界
         private static let DragEdgePadding: CGFloat = 40
         
@@ -216,7 +217,7 @@ extension TimeLine {
                 }
             } else {
                 let dragBottomEdge = dragInfo.endY + Self.DragEdgePadding
-                let bottomEdge = absScrollOffset + scrollViewHeight
+                let bottomEdge = absScrollOffset + scrollViewHeight - Self.ContainerVerticalPadding * 2
                 // 到达下边界，向下移动 1 小时
                 if dragBottomEdge > bottomEdge 
                     && abs(absScrollOffset - maxAbsScrollOffset) > 5 // maxAbsScrollOffset 有小数部分
@@ -450,7 +451,7 @@ extension TimeLine {
                         Active(oneMinuteHeight: oneMinuteHeight)
                     }.scrollOffset(
                         coordinateSpace: .named(TimeLine.GridBG.ScrollCoordinateSpaceName)
-                    ).padding(.vertical, 10)
+                    ).padding(.vertical, TimeLine.GridBG.ContainerVerticalPadding)
                 }
                 .coordinateSpace(name: TimeLine.GridBG.ScrollCoordinateSpaceName)
                 .onPreferenceChange(
