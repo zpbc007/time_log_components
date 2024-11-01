@@ -249,9 +249,20 @@ extension TimeLine {
                             return
                         }
                         
+                        let startY = roundPos(dragState.startLocation.y)
+                        var endY = roundPos(dragState.location.y)
+                        
+                        if startY == endY {
+                            if endY + 10 < 24 * 60 * oneHourHeight {
+                                endY += 10
+                            } else {
+                                endY -= 10
+                            }
+                        }
+                        
                         state = .dragging(
-                            startY: roundPos(dragState.startLocation.y),
-                            endY: roundPos(dragState.location.y)
+                            startY: startY,
+                            endY: endY
                         )
                     }
                 }
@@ -464,7 +475,7 @@ extension TimeLine {
             .contentSize()
             .onPreferenceChange(SizePreferenceKey.self, perform: { value in
                 scrollViewHeight = value.height
-            }).border(.black)
+            })
         }
     }
 }
