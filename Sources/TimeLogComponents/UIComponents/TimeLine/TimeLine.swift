@@ -149,7 +149,7 @@ extension TimeLine {
         // 拖拽检测边界
         private static let DragEdgePadding: CGFloat = 30
         
-        let oneHourHeight: CGFloat
+        let oneMinuteHeight: CGFloat
         let scrollViewHeight: CGFloat
         let scrollOffset: CGFloat
         let absScrollOffset: CGFloat
@@ -157,19 +157,23 @@ extension TimeLine {
         let scrollViewProxy: ScrollViewProxy?
         @GestureState private var dragState = DragState.inactive
         
+        private var oneHourHeight: CGFloat {
+            oneMinuteHeight * 60
+        }
+        
         init(
-            oneHourHeight: CGFloat,
+            oneMinuteHeight: CGFloat,
             scrollViewHeight: CGFloat,
             scrollOffset: CGFloat,
             scrollViewProxy: ScrollViewProxy? = nil
         ) {
-            self.oneHourHeight = oneHourHeight
+            self.oneMinuteHeight = oneMinuteHeight
             self.scrollViewHeight = scrollViewHeight
             self.scrollOffset = scrollOffset
             self.scrollViewProxy = scrollViewProxy
             
             self.absScrollOffset = abs(scrollOffset)
-            self.maxAbsScrollOffset = oneHourHeight * 24 - scrollViewHeight
+            self.maxAbsScrollOffset = oneMinuteHeight * 60 * 24 - scrollViewHeight
         }
         
         var body: some View {
@@ -240,22 +244,29 @@ extension TimeLine {
                     case .first:
                         state = .pressing
                     case .second(_, let dragState):
-                        var rangedY: CGFloat? = nil
-                        if let locationY = dragState?.location.y {
-                            // 不能超出下边界
-                            rangedY = min(
-                                24 * oneHourHeight,
-                                // 不能超出上边界
-                                max(0, locationY)
-                            )
+                        guard let dragState else {
+                            state = .dragging(startY: nil, endY: nil)
+                            return
                         }
                         
                         state = .dragging(
-                            startY: dragState?.startLocation.y,
-                            endY: rangedY
+                            startY: roundPos(dragState.startLocation.y),
+                            endY: roundPos(dragState.location.y)
                         )
                     }
                 }
+        }
+        
+        // 最少间隔 5 min
+        private func roundPos(_ y: CGFloat) -> CGFloat {
+            let pos = floor(y / (oneMinuteHeight * 5)) * oneHourHeight * 5
+            
+            // 不能超出下边界
+            return min(
+                24 * 60 * oneMinuteHeight,
+                // 不能超出上边界
+                max(0, pos)
+            )
         }
         
         @ViewBuilder
@@ -352,16 +363,16 @@ extension TimeLine.GridBG {
 
 extension TimeLine {
     struct Active: View {
-        let oneHourHeight: CGFloat
+        let oneMinuteHeight: CGFloat
         
         private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
         @State private var now: Date = .now
         
         var body: some View {
-            ActiveDumpView(oneHourHeight: oneHourHeight, now: now)
-            .onReceive(timer, perform: { newDate in
-                now = newDate
-            })
+            ActiveDumpView(oneMinuteHeight: oneMinuteHeight, now: now)
+                .onReceive(timer, perform: { newDate in
+                    now = newDate
+                })
         }
     }
 }
@@ -375,7 +386,7 @@ extension TimeLine {
             return formatter
         }()
         
-        let oneHourHeight: CGFloat
+        let oneMinuteHeight: CGFloat
         let now: Date
         @State private var height: CGFloat = 0
         
@@ -386,7 +397,7 @@ extension TimeLine {
         private var offset: CGFloat {
             let minutes = CGFloat((components.hour ?? 0) * 60 + (components.minute ?? 0))
             
-            return minutes / 60 * oneHourHeight - height / 2
+            return minutes * oneMinuteHeight - height / 2
         }
         
         private var isNearToHour: Bool {
@@ -418,12 +429,12 @@ extension TimeLine {
 
 extension TimeLine {
     public struct GridBGWithActive: View {
-        let oneHourHeight: CGFloat
+        let oneMinuteHeight: CGFloat
         @State private var scrollOffset: CGFloat = 0
         @State private var scrollViewHeight: CGFloat = 0
         
-        public init(oneHourHeight: CGFloat = 100) {
-            self.oneHourHeight = oneHourHeight
+        public init(oneMinuteHeight: CGFloat = 2) {
+            self.oneMinuteHeight = oneMinuteHeight
         }
         
         public var body: some View {
@@ -431,16 +442,16 @@ extension TimeLine {
                 ScrollView {
                     ZStack(alignment: .top) {
                         GridBG(
-                            oneHourHeight: oneHourHeight,
+                            oneMinuteHeight: oneMinuteHeight,
                             scrollViewHeight: scrollViewHeight,
                             scrollOffset: scrollOffset,
                             scrollViewProxy: proxy
                         )
                         
-                        Active(oneHourHeight: oneHourHeight)
+                        Active(oneMinuteHeight: oneMinuteHeight)
                     }.scrollOffset(
                         coordinateSpace: .named(TimeLine.GridBG.ScrollCoordinateSpaceName)
-                    )
+                    ).padding(.vertical)
                 }
                 .coordinateSpace(name: TimeLine.GridBG.ScrollCoordinateSpaceName)
                 .onPreferenceChange(
@@ -459,7 +470,16 @@ extension TimeLine {
 }
 
 #Preview("GridBGWithActive") {
-    TimeLine.GridBGWithActive()
+    VStack {
+        Text("top")
+            .frame(height: 100)
+        
+        TimeLine.GridBGWithActive()
+        
+        Text("bottom")
+            .frame(height: 100)
+    }
+    
 }
 
 //#Preview("GridBGWithActive static") {
