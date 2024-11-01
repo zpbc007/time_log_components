@@ -156,6 +156,7 @@ extension TimeLine {
         let absScrollOffset: CGFloat
         let maxAbsScrollOffset: CGFloat
         let scrollViewProxy: ScrollViewProxy?
+        let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         @GestureState private var dragState = DragState.inactive
         
         private let oneHourHeight: CGFloat
@@ -166,12 +167,14 @@ extension TimeLine {
             oneMinuteHeight: CGFloat,
             scrollViewHeight: CGFloat,
             scrollOffset: CGFloat,
-            scrollViewProxy: ScrollViewProxy? = nil
+            scrollViewProxy: ScrollViewProxy? = nil,
+            selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         ) {
             self.oneMinuteHeight = oneMinuteHeight
             self.scrollViewHeight = scrollViewHeight
             self.scrollOffset = scrollOffset
             self.scrollViewProxy = scrollViewProxy
+            self.selectAction = selectAction
             
             let oneHourHeight = oneMinuteHeight * 60
             let oneDayHeight = oneHourHeight * 24
@@ -180,6 +183,7 @@ extension TimeLine {
             self.maxAbsScrollOffset = oneDayHeight - scrollViewHeight
             self.oneHourHeight = oneHourHeight
             self.oneDayHeight = oneDayHeight
+            // 最少间隔 5 min
             self.stepHeight = oneMinuteHeight * 5
         }
         
@@ -254,17 +258,7 @@ extension TimeLine {
                             state = .dragging(startY: nil, endY: nil)
                             return
                         }
-                        
-                        let startY = roundPos(dragState.startLocation.y)
-                        var endY = roundPos(dragState.location.y)
-                        
-                        if startY == endY {
-                            if endY + stepHeight < oneDayHeight {
-                                endY += stepHeight
-                            } else {
-                                endY -= stepHeight
-                            }
-                        }
+                        let (startY, endY) = getPosFromDragState(dragState: dragState)
                         
                         state = .dragging(
                             startY: startY,
@@ -272,9 +266,33 @@ extension TimeLine {
                         )
                     }
                 }
+                .onEnded { value in
+                    switch value {
+                    case .second(_, let dragState):
+                        guard let dragState else {
+                            return
+                        }
+                        let (startY, endY) = getPosFromDragState(dragState: dragState)
+                        let newState: DragState = .dragging(startY: startY, endY: endY)
+                        
+                        let (offsetY, height) = newState.dragRectInfo
+                        if height == 0 {
+                            return
+                        }
+                        
+                        let startAllMinute = Int(floor(offsetY / oneMinuteHeight))
+                        let endAllMinute = Int(floor((offsetY + height) / oneMinuteHeight))
+                        
+                        selectAction(
+                            startAllMinute / 60, startAllMinute % 60,
+                            endAllMinute / 60, endAllMinute % 60
+                        )
+                    default:
+                        return
+                    }
+                }
         }
         
-        // 最少间隔 5 min
         private func roundPos(_ y: CGFloat) -> CGFloat {
             let pos = floor(y / stepHeight) * stepHeight
             
@@ -284,6 +302,21 @@ extension TimeLine {
                 // 不能超出上边界
                 max(0, pos)
             )
+        }
+        
+        private func getPosFromDragState(dragState: DragGesture.Value) -> (startY: CGFloat, endY: CGFloat) {
+            let startY = roundPos(dragState.startLocation.y)
+            var endY = roundPos(dragState.location.y)
+            
+            if startY == endY {
+                if endY + stepHeight < oneDayHeight {
+                    endY += stepHeight
+                } else {
+                    endY -= stepHeight
+                }
+            }
+            
+            return (startY, endY)
         }
         
         @ViewBuilder
@@ -447,11 +480,17 @@ extension TimeLine {
 extension TimeLine {
     public struct GridBGWithActive: View {
         let oneMinuteHeight: CGFloat
+        let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
+        
         @State private var scrollOffset: CGFloat = 0
         @State private var scrollViewHeight: CGFloat = 0
         
-        public init(oneMinuteHeight: CGFloat = 2) {
+        public init(
+            oneMinuteHeight: CGFloat = 2,
+            selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
+        ) {
             self.oneMinuteHeight = oneMinuteHeight
+            self.selectAction = selectAction
         }
         
         public var body: some View {
@@ -462,7 +501,8 @@ extension TimeLine {
                             oneMinuteHeight: oneMinuteHeight,
                             scrollViewHeight: scrollViewHeight,
                             scrollOffset: scrollOffset,
-                            scrollViewProxy: proxy
+                            scrollViewProxy: proxy,
+                            selectAction: selectAction
                         )
                         
                         Active(oneMinuteHeight: oneMinuteHeight)
@@ -491,25 +531,15 @@ extension TimeLine {
         Text("top")
             .frame(height: 100)
         
-        TimeLine.GridBGWithActive()
+        TimeLine.GridBGWithActive { startHour, startMinute, endHour, endMinute in
+            print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
+        }
         
         Text("bottom")
             .frame(height: 100)
     }
     
 }
-
-//#Preview("GridBGWithActive static") {
-//    ScrollView {
-//        ZStack(alignment: .top) {
-//            TimeLine.GridBG(oneHourHeight: 100)
-//            
-//            TimeLine.ActiveDumpView(oneHourHeight: 100, now: {
-//                Calendar.current.date(from: .init(hour: 1, minute: 8)) ?? .now
-//            }())
-//        }
-//    }
-//}
 
 #Preview {
     List {
