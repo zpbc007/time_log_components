@@ -158,9 +158,9 @@ extension TimeLine {
         let scrollViewProxy: ScrollViewProxy?
         @GestureState private var dragState = DragState.inactive
         
-        private var oneHourHeight: CGFloat {
-            oneMinuteHeight * 60
-        }
+        private let oneHourHeight: CGFloat
+        private let oneDayHeight: CGFloat
+        private let stepHeight: CGFloat
         
         init(
             oneMinuteHeight: CGFloat,
@@ -173,8 +173,14 @@ extension TimeLine {
             self.scrollOffset = scrollOffset
             self.scrollViewProxy = scrollViewProxy
             
+            let oneHourHeight = oneMinuteHeight * 60
+            let oneDayHeight = oneHourHeight * 24
+            
             self.absScrollOffset = abs(scrollOffset)
-            self.maxAbsScrollOffset = oneMinuteHeight * 60 * 24 - scrollViewHeight
+            self.maxAbsScrollOffset = oneDayHeight - scrollViewHeight
+            self.oneHourHeight = oneHourHeight
+            self.oneDayHeight = oneDayHeight
+            self.stepHeight = oneMinuteHeight * 5
         }
         
         var body: some View {
@@ -253,10 +259,10 @@ extension TimeLine {
                         var endY = roundPos(dragState.location.y)
                         
                         if startY == endY {
-                            if endY + 10 < 24 * 60 * oneHourHeight {
-                                endY += 10
+                            if endY + stepHeight < oneDayHeight {
+                                endY += stepHeight
                             } else {
-                                endY -= 10
+                                endY -= stepHeight
                             }
                         }
                         
@@ -270,11 +276,11 @@ extension TimeLine {
         
         // 最少间隔 5 min
         private func roundPos(_ y: CGFloat) -> CGFloat {
-            let pos = floor(y / (oneMinuteHeight * 5)) * oneMinuteHeight * 5
+            let pos = floor(y / stepHeight) * stepHeight
             
             // 不能超出下边界
             return min(
-                24 * 60 * oneMinuteHeight,
+                oneDayHeight,
                 // 不能超出上边界
                 max(0, pos)
             )
