@@ -147,7 +147,7 @@ extension TimeLine {
         static let FullHeightCoordinateSpaceName = "grid_bg_full_height"
         static let ScrollCoordinateSpaceName = "grid_bg_scroll"
         // 拖拽检测边界
-        private static let DragEdgePadding: CGFloat = 30
+        private static let DragEdgePadding: CGFloat = 40
         
         let oneMinuteHeight: CGFloat
         let scrollViewHeight: CGFloat
@@ -201,7 +201,6 @@ extension TimeLine {
             guard let dragInfo = dragState.dragInfo else {
                 return
             }
-            
             
             if dragState.dragDirection == .up {
                 let dragTopEdge = dragInfo.endY - Self.DragEdgePadding
@@ -259,7 +258,7 @@ extension TimeLine {
         
         // 最少间隔 5 min
         private func roundPos(_ y: CGFloat) -> CGFloat {
-            let pos = floor(y / (oneMinuteHeight * 5)) * oneHourHeight * 5
+            let pos = floor(y / (oneMinuteHeight * 5)) * oneMinuteHeight * 5
             
             // 不能超出下边界
             return min(
@@ -451,7 +450,7 @@ extension TimeLine {
                         Active(oneMinuteHeight: oneMinuteHeight)
                     }.scrollOffset(
                         coordinateSpace: .named(TimeLine.GridBG.ScrollCoordinateSpaceName)
-                    ).padding(.vertical)
+                    ).padding(.vertical, 10)
                 }
                 .coordinateSpace(name: TimeLine.GridBG.ScrollCoordinateSpaceName)
                 .onPreferenceChange(
@@ -464,7 +463,7 @@ extension TimeLine {
             .contentSize()
             .onPreferenceChange(SizePreferenceKey.self, perform: { value in
                 scrollViewHeight = value.height
-            })
+            }).border(.black)
         }
     }
 }
