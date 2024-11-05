@@ -101,48 +101,6 @@ public struct TimeLine: View {
 }
 
 extension TimeLine {
-    struct Card<TagView: View>: View {
-        let title: String
-        let color: Color
-        let tagView: () -> TagView
-        
-        init(
-            title: String,
-            color: Color,
-            @ViewBuilder tagView: @escaping () -> TagView
-        ) {
-            self.title = title
-            self.color = color
-            self.tagView = tagView
-        }
-        
-        var body: some View {
-            HStack {
-                Text(title)
-                    .padding(.vertical)
-                    .padding(.leading)
-                
-                Spacer()
-                
-                tagView()
-                    .padding(.trailing, 5)
-            }
-            .padding(.leading, 5)
-            .overlay(content: {
-                HStack {
-                    Rectangle()
-                        .fill(color)
-                        .frame(width: 5)
-                    Spacer()
-                }
-            })
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 5))
-        }
-    }
-}
-
-extension TimeLine {
     struct GridBG: View {
         static let FullHeightCoordinateSpaceName = "grid_bg_full_height"
         static let ScrollCoordinateSpaceName = "grid_bg_scroll"
@@ -463,7 +421,6 @@ extension TimeLine {
                     .background(.white)
                     .frame(width: TimeLine.TimeWidth)
                     
-                
                 TLLine.Active()
                     .padding(.leading, 2)
             }
@@ -478,22 +435,75 @@ extension TimeLine {
 }
 
 extension TimeLine {
-    public struct GridBGWithActive: View {
+    struct TimeLineState: Equatable, Identifiable {
+        let id: UUID
+        let startMinute: Int
+        let endMinute: Int
+        
+        func toAcc(_ prevMinute: Int) -> TimeLineStateWithAcc {
+            .init(
+                id: self.id,
+                prevMinute: prevMinute,
+                startMinute: self.startMinute,
+                endMinute: self.endMinute
+            )
+        }
+    }
+    
+    struct TimeLineStateWithAcc: Equatable, Identifiable {
+        let id: UUID
+        let prevMinute: Int
+        let startMinute: Int
+        let endMinute: Int
+        
+        var totalMinutes: CGFloat {
+            CGFloat(integerLiteral: endMinute - startMinute)
+        }
+        
+        var offsetMinutes: CGFloat {
+            CGFloat(integerLiteral: startMinute - prevMinute)
+        }
+    }
+}
+
+extension [TimeLine.TimeLineState] {
+    func toAcc() -> [TimeLine.TimeLineStateWithAcc] {
+        self.reduce(into: .init()) { partialResult, item in
+            guard let last = partialResult.last else {
+                partialResult.append(item.toAcc(0))
+                return
+            }
+            
+            partialResult.append(
+                item.toAcc(last.prevMinute + last.endMinute - last.startMinute)
+            )
+        }
+    }
+}
+
+extension TimeLine {
+    struct GridBGWithActive<Content: View>: View {
         let oneMinuteHeight: CGFloat
+        let items: [TimeLine.TimeLineStateWithAcc]
+        let content: (_ id: UUID, _ height: CGFloat) -> Content
         let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         
         @State private var scrollOffset: CGFloat = 0
         @State private var scrollViewHeight: CGFloat = 0
         
-        public init(
+        init(
             oneMinuteHeight: CGFloat = 2,
+            items: [TimeLine.TimeLineState],
+            @ViewBuilder content: @escaping (_ id: UUID, _ height: CGFloat) -> Content,
             selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         ) {
             self.oneMinuteHeight = oneMinuteHeight
+            self.items = items.toAcc()
+            self.content = content
             self.selectAction = selectAction
         }
         
-        public var body: some View {
+        var body: some View {
             ScrollViewReader(content: { proxy in
                 ScrollView {
                     ZStack(alignment: .top) {
@@ -506,6 +516,8 @@ extension TimeLine {
                         )
                         
                         Active(oneMinuteHeight: oneMinuteHeight)
+                        
+                        self.TimeLineContent
                     }.scrollOffset(
                         coordinateSpace: .named(TimeLine.GridBG.ScrollCoordinateSpaceName)
                     ).padding(.vertical, TimeLine.GridBG.ContainerVerticalPadding)
@@ -523,6 +535,21 @@ extension TimeLine {
                 scrollViewHeight = value.height
             })
         }
+        
+        @ViewBuilder
+        private var TimeLineContent: some View {
+            HStack(alignment: .top, spacing: 0) {
+                HStack {}
+                    .frame(width: TimeLine.TimeWidth)
+                
+                VStack(spacing: 0) {
+                    ForEach(items) { item in
+                        content(item.id, item.totalMinutes * oneMinuteHeight)
+                            .offset(y: item.offsetMinutes * oneMinuteHeight)
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -531,41 +558,29 @@ extension TimeLine {
         Text("top")
             .frame(height: 100)
         
-        TimeLine.GridBGWithActive { startHour, startMinute, endHour, endMinute in
+        TimeLine.GridBGWithActive(
+            oneMinuteHeight: 5,
+            items: [
+                .init(id: .init(), startMinute: 0, endMinute: 30),
+                .init(id: .init(), startMinute: 35, endMinute: 40),
+                .init(id: .init(), startMinute: 60, endMinute: 120)
+            ]
+        ) { (id, height) in
+            HStack {
+                Text("id: \(id)")
+                
+                Spacer()
+            }
+            .frame(height: height)
+            .background(.green.opacity(0.4))
+            .onTapGesture {
+                print("tap id: \(id)")
+            }
+        } selectAction: { startHour, startMinute, endHour, endMinute in
             print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
         }
         
         Text("bottom")
             .frame(height: 100)
     }
-    
-}
-
-#Preview {
-    List {
-        TimeLine(.init(
-            id: UUID().uuidString,
-            startTime: .now.addingTimeInterval(-600),
-            endTime: .now.addingTimeInterval(-180),
-            title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
-            color: .yellow
-        ))
-        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-        
-        TimeLine(.init(
-            id: UUID().uuidString,
-            startTime: .now.addingTimeInterval(-600),
-            endTime: .now.addingTimeInterval(-180),
-            title: "正常title",
-            color: .yellow
-        ))
-        
-        TimeLine(.init(
-            id: UUID().uuidString,
-            startTime: .now,
-            title: "正常title",
-            color: .yellow
-        ))
-    }
-    .listStyle(.plain)
 }
