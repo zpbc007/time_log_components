@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct TimeLine: View {
+public struct TimeLine {
     static let TimeWidth: CGFloat = 50
     
     public struct CardState: Equatable, Identifiable {
@@ -17,7 +17,6 @@ public struct TimeLine: View {
         public let title: String
         public let color: Color
         public let comment: String?
-        public let showEndTime: Bool
         
         public init(
             id: String,
@@ -25,8 +24,7 @@ public struct TimeLine: View {
             endTime: Date,
             title: String,
             color: Color,
-            comment: String? = nil,
-            showEndTime: Bool = true
+            comment: String? = nil
         ) {
             self.id = id
             self.startTime = startTime
@@ -34,7 +32,6 @@ public struct TimeLine: View {
             self.title = title
             self.color = color
             self.comment = comment
-            self.showEndTime = showEndTime
         }
         
         func toTimeLineState(start: Date, end: Date) -> TimeLine.TimeLineState {
@@ -43,67 +40,6 @@ public struct TimeLine: View {
                 startMinute: start.minutesBetween(to: self.startTime < start ? start : self.startTime),
                 endMinute: start.minutesBetween(to: self.endTime > end ? end : self.endTime)
             )
-        }
-    }
-
-    static let durationFormatter: DateComponentsFormatter = {
-        var formatter = DateComponentsFormatter()
-        formatter.unitsStyle = .abbreviated
-        formatter.allowedUnits = [.day, .hour, .minute, .second]
-
-        return formatter
-    }()
-    
-    private let durationString: String?
-    let state: CardState
-    
-//    public init(_ state: CardState) {
-//        self.state = state
-//        
-//        if let endTime = state.endTime {
-//            self.durationString = Self.durationFormatter.string(
-//                from: endTime.timeIntervalSince(state.startTime)
-//            ) ?? nil
-//        } else {
-//            self.durationString = nil
-//        }
-//    }
-    
-    public var body: some View {
-        HStack {
-            TLLine.WithTime(
-                startTime: state.startTime,
-                endTime: state.showEndTime ? state.endTime : nil
-            )
-            
-//            Card(
-//                title: state.title,
-//                color: state.color,
-//            ) {
-//                Group {
-//                    if let durationString {
-//                        Label(durationString, systemImage: "clock.badge.checkmark")
-//                    } else {
-//                        Label(
-//                            title: {
-//                                Text(
-//                                    timerInterval: state.startTime...Date(
-//                                        timeInterval: 60 * 60 * 24 * 30,
-//                                        since: .now
-//                                    ),
-//                                    countsDown: false
-//                                )
-//                                .bold()
-//                            },
-//                            icon: {
-//                                Image(systemName: "clock")
-//                            }
-//                        )
-//                    }
-//                }
-//                .labelStyle(.roundedCornerTag)
-//                .font(.caption)
-//            }
         }
     }
 }
