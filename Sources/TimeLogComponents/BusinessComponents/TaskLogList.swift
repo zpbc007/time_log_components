@@ -173,7 +173,7 @@ extension TaskLogList {
                     
                     Button("-") {
                         withAnimation {
-//                            rows.removeLast()
+                            _ = rows.removeLast()
                         }
                     }
                     
