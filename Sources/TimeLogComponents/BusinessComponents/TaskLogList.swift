@@ -147,26 +147,24 @@ extension TaskLogList {
                     Button("+") {
                         let startTime = rows.elements.last?.endTime.addingTimeInterval(5 * 60) ?? .now.todayStartPoint
                         let endTime = startTime.addingTimeInterval(30 * 60)
-                        scroll2Hour = endTime.hour
+                        scroll2Hour = startTime.hour
                         
-                        withAnimation {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                withAnimation {
-                                    rows.append(.init(
-                                        id: UUID().uuidString,
-                                        startTime: startTime,
-                                        endTime: endTime,
-                                        title: "log-\(rows.count)",
-                                        color: .init(
-                                            uiColor: .init(
-                                                red: .random(in: 0...1),
-                                                green: .random(in: 0...1),
-                                                blue: .random(in: 0...1),
-                                                alpha: .random(in: 0...1)
-                                            )
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation {
+                                rows.append(.init(
+                                    id: UUID().uuidString,
+                                    startTime: startTime,
+                                    endTime: endTime,
+                                    title: "log-\(rows.count)",
+                                    color: .init(
+                                        uiColor: .init(
+                                            red: .random(in: 0...1),
+                                            green: .random(in: 0...1),
+                                            blue: .random(in: 0...1),
+                                            alpha: .random(in: 0...1)
                                         )
-                                    ))
-                                }
+                                    )
+                                ))
                             }
                         }
                     }
