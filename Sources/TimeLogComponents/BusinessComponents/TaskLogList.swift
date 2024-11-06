@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import IdentifiedCollections
 
 public struct TaskLogList {
     static let BottomId = "bottom"
@@ -13,78 +14,55 @@ public struct TaskLogList {
 
 extension TaskLogList {
     public struct MainView<Header: View>: View {
-        let rows: [TaskLogCellViewState]
+        let day: Date
+        let rows: IdentifiedArrayOf<TimeLine.CardState>
+        let timeLineStateRows: [TimeLine.TimeLineState]
         let disableTransition: Bool
-        let scrollToBottom: Bool
+        let latestEndTime: Date?
         let header: () -> Header
+        let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         let onCellTapped: (TimeLine.CardState) -> Void
         
         public init(
-            rows: [TaskLogList.TaskLogCellViewState],
+            day: Date,
+            rows: IdentifiedArrayOf<TimeLine.CardState>,
             disableTransition: Bool,
-            scrollToBottom: Bool = false,
+            latestEndTime: Date? = nil,
             header: @escaping () -> Header,
+            selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void,
             onCellTapped: @escaping (TimeLine.CardState) -> Void
         ) {
+            self.day = day
             self.rows = rows
             self.disableTransition = disableTransition
-            self.scrollToBottom = scrollToBottom
+            self.latestEndTime = latestEndTime
             self.header = header
+            self.selectAction = selectAction
             self.onCellTapped = onCellTapped
+            
+            let start = day.todayStartPoint
+            let end = day.todayEndPoint
+            self.timeLineStateRows = rows.map({$0.toTimeLineState(start: start, end: end)})
         }
         
         public var body: some View {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    header()
-                    
-                    if rows.isEmpty {
-                        self.EmptyRowView
-                    } else {
-                        LazyVStack(alignment: .leading) {
-                            ForEach(rows) { taskLogState in
-                                if let timeLineState = taskLogState.timeLineState {
-                                    TimeLine(timeLineState)
-                                        .id(timeLineState.id)
-                                        .onTapGesture {
-                                            onCellTapped(timeLineState)
-                                        }
-                                        .transition(
-                                            disableTransition
-                                                ? .identity
-                                                : .asymmetric(
-                                                    insertion: .move(edge: .trailing)
-                                                        .combined(
-                                                            with: .scale(scale: 0.1).animation(.bouncy)
-                                                        ),
-                                                    removal: .opacity
-                                                )
-                                        )
-                                    
-                                    HStack {
-                                        TLLine.Vertical()
-                                            .frame(height: TLLine.EndTimeMinHeight)
-                                        Spacer()
-                                    }.padding(.leading, 25)
-                                }
-                                
-                                if let dashedLineState = taskLogState.dashedLineState {
-                                    TLLine.WithDate(date: dashedLineState.date)
-                                }
-                            }
-                        }
+            TimeLine.GridBGWithActive(
+                oneMinuteHeight: 1.2,
+                items: self.timeLineStateRows,
+                latestHour: latestEndTime?.hour,
+                disableTransition: disableTransition,
+                header: header,
+                content: { id, height in
+                    if let state = rows[id: id] {
+                        TimeLine.CardWithTag(state, height: height)
+                            .onTapGesture(perform: {
+                                onCellTapped(state)
+                            })
+                            .padding(.leading, 2)
                     }
-                    
-                    HStack {}.frame(height: 60)
-                        .background(.clear)
-                        .id(TaskLogList.BottomId)
-                }
-                .onChange(of: scrollToBottom) { oldValue, newValue in
-                    withAnimation {
-                        proxy.scrollTo(TaskLogList.BottomId, anchor: .bottom)
-                    }
-                }
-            }
+                },
+                selectAction: self.selectAction
+            )
         }
         
         @ViewBuilder
@@ -106,123 +84,93 @@ extension TaskLogList {
     }
 }
 
-extension TaskLogList {
-    public enum TaskLogCellViewState: Equatable, Identifiable {
-        public struct DashedLineState: Equatable {
-            private static let dateFormatter = {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "YYYY年MM月dd日"
-                return formatter
-            }()
-            
-            let date: Date
-            let dateString: String
-            
-            public init(_ date: Date) {
-                self.date = date
-                self.dateString = Self.dateFormatter.string(from: date)
-            }
-        }
-        
-        case TimeLine(TimeLine.CardState)
-        case DashedLine(DashedLineState)
-        
-        public var id: String {
-            switch self {
-            case .DashedLine(let state):
-                return "DashedLine_\(state.dateString)"
-            case .TimeLine(let state):
-                return "TimeLine-\(state.id)"
-            }
-        }
-        
-        public var timeLineState: TimeLine.CardState? {
-            switch self {
-            case .TimeLine(let timeLineState):
-                return timeLineState
-            default:
-                return nil
-            }
-        }
-        
-        public var dashedLineState: DashedLineState? {
-            switch self {
-            case .DashedLine(let dashedLineState):
-                return dashedLineState
-            default:
-                return nil
-            }
-        }
-    }
-}
-
 #Preview("正常") {
-    TaskLogList.MainView(rows: [
-        .DashedLine(.init(.now)),
-        .TimeLine(.init(
+    var tasks: [TimeLine.CardState] = Array(stride(from: 5, to: 61, by: 5)).reduce(into: []) { partialResult, duration in
+        var startTime: Date
+        if let last = partialResult.last {
+            startTime = last.endTime.addingTimeInterval(5 * 60)
+        } else {
+            startTime = .now.todayStartPoint
+        }
+        
+        partialResult.append(.init(
             id: UUID().uuidString,
-            startTime: .now.addingTimeInterval(-600),
-            endTime: .now.addingTimeInterval(-180) ,
-            title: "已结束任务",
-            color: .blue
-        )),
-        .TimeLine(.init(
-            id: UUID().uuidString,
-            startTime: .now.addingTimeInterval(-600),
-            endTime: .now.addingTimeInterval(-180) ,
-            title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
-            color: .blue
-        )),
-        .TimeLine(.init(
-            id: UUID().uuidString,
-            startTime: .now,
-            title: "未结束任务",
+            startTime: startTime,
+            endTime: startTime.addingTimeInterval(duration * 60),
+            title: "\(duration) min",
             color: .blue
         ))
-    ], disableTransition: false, header: {
-        Text("Header")
-            .font(.title)
-    }) { cell in
+    }
+    
+    tasks.append(.init(
+        id: UUID().uuidString,
+        startTime: .now.todayStartPoint.addingTimeInterval(60 * 60 * 8),
+        endTime: .now.todayStartPoint.addingTimeInterval(60 * 60 * 8 + 60 * 5),
+        title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
+        color: .red
+    ))
+    let rows: IdentifiedArrayOf<TimeLine.CardState> = .init(uniqueElements: tasks)
+    
+    return TaskLogList.MainView(
+        day: .now.todayStartPoint,
+        rows: rows,
+        disableTransition: false,
+        header: {
+            Text("Header")
+                .font(.title)
+        }
+    ) { startHour, startMinute, endHour, endMinute in
+        print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
+    } onCellTapped: { cell in
         print("cell tapped: \(cell.id)")
     }
 }
 
 #Preview("无数据") {
-    TaskLogList.MainView(rows: [], disableTransition: false, header: {
-        Text("Header")
-            .font(.title)
-    }) { cell in
+    TaskLogList.MainView(
+        day: .now, 
+        rows: [],
+        disableTransition: false,
+        header: {
+            Text("Header")
+                .font(.title)
+        }
+    ) { startHour, startMinute, endHour, endMinute in
+        print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
+    } onCellTapped: { cell in
         print("cell tapped: \(cell.id)")
     }
 }
 
 #Preview("动态") {
     struct Playground: View {
-        @State private var rows: [TaskLogList.TaskLogCellViewState] = [
-            .TimeLine(.init(
+        @State private var rows: IdentifiedArrayOf<TimeLine.CardState> = .init(uniqueElements: [
+            .init(
                 id: UUID().uuidString,
-                startTime: .now.addingTimeInterval(-600),
-                endTime: .now.addingTimeInterval(-180) ,
-                title: "已结束任务",
-                color: .blue
-            ))
-        ]
+                startTime: .now.todayStartPoint,
+                endTime: .now.todayStartPoint.addingTimeInterval(TimeInterval(30 * 60)),
+                title: "初始任务",
+                color: .red
+            )
+        ])
         @State private var disableTransition = false
-        @State private var scrollToBottom = false
+        @State private var latestEndTime: Date? = nil
         
         var body: some View {
             VStack {
                 HStack {
                     Button("+") {
+                        let startTime = rows.elements.last?.endTime.addingTimeInterval(5 * 60) ?? .now.todayStartPoint
+                        let endTime = startTime.addingTimeInterval(30 * 60)
+                        latestEndTime = endTime
+                        
                         withAnimation {
-                            scrollToBottom.toggle()
-                            
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 withAnimation {
-                                    rows.append(.TimeLine(.init(
+                                    rows.append(.init(
                                         id: UUID().uuidString,
-                                        startTime: .now,
-                                        endTime: .now,
+                                        startTime: startTime,
+                                        endTime: endTime,
                                         title: "log-\(rows.count)",
                                         color: .init(
                                             uiColor: .init(
@@ -232,8 +180,7 @@ extension TaskLogList {
                                                 alpha: .random(in: 0...1)
                                             )
                                         )
-                                    )))
-                                    scrollToBottom.toggle()
+                                    ))
                                 }
                             }
                         }
@@ -241,7 +188,7 @@ extension TaskLogList {
                     
                     Button("-") {
                         withAnimation {
-                            _ = rows.removeLast()
+//                            rows.removeLast()
                         }
                     }
                     
@@ -249,18 +196,20 @@ extension TaskLogList {
                 }.padding()
                 
                 TaskLogList.MainView(
+                    day: .now,
                     rows: rows,
                     disableTransition: disableTransition,
-                    scrollToBottom: scrollToBottom,
+                    latestEndTime: latestEndTime,
                     header: {
                         Text("Header")
                             .font(.title)
                     }
-                ) { _ in
-                    
+                ) { startHour, startMinute, endHour, endMinute in
+                    print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
+                } onCellTapped: { cell in
+                    print("cell tapped: \(cell.id)")
                 }
             }
-            
         }
     }
     
@@ -269,11 +218,11 @@ extension TaskLogList {
 
 #Preview("替换") {
     struct Playground: View {
-        @State private var rows: [TaskLogList.TaskLogCellViewState] = []
-        let first: TaskLogList.TaskLogCellViewState = .TimeLine(.init(
+        @State private var rows: IdentifiedArrayOf<TimeLine.CardState> = .init()
+        let first: TimeLine.CardState = .init(
             id: UUID().uuidString,
-            startTime: .now,
-            endTime: .now,
+            startTime: .now.todayStartPoint,
+            endTime: .now.todayStartPoint.addingTimeInterval(30 * 60),
             title: "log-first",
             color: .init(
                 uiColor: .init(
@@ -283,11 +232,11 @@ extension TaskLogList {
                     alpha: .random(in: 0...1)
                 )
             )
-        ))
-        let second: TaskLogList.TaskLogCellViewState = .TimeLine(.init(
+        )
+        let second: TimeLine.CardState = .init(
             id: UUID().uuidString,
-            startTime: .now,
-            endTime: .now,
+            startTime: .now.todayStartPoint.addingTimeInterval(60 * 60),
+            endTime: .now.todayStartPoint.addingTimeInterval(120 * 60),
             title: "log-second",
             color: .init(
                 uiColor: .init(
@@ -297,31 +246,34 @@ extension TaskLogList {
                     alpha: .random(in: 0...1)
                 )
             )
-        ))
+        )
         
         var body: some View {
             VStack {
                 Button("toggle") {
                     withAnimation {
                         if rows.isEmpty {
-                            rows = [first]
+                            rows = .init(uniqueElements: [first])
                         } else if rows.count == 1 {
-                            rows = [first, second]
+                            rows = .init(uniqueElements: [first, second])
                         } else {
-                            rows = []
+                            rows = .init()
                         }
                     }
                 }
                 
                 TaskLogList.MainView(
+                    day: .now,
                     rows: rows,
                     disableTransition: false,
                     header: {
                         Text("Header")
                             .font(.title)
                     }
-                ) { _ in
-                    
+                ) { startHour, startMinute, endHour, endMinute in
+                    print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
+                } onCellTapped: { cell in
+                    print("cell tapped: \(cell.id)")
                 }
             }
         }

@@ -11,30 +11,38 @@ extension TimeLine {
     struct Card<TagView: View>: View {
         let title: String
         let color: Color
+        let height: CGFloat?
+        let fontValue: Font?
         let tagView: () -> TagView
         
         init(
             title: String,
             color: Color,
+            height: CGFloat? = nil,
+            fontValue: Font? = nil,
             @ViewBuilder tagView: @escaping () -> TagView
         ) {
             self.title = title
             self.color = color
+            self.height = height
+            self.fontValue = fontValue
             self.tagView = tagView
         }
         
         var body: some View {
             HStack {
                 Text(title)
-                    .padding(.vertical)
-                    .padding(.leading)
+                    .font(fontValue)
+                    .padding(.leading, 5)
                 
                 Spacer()
                 
                 tagView()
+                    .opacity(0.8)
                     .padding(.trailing, 5)
             }
             .padding(.leading, 5)
+            .frame(height: height)
             .overlay(content: {
                 HStack {
                     Rectangle()
@@ -43,7 +51,7 @@ extension TimeLine {
                     Spacer()
                 }
             })
-            .background(.ultraThinMaterial)
+            .background(.ultraThinMaterial.opacity(0.8))
             .clipShape(RoundedRectangle(cornerRadius: 5))
         }
     }
@@ -60,49 +68,76 @@ extension TimeLine {
         }()
         
         let state: CardState
-        private let durationString: String?
+        let height: CGFloat?
+        let fontValue: Font
+        let tagFontValue: Font
+        private let durationString: String
         
-        public init(_ state: CardState) {
+        public init(
+            _ state: CardState,
+            height: CGFloat? = nil
+        ) {
             self.state = state
+            self.height = height
             
-            if let endTime = state.endTime {
-                self.durationString = Self.durationFormatter.string(
-                    from: endTime.timeIntervalSince(state.startTime)
-                ) ?? nil
+            if let height {
+                self.fontValue = Self.getFontFromHeight(height)
+                self.tagFontValue = Self.getTagFontFromHeight(height)
             } else {
-                self.durationString = nil
+                self.fontValue = .body
+                self.tagFontValue = .caption
             }
+            
+            self.durationString = Self.durationFormatter.string(
+                from: state.endTime.timeIntervalSince(state.startTime)
+            ) ?? ""
         }
         
         var body: some View {
             TimeLine.Card(
                 title: state.title,
-                color: state.color
+                color: state.color,
+                height: height,
+                fontValue: fontValue
             ) {
-                Group {
-                    if let durationString {
-                        Label(durationString, systemImage: "clock.badge.checkmark")
-                    } else {
-                        Label(
-                            title: {
-                                Text(
-                                    timerInterval: state.startTime...Date(
-                                        timeInterval: 60 * 60 * 24 * 30,
-                                        since: .now
-                                    ),
-                                    countsDown: false
-                                )
-                                .bold()
-                            },
-                            icon: {
-                                Image(systemName: "clock")
-                            }
-                        )
-                    }
-                }
-                .labelStyle(.roundedCornerTag)
-                .font(.caption)
+                Label(durationString, systemImage: "clock.badge.checkmark")
+                    .font(tagFontValue)
+                    .labelStyle(.roundedCornerTag)
             }
+        }
+    }
+}
+
+extension TimeLine.CardWithTag {
+    static func getFontFromHeight(_ height: CGFloat) -> Font {
+        if height <= 6 {
+            return .system(size: 6)
+        } else if height <= 10 {
+            return .system(size: 7)
+        } else if height <= 15 {
+            return .system(size: 9)
+        } else if height <= 30 {
+            return .caption2
+        } else if height <= 40 {
+            return .caption
+        } else if height <= 50 {
+            return .footnote
+        } else {
+            return .body
+        }
+    }
+    
+    static func getTagFontFromHeight(_ height: CGFloat) -> Font {
+        if height <= 6 {
+            return .system(size: 6)
+        } else if height <= 10 {
+            return .system(size: 7)
+        } else if height <= 15 {
+            return .system(size: 9)
+        } else if height <= 30 {
+            return .caption2
+        } else {
+            return .caption
         }
     }
 }
@@ -119,23 +154,56 @@ extension TimeLine {
             id: UUID().uuidString,
             startTime: .now.addingTimeInterval(-600),
             endTime: .now.addingTimeInterval(-180),
-            title: "超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title超长Title",
-            color: .yellow
-        )).listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-        
-        TimeLine.CardWithTag(.init(
-            id: UUID().uuidString,
-            startTime: .now.addingTimeInterval(-600),
-            endTime: .now.addingTimeInterval(-180),
-            title: "正常title",
+            title: "默认值",
             color: .yellow
         ))
         
         TimeLine.CardWithTag(.init(
             id: UUID().uuidString,
             startTime: .now,
-            title: "正常title",
+            endTime: .now,
+            title: "height 6 高度中文",
             color: .yellow
-        ))
+        ), height: 6)
+        
+        TimeLine.CardWithTag(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            endTime: .now,
+            title: "height 7 高度中文",
+            color: .yellow
+        ), height: 7)
+        
+        TimeLine.CardWithTag(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            endTime: .now,
+            title: "height 11 高度中文",
+            color: .yellow
+        ), height: 11)
+        
+        TimeLine.CardWithTag(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            endTime: .now,
+            title: "height 31 高度中文",
+            color: .yellow
+        ), height: 31)
+        
+        TimeLine.CardWithTag(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            endTime: .now,
+            title: "height 41 高度中文",
+            color: .yellow
+        ), height: 41)
+        
+        TimeLine.CardWithTag(.init(
+            id: UUID().uuidString,
+            startTime: .now,
+            endTime: .now,
+            title: "height 51 高度中文",
+            color: .yellow
+        ), height: 51)
     }.listStyle(.plain)
 }

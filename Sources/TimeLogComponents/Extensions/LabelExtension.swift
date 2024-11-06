@@ -9,12 +9,9 @@ import Foundation
 import SwiftUI
 
 struct RoundedCornerLabelStyle: LabelStyle {
-    @ScaledMetric(relativeTo: .footnote) private var iconWidth = 14.0
-    
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 3) {
             configuration.icon
-                .frame(width: iconWidth)
             
             configuration.title
         }

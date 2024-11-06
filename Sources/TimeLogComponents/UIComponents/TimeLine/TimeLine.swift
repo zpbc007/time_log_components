@@ -13,7 +13,7 @@ public struct TimeLine: View {
     public struct CardState: Equatable, Identifiable {
         public let id: String
         public let startTime: Date
-        public let endTime: Date?
+        public let endTime: Date
         public let title: String
         public let color: Color
         public let comment: String?
@@ -22,7 +22,7 @@ public struct TimeLine: View {
         public init(
             id: String,
             startTime: Date,
-            endTime: Date? = nil,
+            endTime: Date,
             title: String,
             color: Color,
             comment: String? = nil,
@@ -35,6 +35,14 @@ public struct TimeLine: View {
             self.color = color
             self.comment = comment
             self.showEndTime = showEndTime
+        }
+        
+        func toTimeLineState(start: Date, end: Date) -> TimeLine.TimeLineState {
+            .init(
+                id: self.id,
+                startMinute: start.minutesBetween(to: self.startTime < start ? start : self.startTime),
+                endMinute: start.minutesBetween(to: self.endTime > end ? end : self.endTime)
+            )
         }
     }
 
@@ -49,17 +57,17 @@ public struct TimeLine: View {
     private let durationString: String?
     let state: CardState
     
-    public init(_ state: CardState) {
-        self.state = state
-        
-        if let endTime = state.endTime {
-            self.durationString = Self.durationFormatter.string(
-                from: endTime.timeIntervalSince(state.startTime)
-            ) ?? nil
-        } else {
-            self.durationString = nil
-        }
-    }
+//    public init(_ state: CardState) {
+//        self.state = state
+//        
+//        if let endTime = state.endTime {
+//            self.durationString = Self.durationFormatter.string(
+//                from: endTime.timeIntervalSince(state.startTime)
+//            ) ?? nil
+//        } else {
+//            self.durationString = nil
+//        }
+//    }
     
     public var body: some View {
         HStack {
@@ -68,34 +76,34 @@ public struct TimeLine: View {
                 endTime: state.showEndTime ? state.endTime : nil
             )
             
-            Card(
-                title: state.title,
-                color: state.color
-            ) {
-                Group {
-                    if let durationString {
-                        Label(durationString, systemImage: "clock.badge.checkmark")
-                    } else {
-                        Label(
-                            title: {
-                                Text(
-                                    timerInterval: state.startTime...Date(
-                                        timeInterval: 60 * 60 * 24 * 30,
-                                        since: .now
-                                    ),
-                                    countsDown: false
-                                )
-                                .bold()
-                            },
-                            icon: {
-                                Image(systemName: "clock")
-                            }
-                        )
-                    }
-                }
-                .labelStyle(.roundedCornerTag)
-                .font(.caption)
-            }
+//            Card(
+//                title: state.title,
+//                color: state.color,
+//            ) {
+//                Group {
+//                    if let durationString {
+//                        Label(durationString, systemImage: "clock.badge.checkmark")
+//                    } else {
+//                        Label(
+//                            title: {
+//                                Text(
+//                                    timerInterval: state.startTime...Date(
+//                                        timeInterval: 60 * 60 * 24 * 30,
+//                                        since: .now
+//                                    ),
+//                                    countsDown: false
+//                                )
+//                                .bold()
+//                            },
+//                            icon: {
+//                                Image(systemName: "clock")
+//                            }
+//                        )
+//                    }
+//                }
+//                .labelStyle(.roundedCornerTag)
+//                .font(.caption)
+//            }
         }
     }
 }
@@ -436,7 +444,7 @@ extension TimeLine {
 
 extension TimeLine {
     struct TimeLineState: Equatable, Identifiable {
-        let id: UUID
+        let id: String
         let startMinute: Int
         let endMinute: Int
         
@@ -451,7 +459,7 @@ extension TimeLine {
     }
     
     struct TimeLineStateWithAcc: Equatable, Identifiable {
-        let id: UUID
+        let id: String
         let prevMinute: Int
         let startMinute: Int
         let endMinute: Int
@@ -482,23 +490,32 @@ extension [TimeLine.TimeLineState] {
 }
 
 extension TimeLine {
-    struct GridBGWithActive<Content: View>: View {
+    struct GridBGWithActive<Content: View, Header: View>: View {
         let oneMinuteHeight: CGFloat
         let items: [TimeLine.TimeLineStateWithAcc]
-        let content: (_ id: UUID, _ height: CGFloat) -> Content
+        let latestHour: Int?
+        let disableTransition: Bool
+        let header: () -> Header
+        let content: (_ id: TimeLine.TimeLineStateWithAcc.ID, _ height: CGFloat) -> Content
         let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         
         @State private var scrollOffset: CGFloat = 0
         @State private var scrollViewHeight: CGFloat = 0
         
         init(
-            oneMinuteHeight: CGFloat = 2,
+            oneMinuteHeight: CGFloat = 3,
             items: [TimeLine.TimeLineState],
-            @ViewBuilder content: @escaping (_ id: UUID, _ height: CGFloat) -> Content,
+            latestHour: Int? = nil,
+            disableTransition: Bool = false,
+            @ViewBuilder header: @escaping () -> Header,
+            @ViewBuilder content: @escaping (_ id: TimeLine.TimeLineStateWithAcc.ID, _ height: CGFloat) -> Content,
             selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         ) {
             self.oneMinuteHeight = oneMinuteHeight
             self.items = items.toAcc()
+            self.latestHour = latestHour
+            self.disableTransition = disableTransition
+            self.header = header
             self.content = content
             self.selectAction = selectAction
         }
@@ -506,6 +523,8 @@ extension TimeLine {
         var body: some View {
             ScrollViewReader(content: { proxy in
                 ScrollView {
+                    header()
+                    
                     ZStack(alignment: .top) {
                         GridBG(
                             oneMinuteHeight: oneMinuteHeight,
@@ -528,7 +547,14 @@ extension TimeLine {
                     perform: { value in
                         scrollOffset = value
                     }
-                )
+                ).onChange(of: latestHour) { _, newValue in
+                    guard let newValue else {
+                        return
+                    }
+                    withAnimation {
+                        proxy.scrollTo(newValue)
+                    }
+                }
             })
             .contentSize()
             .onPreferenceChange(SizePreferenceKey.self, perform: { value in
@@ -546,6 +572,17 @@ extension TimeLine {
                     ForEach(items) { item in
                         content(item.id, item.totalMinutes * oneMinuteHeight)
                             .offset(y: item.offsetMinutes * oneMinuteHeight)
+                            .transition(
+                                disableTransition
+                                    ? .identity
+                                    : .asymmetric(
+                                        insertion: .move(edge: .trailing)
+                                            .combined(
+                                                with: .scale(scale: 0.1).animation(.bouncy)
+                                            ),
+                                        removal: .opacity
+                                    )
+                            )
                     }
                 }
             }
@@ -554,33 +591,55 @@ extension TimeLine {
 }
 
 #Preview("GridBGWithActive") {
-    VStack {
-        Text("top")
-            .frame(height: 100)
+    struct Playground: View {
+        @State var latestHour: Int? = nil
+        let items: [TimeLine.TimeLineState] = [
+            .init(id: UUID().uuidString, startMinute: 0, endMinute: 30),
+            .init(id: UUID().uuidString, startMinute: 35, endMinute: 40),
+            .init(id: UUID().uuidString, startMinute: 60, endMinute: 120)
+        ]
         
-        TimeLine.GridBGWithActive(
-            oneMinuteHeight: 5,
-            items: [
-                .init(id: .init(), startMinute: 0, endMinute: 30),
-                .init(id: .init(), startMinute: 35, endMinute: 40),
-                .init(id: .init(), startMinute: 60, endMinute: 120)
-            ]
-        ) { (id, height) in
-            HStack {
-                Text("id: \(id)")
+        var body: some View {
+            VStack {
+                HStack {
+                    Text("top")
+                        .frame(height: 100)
+                    Spacer()
+                    Button("scroll to 21:00") {
+                        latestHour = 21
+                    }
+                    Button("scroll to 00:00") {
+                        latestHour = 0
+                    }
+                }.padding(.horizontal)
                 
-                Spacer()
+                
+                TimeLine.GridBGWithActive(
+                    oneMinuteHeight: 5,
+                    items: items,
+                    latestHour: latestHour
+                ) {
+                    Text("Header")
+                } content: { (id, height) in
+                    HStack {
+                        Text("id: \(id)")
+                        
+                        Spacer()
+                    }
+                    .frame(height: height)
+                    .background(.green.opacity(0.4))
+                    .onTapGesture {
+                        print("tap id: \(id)")
+                    }
+                } selectAction: { startHour, startMinute, endHour, endMinute in
+                    print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
+                }
+                
+                Text("bottom")
+                    .frame(height: 100)
             }
-            .frame(height: height)
-            .background(.green.opacity(0.4))
-            .onTapGesture {
-                print("tap id: \(id)")
-            }
-        } selectAction: { startHour, startMinute, endHour, endMinute in
-            print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
         }
-        
-        Text("bottom")
-            .frame(height: 100)
     }
+    
+    return Playground()
 }

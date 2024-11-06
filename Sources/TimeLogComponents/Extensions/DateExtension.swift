@@ -159,4 +159,13 @@ extension Date {
         let components = Calendar.current.dateComponents([.day], from: from, to: to)
         return components.day ?? 0
     }
+    
+    func minutesBetween(to: Date) -> Int {
+        let components = Calendar.current.dateComponents([.minute], from: self, to: to)
+        return components.minute ?? 0
+    }
+    
+    var hour: Int {
+        Calendar.current.component(.hour, from: self)
+    }
 }
