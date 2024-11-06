@@ -18,16 +18,16 @@ extension TaskLogList {
         let rows: IdentifiedArrayOf<TimeLine.CardState>
         let timeLineStateRows: [TimeLine.TimeLineState]
         let disableTransition: Bool
-        let latestEndTime: Date?
         let header: () -> Header
         let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         let onCellTapped: (TimeLine.CardState) -> Void
+        @Binding var scroll2Hour: Int?
         
         public init(
             day: Date,
             rows: IdentifiedArrayOf<TimeLine.CardState>,
             disableTransition: Bool,
-            latestEndTime: Date? = nil,
+            scroll2Hour: Binding<Int?>,
             header: @escaping () -> Header,
             selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void,
             onCellTapped: @escaping (TimeLine.CardState) -> Void
@@ -35,7 +35,7 @@ extension TaskLogList {
             self.day = day
             self.rows = rows
             self.disableTransition = disableTransition
-            self.latestEndTime = latestEndTime
+            self._scroll2Hour = scroll2Hour
             self.header = header
             self.selectAction = selectAction
             self.onCellTapped = onCellTapped
@@ -49,7 +49,7 @@ extension TaskLogList {
             TimeLine.GridBGWithActive(
                 oneMinuteHeight: 1.2,
                 items: self.timeLineStateRows,
-                latestHour: latestEndTime?.hour,
+                scroll2Hour: $scroll2Hour,
                 disableTransition: disableTransition,
                 header: header,
                 content: { id, height in
@@ -63,23 +63,6 @@ extension TaskLogList {
                 },
                 selectAction: self.selectAction
             )
-        }
-        
-        @ViewBuilder
-        private var EmptyRowView: some View {
-            VStack {
-                Spacer()
-                
-                HStack(alignment: .center) {
-                    Spacer()
-                    
-                    Text("无记录数据")
-                        
-                    Spacer()
-                }
-                
-                Spacer()
-            }
         }
     }
 }
@@ -115,6 +98,7 @@ extension TaskLogList {
         day: .now.todayStartPoint,
         rows: rows,
         disableTransition: false,
+        scroll2Hour: .constant(nil),
         header: {
             Text("Header")
                 .font(.title)
@@ -131,6 +115,7 @@ extension TaskLogList {
         day: .now, 
         rows: [],
         disableTransition: false,
+        scroll2Hour: .constant(nil),
         header: {
             Text("Header")
                 .font(.title)
@@ -154,7 +139,7 @@ extension TaskLogList {
             )
         ])
         @State private var disableTransition = false
-        @State private var latestEndTime: Date? = nil
+        @State private var scroll2Hour: Int? = nil
         
         var body: some View {
             VStack {
@@ -162,7 +147,7 @@ extension TaskLogList {
                     Button("+") {
                         let startTime = rows.elements.last?.endTime.addingTimeInterval(5 * 60) ?? .now.todayStartPoint
                         let endTime = startTime.addingTimeInterval(30 * 60)
-                        latestEndTime = endTime
+                        scroll2Hour = endTime.hour
                         
                         withAnimation {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -199,7 +184,7 @@ extension TaskLogList {
                     day: .now,
                     rows: rows,
                     disableTransition: disableTransition,
-                    latestEndTime: latestEndTime,
+                    scroll2Hour: $scroll2Hour,
                     header: {
                         Text("Header")
                             .font(.title)
@@ -266,6 +251,7 @@ extension TaskLogList {
                     day: .now,
                     rows: rows,
                     disableTransition: false,
+                    scroll2Hour: .constant(nil),
                     header: {
                         Text("Header")
                             .font(.title)

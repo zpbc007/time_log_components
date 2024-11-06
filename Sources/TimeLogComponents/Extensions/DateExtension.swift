@@ -115,6 +115,10 @@ extension Date {
     public var year: Int {
         Calendar.current.component(.year, from: self)
     }
+    
+    public var hour: Int {
+        Calendar.current.component(.hour, from: self)
+    }
 }
 
 // MARK: - 内部使用
@@ -163,9 +167,5 @@ extension Date {
     func minutesBetween(to: Date) -> Int {
         let components = Calendar.current.dateComponents([.minute], from: self, to: to)
         return components.minute ?? 0
-    }
-    
-    var hour: Int {
-        Calendar.current.component(.hour, from: self)
     }
 }

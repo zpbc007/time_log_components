@@ -493,11 +493,11 @@ extension TimeLine {
     struct GridBGWithActive<Content: View, Header: View>: View {
         let oneMinuteHeight: CGFloat
         let items: [TimeLine.TimeLineStateWithAcc]
-        let latestHour: Int?
         let disableTransition: Bool
         let header: () -> Header
         let content: (_ id: TimeLine.TimeLineStateWithAcc.ID, _ height: CGFloat) -> Content
         let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
+        @Binding var scroll2Hour: Int?
         
         @State private var scrollOffset: CGFloat = 0
         @State private var scrollViewHeight: CGFloat = 0
@@ -505,7 +505,7 @@ extension TimeLine {
         init(
             oneMinuteHeight: CGFloat = 3,
             items: [TimeLine.TimeLineState],
-            latestHour: Int? = nil,
+            scroll2Hour: Binding<Int?>,
             disableTransition: Bool = false,
             @ViewBuilder header: @escaping () -> Header,
             @ViewBuilder content: @escaping (_ id: TimeLine.TimeLineStateWithAcc.ID, _ height: CGFloat) -> Content,
@@ -513,7 +513,7 @@ extension TimeLine {
         ) {
             self.oneMinuteHeight = oneMinuteHeight
             self.items = items.toAcc()
-            self.latestHour = latestHour
+            self._scroll2Hour = scroll2Hour
             self.disableTransition = disableTransition
             self.header = header
             self.content = content
@@ -547,12 +547,13 @@ extension TimeLine {
                     perform: { value in
                         scrollOffset = value
                     }
-                ).onChange(of: latestHour) { _, newValue in
+                ).onChange(of: scroll2Hour) { _, newValue in
                     guard let newValue else {
                         return
                     }
                     withAnimation {
                         proxy.scrollTo(newValue)
+                        scroll2Hour = nil
                     }
                 }
             })
@@ -592,7 +593,7 @@ extension TimeLine {
 
 #Preview("GridBGWithActive") {
     struct Playground: View {
-        @State var latestHour: Int? = nil
+        @State var scroll2Hour: Int? = nil
         let items: [TimeLine.TimeLineState] = [
             .init(id: UUID().uuidString, startMinute: 0, endMinute: 30),
             .init(id: UUID().uuidString, startMinute: 35, endMinute: 40),
@@ -606,10 +607,10 @@ extension TimeLine {
                         .frame(height: 100)
                     Spacer()
                     Button("scroll to 21:00") {
-                        latestHour = 21
+                        scroll2Hour = 21
                     }
                     Button("scroll to 00:00") {
-                        latestHour = 0
+                        scroll2Hour = 0
                     }
                 }.padding(.horizontal)
                 
@@ -617,7 +618,7 @@ extension TimeLine {
                 TimeLine.GridBGWithActive(
                     oneMinuteHeight: 5,
                     items: items,
-                    latestHour: latestHour
+                    scroll2Hour: $scroll2Hour
                 ) {
                     Text("Header")
                 } content: { (id, height) in
