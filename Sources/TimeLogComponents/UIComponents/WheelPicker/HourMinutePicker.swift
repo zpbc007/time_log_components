@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HourMinutePicker: UIViewRepresentable {
-    let selection: Binding<PickerValue>
+    let selection: Binding<Date>
     
     func makeUIView(context: Context) -> UIPickerView {
         let pickerView = UIPickerView(frame: .zero)
@@ -25,11 +25,11 @@ struct HourMinutePicker: UIViewRepresentable {
     }
     
     final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
-        let selection: Binding<PickerValue>
+        let selection: Binding<Date>
         let hours: [Int]
         let minutes: [Int]
         
-        init(selection: Binding<PickerValue>) {
+        init(selection: Binding<Date>) {
             self.selection = selection
             self.hours = Array(stride(from: 0, through: 23, by: 1))
             self.minutes = Array(stride(from: 0, through: 55, by: 5))
@@ -54,24 +54,23 @@ struct HourMinutePicker: UIViewRepresentable {
         func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
             let hourIndex = pickerView.selectedRow(inComponent: 0)
             let minuteIndex = pickerView.selectedRow(inComponent: 1)
-            selection.wrappedValue = .init(hour: hours[hourIndex], minute: minutes[minuteIndex])
+            
+            selection.wrappedValue = selection.wrappedValue
+                .setHourAndMinute(hour: hours[hourIndex], minute: minutes[minuteIndex])
         }
-    }
-}
-
-extension HourMinutePicker {
-    struct PickerValue: Equatable {
-        let hour: Int
-        let minute: Int
     }
 }
 
 #Preview {
     struct Playground: View {
-        @State var selected: HourMinutePicker.PickerValue = .init(hour: 0, minute: 0)
+        @State var selected: Date = .now
         
         var body: some View {
-            HourMinutePicker(selection: $selected)
+            VStack {
+                Text("selection: \(selected)")
+                HourMinutePicker(selection: $selected)
+            }
+            
         }
     }
     

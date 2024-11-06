@@ -108,6 +108,23 @@ extension Date {
         )!
     }
     
+    public func setDayInMinute(_ dayInMinute: Int) -> Date {
+        let hour = Int(floor(Double(dayInMinute / 60)))
+        let minute = dayInMinute % 60
+        
+        return setHourAndMinute(hour: hour, minute: minute)
+    }
+    
+    public func setHourAndMinute(hour: Int, minute: Int) -> Date {
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: self)
+        
+        components.hour = hour
+        components.minute = minute
+        
+        return calendar.date(from: components) ?? self
+    }
+    
     public var month: Int {
         Calendar.current.component(.month, from: self)
     }
