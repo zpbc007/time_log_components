@@ -14,6 +14,8 @@ public struct TaskCommentEditor: View {
     let onSendButtonTapped: () -> Void
     let dismiss: () -> Void
     
+    @State private var bottomSize: CGSize = .zero
+    
     public init(
         fontColor: Color,
         activeFontColor: Color,
@@ -34,8 +36,8 @@ public struct TaskCommentEditor: View {
             dismiss: dismiss
         ) { size in
             VStack {
-                RichTextEditor(placeholder: "备注")
-                    .frame(maxHeight: 200)
+                RichTextEditor(placeholder: "备注", maxHeight: size.height - bottomSize.height)
+                    .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 10))
                 
                 HStack {
                     Spacer()
@@ -47,6 +49,10 @@ public struct TaskCommentEditor: View {
                         isValid: true
                     )
                 }
+                .contentSize()
+                .onPreferenceChange(SizePreferenceKey.self, perform: { value in
+                    bottomSize = value
+                })
                 .padding(.top)
             }.padding()
         }
