@@ -136,6 +136,10 @@ extension Date {
     public var hour: Int {
         Calendar.current.component(.hour, from: self)
     }
+    
+    public var minute: Int {
+        Calendar.current.component(.minute, from: self)
+    }
 }
 
 // MARK: - 内部使用
