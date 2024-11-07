@@ -52,6 +52,27 @@ public struct TaskLogEditor: View {
         startTime < endTime && selectedTaskName != nil
     }
     
+    private var durationString: String {
+        var hourDiff = endTime.hour - startTime.hour
+        var minuteDiff = endTime.minute - startTime.minute
+        // 避免分钟出现负数
+        if minuteDiff < 0 {
+            hourDiff -= 1
+            minuteDiff += 60
+        }
+        
+        var result: String = ""
+        
+        if hourDiff != 0 {
+            result += "\(hourDiff)小时"
+        }
+        if minuteDiff != 0 {
+            result += "\(minuteDiff)分钟"
+        }
+        
+        return result
+    }
+    
     public var body: some View {
         KeyboardEditor(
             bgColor: bgColor,
@@ -72,17 +93,7 @@ public struct TaskLogEditor: View {
                     .border(.black)
                 
                 VStack {
-                    HStack {
-                        Text("开始时间")
-                        Spacer()
-                        HourMinutePicker(selection: $startTime)
-                    }
-                    
-                    HStack {
-                        Text("结束时间")
-                        Spacer()
-                        HourMinutePicker(selection: $endTime)
-                    }
+                    self.timeSelector
                     
                     HStack {
                         Button(
@@ -104,14 +115,38 @@ public struct TaskLogEditor: View {
                             isValid: isValid
                         )
                     }
-                    .padding(.top)
                 }
                 .contentSize()
                 .onPreferenceChange(SizePreferenceKey.self, perform: { value in
                     bottomSize = value
                 })
-                
             }.padding()
+        }.onChange(of: startTime) { _, newValue in
+            if newValue < endTime {
+                return
+            }
+            
+            endTime = startTime.addingTimeInterval(30 * 60)
+        }.onChange(of: endTime) { _, newValue in
+            if startTime < newValue {
+                return
+            }
+            
+            startTime = endTime.addingTimeInterval(-30 * 60)
+        }
+    }
+    
+    @ViewBuilder
+    private var timeSelector: some View {
+        HStack {
+            Image(systemName: "clock")
+            HourMinutePicker(selection: $startTime)
+            Spacer()
+            Image(systemName: "arrow.right")
+            HourMinutePicker(selection: $endTime)
+            Text(self.durationString)
+                .foregroundStyle(.secondary)
+            Spacer()
         }
     }
 }
@@ -138,25 +173,43 @@ public struct TaskLogEditor: View {
                     showEditor.toggle()
                 }
                 
-                if showEditor {
-                    TaskLogEditor(
-                        fontColor: .primary,
-                        activeFontColor: .blue,
-                        bgColor: .white,
-                        selectedTaskName: nil,
-                        startTime: $startTime,
-                        endTime: $endTime
-                    ) {
-                        print("onSelectTaskButtonTapped")
-                    } onSendButtonTapped: {
-                        print("onSendButtonTapped")
-                    } dismiss: {
-                        showEditor = false
-                    } onDeleteButtonTapped: {
-                        print("delete")
-                    }
-                    .environmentObject(editorVM)
+//                if showEditor {
+//                    TaskLogEditor(
+//                        fontColor: .primary,
+//                        activeFontColor: .blue,
+//                        bgColor: .white,
+//                        selectedTaskName: nil,
+//                        startTime: $startTime,
+//                        endTime: $endTime
+//                    ) {
+//                        print("onSelectTaskButtonTapped")
+//                    } onSendButtonTapped: {
+//                        print("onSendButtonTapped")
+//                    } dismiss: {
+//                        showEditor = false
+//                    } onDeleteButtonTapped: {
+//                        print("delete")
+//                    }
+//                    .environmentObject(editorVM)
+//                }
+                
+                TaskLogEditor(
+                    fontColor: .primary,
+                    activeFontColor: .blue,
+                    bgColor: .white,
+                    selectedTaskName: nil,
+                    startTime: $startTime,
+                    endTime: $endTime
+                ) {
+                    print("onSelectTaskButtonTapped")
+                } onSendButtonTapped: {
+                    print("onSendButtonTapped")
+                } dismiss: {
+                    showEditor = false
+                } onDeleteButtonTapped: {
+                    print("delete")
                 }
+                .environmentObject(editorVM)
             }
             
         }
