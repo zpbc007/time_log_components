@@ -72,14 +72,17 @@ public struct TaskLogEditor: View {
                     .border(.black)
                 
                 VStack {
-                    DatePicker(
-                        "开始时间",
-                        selection: $startTime
-                    )
-                    DatePicker(
-                        "结束时间",
-                        selection: $endTime
-                    )
+                    HStack {
+                        Text("开始时间")
+                        Spacer()
+                        HourMinutePicker(selection: $startTime)
+                    }
+                    
+                    HStack {
+                        Text("结束时间")
+                        Spacer()
+                        HourMinutePicker(selection: $endTime)
+                    }
                     
                     HStack {
                         Button(
