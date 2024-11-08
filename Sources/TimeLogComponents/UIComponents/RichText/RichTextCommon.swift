@@ -138,6 +138,9 @@ extension RichTextCommon {
                 #editor .ql-editor {
                     padding: 10px;
                 }
+                #editor .ql-editor ol {
+                    padding-left: 0;
+                }
             </style>
             <script>
                 window.tl_editor_config = {
