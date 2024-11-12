@@ -480,10 +480,10 @@ extension TimeLine {
                             scrollViewProxy: proxy,
                             selectAction: selectAction
                         )
+                                                
+                        self.TimeLineContent
                         
                         Active(oneMinuteHeight: oneMinuteHeight, lineColor: activeLineColor)
-                        
-                        self.TimeLineContent
                     }.scrollOffset(
                         coordinateSpace: .named(TimeLine.GridBG.ScrollCoordinateSpaceName)
                     ).padding(.vertical, TimeLine.GridBG.ContainerVerticalPadding)
