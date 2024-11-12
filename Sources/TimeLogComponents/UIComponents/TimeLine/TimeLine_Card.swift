@@ -51,7 +51,7 @@ extension TimeLine {
                     Spacer()
                 }
             })
-            .background(.ultraThinMaterial.opacity(0.8))
+            .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 5))
         }
     }

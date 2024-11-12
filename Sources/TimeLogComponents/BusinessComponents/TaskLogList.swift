@@ -62,7 +62,7 @@ extension TaskLogList {
                             .onTapGesture(perform: {
                                 onCellTapped(state)
                             })
-                            .padding(.leading, 2)
+                            .padding(.horizontal, 5)
                     }
                 },
                 selectAction: self.selectAction
