@@ -229,6 +229,10 @@ extension TimeLine {
                     .offset(CGSize(width: 0, height: -10.0))
                 
                 HStack(alignment: .top, spacing: 0) {
+                    // 占位用
+                    TLLine.Vertical()
+                        .opacity(0)
+                    
                     TLLine.Horizental()
                 }
                 .padding(.leading)
@@ -359,7 +363,7 @@ extension TimeLine {
         private var isNearToHour: Bool {
             let minutes = components.minute ?? 0
             
-            return minutes <= 10 || minutes >= 50
+            return minutes <= 15 || minutes >= 45
         }
         
         var body: some View {
@@ -558,9 +562,8 @@ extension TimeLine {
                     }
                 }.padding(.horizontal)
                 
-                
                 TimeLine.GridBGWithActive(
-                    oneMinuteHeight: 5,
+                    oneMinuteHeight: 1.2,
                     activeLineColor: .black,
                     items: items,
                     scroll2Hour: $scroll2Hour
@@ -583,6 +586,67 @@ extension TimeLine {
                 
                 Text("bottom")
                     .frame(height: 100)
+            }
+        }
+    }
+    
+    return Playground()
+}
+
+#Preview("static") {
+    struct Playground: View {
+        let oneMinuteHeight = 1.2
+        
+        @State private var scrollOffset: CGFloat = 0
+        @State private var scrollViewHeight: CGFloat = 0
+        @State private var now: Date = .now.setHourAndMinute(hour: 0, minute: 0)
+        
+        var body: some View {
+            VStack {
+                HStack {
+                    Button("add 1min") {
+                        now = now.addingTimeInterval(1 * 60)
+                    }
+                    Spacer()
+                    Button("minus 1min") {
+                        now = now.addingTimeInterval(-1 * 60)
+                    }
+                }.padding(.horizontal)
+                
+                ScrollViewReader(content: { proxy in
+                    ScrollView {
+                        ZStack(alignment: .top) {
+                            TimeLine.GridBG(
+                                oneMinuteHeight: oneMinuteHeight,
+                                scrollViewHeight: scrollViewHeight,
+                                scrollOffset: scrollOffset,
+                                scrollViewProxy: proxy,
+                                selectAction: { startHour, startMinute, endHour, endMinute in
+                                    print("select: start: \(startHour):\(startMinute), end: \(endHour):\(endMinute)")
+                                }
+                            )
+                            
+                            TimeLine.ActiveDumpView(
+                                oneMinuteHeight: oneMinuteHeight,
+                                now: now,
+                                lineColor: .black
+                            )
+                        }.scrollOffset(
+                            coordinateSpace: .named(TimeLine.GridBG.ScrollCoordinateSpaceName)
+                        ).padding(.vertical, TimeLine.GridBG.ContainerVerticalPadding)
+                    }
+                    .coordinateSpace(name: TimeLine.GridBG.ScrollCoordinateSpaceName)
+                    .onPreferenceChange(
+                        ScrollOffsetPreferenceKey.self,
+                        perform: { value in
+                            scrollOffset = value
+                        }
+                    )
+                })
+                .contentSize()
+                .onPreferenceChange(SizePreferenceKey.self, perform: { value in
+                    scrollViewHeight = value.height
+                })
             }
         }
     }
