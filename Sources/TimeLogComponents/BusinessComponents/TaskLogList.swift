@@ -17,6 +17,7 @@ extension TaskLogList {
         let day: Date
         let rows: IdentifiedArrayOf<TimeLine.CardState>
         let timeLineStateRows: [TimeLine.TimeLineState]
+        let activeLineColor: Color
         let disableTransition: Bool
         let header: () -> Header
         let selectAction: (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
@@ -27,6 +28,7 @@ extension TaskLogList {
             day: Date,
             rows: IdentifiedArrayOf<TimeLine.CardState>,
             disableTransition: Bool,
+            activeLineColor: Color,
             scroll2Hour: Binding<Int?>,
             header: @escaping () -> Header,
             selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void,
@@ -35,6 +37,7 @@ extension TaskLogList {
             self.day = day
             self.rows = rows
             self.disableTransition = disableTransition
+            self.activeLineColor = activeLineColor
             self._scroll2Hour = scroll2Hour
             self.header = header
             self.selectAction = selectAction
@@ -48,6 +51,7 @@ extension TaskLogList {
         public var body: some View {
             TimeLine.GridBGWithActive(
                 oneMinuteHeight: 1.2,
+                activeLineColor: activeLineColor,
                 items: self.timeLineStateRows,
                 scroll2Hour: $scroll2Hour,
                 disableTransition: disableTransition,
@@ -98,6 +102,7 @@ extension TaskLogList {
         day: .now.todayStartPoint,
         rows: rows,
         disableTransition: false,
+        activeLineColor: .black,
         scroll2Hour: .constant(nil),
         header: {
             Text("Header")
@@ -115,6 +120,7 @@ extension TaskLogList {
         day: .now, 
         rows: [],
         disableTransition: false,
+        activeLineColor: .black,
         scroll2Hour: .constant(nil),
         header: {
             Text("Header")
@@ -182,6 +188,7 @@ extension TaskLogList {
                     day: .now,
                     rows: rows,
                     disableTransition: disableTransition,
+                    activeLineColor: .black,
                     scroll2Hour: $scroll2Hour,
                     header: {
                         Text("Header")
@@ -249,6 +256,7 @@ extension TaskLogList {
                     day: .now,
                     rows: rows,
                     disableTransition: false,
+                    activeLineColor: .black,
                     scroll2Hour: .constant(nil),
                     header: {
                         Text("Header")

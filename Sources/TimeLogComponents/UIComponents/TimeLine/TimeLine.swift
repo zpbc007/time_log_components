@@ -229,10 +229,9 @@ extension TimeLine {
                     .offset(CGSize(width: 0, height: -10.0))
                 
                 HStack(alignment: .top, spacing: 0) {
-                    TLLine.Vertical()
-                    
                     TLLine.Horizental()
                 }
+                .padding(.leading)
                 .contentShape(Rectangle())
                 // fix: 避免 scrollView 无法滚动
                 .onTapGesture {}
@@ -316,15 +315,19 @@ extension TimeLine.GridBG {
 extension TimeLine {
     struct Active: View {
         let oneMinuteHeight: CGFloat
+        let lineColor: Color
         
         private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
         @State private var now: Date = .now
         
         var body: some View {
-            ActiveDumpView(oneMinuteHeight: oneMinuteHeight, now: now)
-                .onReceive(timer, perform: { newDate in
-                    now = newDate
-                })
+            ActiveDumpView(
+                oneMinuteHeight: oneMinuteHeight,
+                now: now,
+                lineColor: lineColor
+            ).onReceive(timer, perform: { newDate in
+                now = newDate
+            })
         }
     }
 }
@@ -340,6 +343,7 @@ extension TimeLine {
         
         let oneMinuteHeight: CGFloat
         let now: Date
+        let lineColor: Color
         @State private var height: CGFloat = 0
         
         private var components: DateComponents {
@@ -362,13 +366,13 @@ extension TimeLine {
             HStack(spacing: 0) {
                 Text(Self.formatter.string(from: now))
                     .padding(.vertical, isNearToHour ? 20 : 0)
-                    .background(.white)
+                    .background(.background)
                     .frame(width: TimeLine.TimeWidth)
                     
                 TLLine.Active()
                     .padding(.leading, 2)
             }
-            .foregroundStyle(.black)
+            .foregroundStyle(lineColor)
             .contentSize()
             .onPreferenceChange(SizePreferenceKey.self, perform: { value in
                 height = value.height
@@ -428,6 +432,7 @@ extension [TimeLine.TimeLineState] {
 extension TimeLine {
     struct GridBGWithActive<Content: View, Header: View>: View {
         let oneMinuteHeight: CGFloat
+        let activeLineColor: Color
         let items: [TimeLine.TimeLineStateWithAcc]
         let disableTransition: Bool
         let header: () -> Header
@@ -440,6 +445,7 @@ extension TimeLine {
         
         init(
             oneMinuteHeight: CGFloat = 3,
+            activeLineColor: Color,
             items: [TimeLine.TimeLineState],
             scroll2Hour: Binding<Int?>,
             disableTransition: Bool = false,
@@ -448,6 +454,7 @@ extension TimeLine {
             selectAction: @escaping (_ startHour: Int, _ startMinute: Int, _ endHour: Int, _ endMinute: Int) -> Void
         ) {
             self.oneMinuteHeight = oneMinuteHeight
+            self.activeLineColor = activeLineColor
             self.items = items.toAcc()
             self._scroll2Hour = scroll2Hour
             self.disableTransition = disableTransition
@@ -470,7 +477,7 @@ extension TimeLine {
                             selectAction: selectAction
                         )
                         
-                        Active(oneMinuteHeight: oneMinuteHeight)
+                        Active(oneMinuteHeight: oneMinuteHeight, lineColor: activeLineColor)
                         
                         self.TimeLineContent
                     }.scrollOffset(
@@ -508,6 +515,7 @@ extension TimeLine {
                 VStack(spacing: 0) {
                     ForEach(items) { item in
                         content(item.id, item.totalMinutes * oneMinuteHeight)
+                            .padding(.leading)
                             .offset(y: item.offsetMinutes * oneMinuteHeight)
                             .transition(
                                 disableTransition
@@ -553,6 +561,7 @@ extension TimeLine {
                 
                 TimeLine.GridBGWithActive(
                     oneMinuteHeight: 5,
+                    activeLineColor: .black,
                     items: items,
                     scroll2Hour: $scroll2Hour
                 ) {

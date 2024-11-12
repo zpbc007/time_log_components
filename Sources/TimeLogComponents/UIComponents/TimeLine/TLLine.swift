@@ -105,7 +105,7 @@ extension TLLine {
     struct Horizental: View {
         var body: some View {
             HorizentalLineShape()
-                .stroke(style: StrokeStyle(lineWidth: 1))
+                .stroke(style: StrokeStyle(lineWidth: 1, dash: [20]))
                 .frame(height: 1)
         }
     }
