@@ -8,57 +8,51 @@
 import SwiftUI
 import IdentifiedCollections
 
-public struct TaskSelector: View {
-    let menus: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>
-    let tasks: IdentifiedArrayOf<TreeTaskValue>
+public struct EventSelector: View {
+    let categories: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>
+    let events: IdentifiedArrayOf<EventTreeValue>
     
-    @Binding var selectedTask: TaskItem?
-    @Binding var selectedMenu: MenuSidebar.SidebarMenuValue?
-    @Binding var searchText: String
+    @Binding private var selectedEvent: EventItem?
+    @Binding var selectedCategory: MenuSidebar.SidebarMenuValue?
     
-    @State private var showTaskSearchMenu = false
+    @State private var searchText: String = ""
+    @State private var showCategoryMenu = false
     
-    private var filteredTasks: IdentifiedArrayOf<TreeTaskValue> {
+    private var filteredEvents: IdentifiedArrayOf<EventTreeValue> {
         if (searchText.isEmpty) {
-            return tasks
+            return events
         }
         
-        return CommonTreeNode.filter(tree: tasks) { node in
+        return CommonTreeNode.filter(tree: events) { node in
             node.name.contains(searchText)
         }
     }
     
     public init(
-        menus: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>,
-        tasks: IdentifiedArrayOf<TreeTaskValue>,
-        selectedTask: Binding<TaskItem?>,
-        selectedMenu: Binding<MenuSidebar.SidebarMenuValue?>,
-        searchText: Binding<String>
+        categories: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>,
+        events: IdentifiedArrayOf<EventTreeValue>,
+        selectedEvent: Binding<EventItem?>,
+        selectedCategory: Binding<MenuSidebar.SidebarMenuValue?>
     ) {
-        self.menus = menus
-        self.tasks = tasks
-        self._selectedTask = selectedTask
-        self._selectedMenu = selectedMenu
-        self._searchText = searchText
+        self.categories = categories
+        self.events = events
+        self._selectedEvent = selectedEvent
+        self._selectedCategory = selectedCategory
     }
     
     public var body: some View {
         Form {
             TextField("搜索", text: $searchText)
             
-            Section(header: tasksHeader) {
-                if filteredTasks.isEmpty {
-                    HStack {
-                        Spacer()
-                        Text("无任务")
-                        Spacer()
-                    }
+            Section(header: self.EventsHeader) {
+                if filteredEvents.isEmpty {
+                    self.EmptyEventView
                 } else {
                     List {
-                        OutlineGroup(filteredTasks, children: \.children) { item in
+                        OutlineGroup(filteredEvents, children: \.children) { item in
                             Group {
                                 HStack {
-                                    if item.id == selectedTask?.id {
+                                    if item.id == selectedEvent?.id {
                                         Text(item.value.name)
                                             .lineLimit(1)
                                             .foregroundStyle(.selection)
@@ -70,38 +64,36 @@ public struct TaskSelector: View {
                                     
                                     Spacer()
                                 }
-                                
                             }
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                selectedTask = item.value
+                                selectedEvent = item.value
                             }
                         }
                     }
                 }
             }
         }
-        .sheet(isPresented: $showTaskSearchMenu) {
+        .sheet(isPresented: $showCategoryMenu) {
             NavigationStack {
-                TaskSearchMenu.Sheet(menus: menus, selection: $selectedMenu)
+                TaskSearchMenu.Sheet(menus: categories, selection: $selectedCategory)
             }
         }
-        .navigationTitle("选择任务")
-        .onChange(of: selectedMenu) { oldValue, newValue in
+        .onChange(of: selectedCategory) { _, _ in
             searchText = ""
         }
     }
     
     @ViewBuilder
-    private var tasksHeader: some View {
+    private var EventsHeader: some View {
         Button {
-            showTaskSearchMenu = true
+            showCategoryMenu = true
         } label: {
             HStack {
-                if let selectedMenu {
-                    MenuSidebar.MenuCellContent(selectedMenu, addSpacer: false)
+                if let selectedCategory {
+                    MenuSidebar.MenuCellContent(selectedCategory, addSpacer: false)
                 } else {
-                    Text("任务列表")
+                    Text("所有分类")
                 }
                 
                 Image(systemName: "chevron.right")
@@ -111,10 +103,19 @@ public struct TaskSelector: View {
             .font(.caption)
         }
     }
+    
+    @ViewBuilder
+    private var EmptyEventView: some View {
+        HStack {
+            Spacer()
+            Text("无事件")
+            Spacer()
+        }
+    }
 }
 
-extension TaskSelector {
-    public struct TaskItem: Equatable, Identifiable {
+extension EventSelector {
+    public struct EventItem: Equatable, Identifiable {
         public let id: String
         public let name: String
         
@@ -124,7 +125,7 @@ extension TaskSelector {
         }
     }
     
-    public typealias TreeTaskValue = CommonTreeNode<TaskItem>
+    public typealias EventTreeValue = CommonTreeNode<EventItem>
 }
 
 #Preview {
@@ -158,14 +159,11 @@ extension TaskSelector {
                 )),
             ]))
         ])
-        let tasks: IdentifiedArrayOf<TaskSelector.TreeTaskValue> = .init(uniqueElements: [
-            .init(
-                value: .init(id: UUID().uuidString, name: "任务1"),
-                children: .init(uniqueElements: [
-                    .init(value: .init(id: UUID().uuidString, name: "任务 1-1")),
-                    .init(value: .init(id: UUID().uuidString, name: "任务 1-2"))
-            ])),
-            .init(value: .init(id: UUID().uuidString, name: "长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2")),
+        let tasks: IdentifiedArrayOf<EventSelector.EventTreeValue> = .init(uniqueElements: [
+            .init(value: .init(
+                id: UUID().uuidString,
+                name: "长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2"
+            )),
             .init(value: .init(id: UUID().uuidString, name: "任务3")),
             .init(value: .init(id: UUID().uuidString, name: "任务4")),
             .init(value: .init(id: UUID().uuidString, name: "任务5")),
@@ -183,20 +181,18 @@ extension TaskSelector {
             .init(value: .init(id: UUID().uuidString, name: "任务17")),
         ])
         
-        @State private var searchText = ""
         @State private var selectedMenu: MenuSidebar.SidebarMenuValue? = nil
-        @State private var selectedTask: TaskSelector.TaskItem? = nil
+        @State private var selectedTask: EventSelector.EventItem? = nil
         
         var body: some View {
             NavigationStack {
                 NavigationLink {
-                    TaskSelector(
-                        menus: menus,
-                        tasks: tasks,
-                        selectedTask: $selectedTask,
-                        selectedMenu: $selectedMenu,
-                        searchText: $searchText
-                    )
+                    EventSelector(
+                        categories: menus,
+                        events: tasks,
+                        selectedEvent: $selectedTask,
+                        selectedCategory: $selectedMenu
+                    ).navigationTitle("测试 Title")
                 } label: {
                     Text("go to select, current is: \(selectedTask?.name ?? "null")")
                 }

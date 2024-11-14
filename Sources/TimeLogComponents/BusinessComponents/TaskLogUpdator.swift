@@ -67,7 +67,7 @@ public struct TaskLogUpdator: View {
                 )),
             ]))
         ])
-        let tasks: IdentifiedArrayOf<TaskSelector.TreeTaskValue> = .init(uniqueElements: [
+        let tasks: IdentifiedArrayOf<EventSelector.EventTreeValue> = .init(uniqueElements: [
             .init(
                 value: .init(id: UUID().uuidString, name: "任务1"),
                 children: .init(uniqueElements: [
@@ -82,20 +82,18 @@ public struct TaskLogUpdator: View {
         @State private var endTime: Date = .now
         @StateObject private var editorVM = RichTextEditor.ViewModel()
         
-        @State private var searchText = ""
         @State private var selectedMenu: MenuSidebar.SidebarMenuValue? = nil
-        @State private var selectedTask: TaskSelector.TaskItem? = nil
+        @State private var selectedTask: EventSelector.EventItem? = nil
         
         var body: some View {
             NavigationStack {
                 VStack {
                     NavigationLink {
-                        TaskSelector(
-                            menus: menus,
-                            tasks: tasks,
-                            selectedTask: $selectedTask,
-                            selectedMenu: $selectedMenu,
-                            searchText: $searchText
+                        EventSelector(
+                            categories: menus,
+                            events: tasks,
+                            selectedEvent: $selectedTask,
+                            selectedCategory: $selectedMenu
                         )
                     } label: {
                         HStack {
