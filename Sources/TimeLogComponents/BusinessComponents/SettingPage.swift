@@ -7,101 +7,115 @@
 
 import SwiftUI
 
-public struct SettingPage: View {
-    let hasNotifyAuth: Bool
-    @Binding var syncByICloud: Bool
-    @Binding var isDemoMode: Bool
-    @Binding var isMorningOn: Bool
-    @Binding var isEveningOn: Bool
-    let requestNotifyAuthAction: () -> Void
-    
-    public init(
-        hasNotifyAuth: Bool,
-        syncByICloud: Binding<Bool>,
-        isDemoMode: Binding<Bool>,
-        isMorningOn: Binding<Bool>,
-        isEveningOn: Binding<Bool>,
-        requestNotifyAuthAction: @escaping () -> Void
-    ) {
-        self.hasNotifyAuth = hasNotifyAuth
-        self._syncByICloud = syncByICloud
-        self._isDemoMode = isDemoMode
-        self._isMorningOn = isMorningOn
-        self._isEveningOn = isEveningOn
-        self.requestNotifyAuthAction = requestNotifyAuthAction
-    }
-    
-    public var body: some View {
-        Form {
-            NavigationLink {
-                HelpCenterWebView()
-                    .toolbar(.hidden, for: .tabBar)
-            } label: {
-                Label("新手指南", systemImage: "questionmark.circle")
-            }
-            
-            NavigationLink {
-                FeedbackView(user: nil)
-                    .toolbar(.hidden, for: .tabBar)
-            } label: {
-                Label("联系我们", systemImage: "phone.circle")
-            }
+public struct SettingPage {}
 
-            if !isDemoMode {
-                Toggle(
-                    isOn: $syncByICloud,
-                    label: {
-                        HStack {
-                            Text("通过 iCloud 同步")
-                            PlusTag()
-                        }
-                    }
-                )
-            }
-            
-            Section {
-                VStack(alignment: .leading) {
-                    Toggle(
-                        isOn: $isMorningOn,
-                        label: {
-                            Label("今日目标", systemImage: "sun.horizon")
-                        }
-                    )
-                    
-                    Text("每天早上8点提醒设定今日目标")
-                        .font(.footnote)
-                        .fontWeight(.light)
+extension SettingPage {
+    public struct MainView<EventCenter: View>: View {
+        let hasNotifyAuth: Bool
+        @Binding var syncByICloud: Bool
+        @Binding var isDemoMode: Bool
+        @Binding var isMorningOn: Bool
+        @Binding var isEveningOn: Bool
+        let eventCenter: () -> EventCenter
+        let requestNotifyAuthAction: () -> Void
+        
+        public init(
+            hasNotifyAuth: Bool,
+            syncByICloud: Binding<Bool>,
+            isDemoMode: Binding<Bool>,
+            isMorningOn: Binding<Bool>,
+            isEveningOn: Binding<Bool>,
+            eventCenter: @escaping () -> EventCenter,
+            requestNotifyAuthAction: @escaping () -> Void
+        ) {
+            self.hasNotifyAuth = hasNotifyAuth
+            self._syncByICloud = syncByICloud
+            self._isDemoMode = isDemoMode
+            self._isMorningOn = isMorningOn
+            self._isEveningOn = isEveningOn
+            self.eventCenter = eventCenter
+            self.requestNotifyAuthAction = requestNotifyAuthAction
+        }
+        
+        public var body: some View {
+            Form {
+                NavigationLink {
+                    eventCenter()
+                        .toolbar(.hidden, for: .tabBar)
+                } label: {
+                    Label("事件中心", systemImage: "list.bullet.circle")
                 }
                 
-                VStack(alignment: .leading) {
-                    Toggle(
-                        isOn: $isEveningOn,
-                        label: {
-                            Label("晚间回顾", systemImage: "moon.haze")
-                        }
-                    )
-                    
-                    Text("每天晚上22点提醒回顾")
-                        .font(.footnote)
-                        .fontWeight(.light)
+                NavigationLink {
+                    HelpCenterWebView()
+                        .toolbar(.hidden, for: .tabBar)
+                } label: {
+                    Label("新手指南", systemImage: "questionmark.circle")
                 }
                 
-                if !hasNotifyAuth {
-                    Button(action: requestNotifyAuthAction) {
-                        Text("前往设置通知权限")
-                    }
+                NavigationLink {
+                    FeedbackView(user: nil)
+                        .toolbar(.hidden, for: .tabBar)
+                } label: {
+                    Label("联系我们", systemImage: "phone.circle")
                 }
-            }
-            
-            Section(footer: Text("重启后，演示模式中的数据会被重置！")) {
-                Toggle(
-                    isOn: $isDemoMode.animation(),
-                    label: {
-                        HStack {
-                            Text("演示模式")
+
+                if !isDemoMode {
+                    Toggle(
+                        isOn: $syncByICloud,
+                        label: {
+                            HStack {
+                                Text("通过 iCloud 同步")
+                                PlusTag()
+                            }
+                        }
+                    )
+                }
+                
+                Section {
+                    VStack(alignment: .leading) {
+                        Toggle(
+                            isOn: $isMorningOn,
+                            label: {
+                                Label("今日目标", systemImage: "sun.horizon")
+                            }
+                        )
+                        
+                        Text("每天早上8点提醒设定今日目标")
+                            .font(.footnote)
+                            .fontWeight(.light)
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        Toggle(
+                            isOn: $isEveningOn,
+                            label: {
+                                Label("晚间回顾", systemImage: "moon.haze")
+                            }
+                        )
+                        
+                        Text("每天晚上22点提醒回顾")
+                            .font(.footnote)
+                            .fontWeight(.light)
+                    }
+                    
+                    if !hasNotifyAuth {
+                        Button(action: requestNotifyAuthAction) {
+                            Text("前往设置通知权限")
                         }
                     }
-                )
+                }
+                
+                Section(footer: Text("重启后，演示模式中的数据会被重置！")) {
+                    Toggle(
+                        isOn: $isDemoMode.animation(),
+                        label: {
+                            HStack {
+                                Text("演示模式")
+                            }
+                        }
+                    )
+                }
             }
         }
     }
@@ -201,13 +215,15 @@ extension SettingPage {
                         hasAuth.toggle()
                     }
                     
-                    SettingPage(
+                    SettingPage.MainView(
                         hasNotifyAuth: hasAuth,
                         syncByICloud: $syncByICloud,
                         isDemoMode: $isDemoMode,
                         isMorningOn: $isMorningOn,
                         isEveningOn: $isEveningOn
                     ) {
+                        Text("Event Center")
+                    } requestNotifyAuthAction: {
                         hasAuth.toggle()
                     }
                 }
