@@ -9,12 +9,12 @@ import SwiftUI
 import IdentifiedCollections
 import WrappingHStack
 
-public struct TaskAddEditor {
+public struct EventAddEditor {
     public typealias TagInfo = TimeLogSelectable
     public typealias CheckListInfo = TimeLogSelectable
 }
 
-extension TaskAddEditor {
+extension EventAddEditor {
     public struct MainView<Content: View>: View {
         let bgColor: Color
         let fontColor: Color
@@ -102,13 +102,13 @@ extension TaskAddEditor {
 
 #Preview {
     struct PlaygroundView: View {
-        let tags: [TaskAddEditor.TagInfo] = [
+        let tags: [EventAddEditor.TagInfo] = [
             .init(id: UUID().uuidString, name: "时间投资/01消费"),
             .init(id: UUID().uuidString, name: "时间投资/02投资"),
             .init(id: UUID().uuidString, name: "时间投资/03浪费"),
             .init(id: UUID().uuidString, name: "时间投资/04消耗")
         ]
-        let checklists: [TaskAddEditor.CheckListInfo] = [
+        let checklists: [EventAddEditor.CheckListInfo] = [
             .init(id: UUID().uuidString, name: "健身"),
             .init(id: UUID().uuidString, name: "日常"),
             .init(id: UUID().uuidString, name: "工作"),
@@ -125,7 +125,7 @@ extension TaskAddEditor {
                 Color.gray
                 
                 if visible {
-                    TaskAddEditor.MainView(
+                    EventAddEditor.MainView(
                         bgColor: .white,
                         fontColor: .black,
                         activeFontColor: .blue,

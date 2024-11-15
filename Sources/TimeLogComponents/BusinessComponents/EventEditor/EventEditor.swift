@@ -73,13 +73,13 @@ public struct TaskEditor: View {
 
 #Preview {
     struct Playground: View {
-        let tags: [TaskAddEditor.TagInfo] = [
+        let tags: [EventAddEditor.TagInfo] = [
             .init(id: UUID().uuidString, name: "时间投资/01消费"),
             .init(id: UUID().uuidString, name: "时间投资/02投资"),
             .init(id: UUID().uuidString, name: "时间投资/03浪费"),
             .init(id: UUID().uuidString, name: "时间投资/04消耗")
         ]
-        let checklists: [TaskAddEditor.CheckListInfo] = [
+        let checklists: [EventAddEditor.CheckListInfo] = [
             .init(id: UUID().uuidString, name: "健身"),
             .init(id: UUID().uuidString, name: "日常"),
             .init(id: UUID().uuidString, name: "工作"),
