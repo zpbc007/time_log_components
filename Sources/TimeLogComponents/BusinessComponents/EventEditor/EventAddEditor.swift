@@ -10,7 +10,6 @@ import IdentifiedCollections
 import WrappingHStack
 
 public struct EventAddEditor {
-    public typealias TagInfo = TimeLogSelectable
     public typealias CheckListInfo = TimeLogSelectable
 }
 
@@ -19,7 +18,6 @@ extension EventAddEditor {
         let bgColor: Color
         let fontColor: Color
         let activeFontColor: Color
-        let tags: IdentifiedArrayOf<TagInfo>
         let checklists: IdentifiedArrayOf<CheckListInfo>
         @Binding var title: String
         @Binding var selectedCheckList: String?
@@ -33,7 +31,6 @@ extension EventAddEditor {
             bgColor: Color,
             fontColor: Color,
             activeFontColor: Color,
-            tags: IdentifiedArrayOf<TagInfo>,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
             selectedCheckList: Binding<String?>,
@@ -45,7 +42,6 @@ extension EventAddEditor {
             self.bgColor = bgColor
             self.fontColor = fontColor
             self.activeFontColor = activeFontColor
-            self.tags = tags
             self.checklists = checklists
             self._title = title
             self._selectedCheckList = selectedCheckList
@@ -99,12 +95,6 @@ extension EventAddEditor {
 
 #Preview {
     struct PlaygroundView: View {
-        let tags: [EventAddEditor.TagInfo] = [
-            .init(id: UUID().uuidString, name: "时间投资/01消费"),
-            .init(id: UUID().uuidString, name: "时间投资/02投资"),
-            .init(id: UUID().uuidString, name: "时间投资/03浪费"),
-            .init(id: UUID().uuidString, name: "时间投资/04消耗")
-        ]
         let checklists: [EventAddEditor.CheckListInfo] = [
             .init(id: UUID().uuidString, name: "健身"),
             .init(id: UUID().uuidString, name: "日常"),
@@ -125,7 +115,6 @@ extension EventAddEditor {
                         bgColor: .white,
                         fontColor: .black,
                         activeFontColor: .blue,
-                        tags: .init(uniqueElements: tags),
                         checklists: .init(uniqueElements: checklists),
                         title: $title,
                         selectedCheckList: $selectedCheckList,

@@ -73,7 +73,7 @@ public struct TaskEditor: View {
 
 #Preview {
     struct Playground: View {
-        let tags: [EventAddEditor.TagInfo] = [
+        let tags: [TaskEditor.TagInfo] = [
             .init(id: UUID().uuidString, name: "时间投资/01消费"),
             .init(id: UUID().uuidString, name: "时间投资/02投资"),
             .init(id: UUID().uuidString, name: "时间投资/03浪费"),
