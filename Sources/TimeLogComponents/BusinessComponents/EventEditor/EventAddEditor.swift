@@ -22,7 +22,6 @@ extension EventAddEditor {
         let tags: IdentifiedArrayOf<TagInfo>
         let checklists: IdentifiedArrayOf<CheckListInfo>
         @Binding var title: String
-        @Binding var selectedTags: [String]
         @Binding var selectedCheckList: String?
         let content: () -> Content
         let onSendButtonTapped: () -> Void
@@ -37,7 +36,6 @@ extension EventAddEditor {
             tags: IdentifiedArrayOf<TagInfo>,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
-            selectedTags: Binding<[String]>,
             selectedCheckList: Binding<String?>,
             @ViewBuilder
             content: @escaping () -> Content,
@@ -50,7 +48,6 @@ extension EventAddEditor {
             self.tags = tags
             self.checklists = checklists
             self._title = title
-            self._selectedTags = selectedTags
             self._selectedCheckList = selectedCheckList
             self.content = content
             self.onSendButtonTapped = onSendButtonTapped
@@ -116,7 +113,6 @@ extension EventAddEditor {
         ]
         
         @State private var title: String = ""
-        @State private var selectedTags: [String] = []
         @State private var selectedCheckList: String? = nil
         @State private var visible = true
         
@@ -132,7 +128,6 @@ extension EventAddEditor {
                         tags: .init(uniqueElements: tags),
                         checklists: .init(uniqueElements: checklists),
                         title: $title,
-                        selectedTags: $selectedTags,
                         selectedCheckList: $selectedCheckList,
                         content: {
                             Text("Tag Picker")
