@@ -60,7 +60,7 @@ extension EventAddEditor {
                 dismiss: dismiss
             ) { size in
                 VStack {
-                    TextField("任务名称", text: $title)
+                    TextField("事件名称", text: $title)
                         .focused($focusedField)
                         .font(.title3)
                     
