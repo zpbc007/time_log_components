@@ -62,7 +62,7 @@ struct TaskEditor_Common {
         }
     }
     
-    struct CheckListSelector: View {
+    struct CategorySelector: View {
         let activeFontColor: Color
         let checklists: IdentifiedArrayOf<TimeLogSelectable>
         @Binding var selected: String?
@@ -136,61 +136,35 @@ struct TaskEditor_Common {
     struct TaskToolbar: View {
         let fontColor: Color
         let activeFontColor: Color
-        let tags: IdentifiedArrayOf<TimeLogSelectable>
         let checklists: IdentifiedArrayOf<TimeLogSelectable>
         let isValid: Bool
-        @Binding var selectedTags: [String]
         @Binding var selectedCheckList: String?
         let onSendButtonTapped: () -> Void
         
         var body: some View {
-            VStack {
-                if !selectedTags.isEmpty {
-                    TaskEditor_Common.SelectedTags(
-                        tags: tags,
-                        selected: $selectedTags
-                    )
-                }
+            // 工具栏
+            HStack(spacing: 20) {
+                TaskEditor_Common.CategorySelector(
+                    activeFontColor: activeFontColor,
+                    checklists: checklists,
+                    selected: $selectedCheckList
+                )
                 
-                // 工具栏
-                HStack(spacing: 20) {
-                    // tag 列表
-                    TaskEditor_Common.TagSelector(
-                        fontColor: fontColor,
-                        activeFontColor: activeFontColor,
-                        tags: tags,
-                        selected: $selectedTags
-                    )
-                    
-                    // checkList 列表
-                    TaskEditor_Common.CheckListSelector(
-                        activeFontColor: activeFontColor,
-                        checklists: checklists,
-                        selected: $selectedCheckList
-                    )
-                    
-                    Spacer()
-                    
-                    TaskEditor_Common.ConfirmButton(
-                        fontColor: fontColor,
-                        activeFontColor: activeFontColor,
-                        action: onSendButtonTapped,
-                        isValid: isValid
-                    )
-                }.foregroundStyle(fontColor)
-            }
+                Spacer()
+                
+                TaskEditor_Common.ConfirmButton(
+                    fontColor: fontColor,
+                    activeFontColor: activeFontColor,
+                    action: onSendButtonTapped,
+                    isValid: isValid
+                )
+            }.foregroundStyle(fontColor)
         }
     }
 }
 
 #Preview {
     struct Playground: View {
-        let tags: IdentifiedArrayOf<TimeLogSelectable> = .init(uniqueElements: [
-            .init(id: UUID().uuidString, name: "时间投资/01消费"),
-            .init(id: UUID().uuidString, name: "时间投资/02投资"),
-            .init(id: UUID().uuidString, name: "时间投资/03浪费"),
-            .init(id: UUID().uuidString, name: "时间投资/04消耗")
-        ])
         let checklists: IdentifiedArrayOf<TimeLogSelectable> = .init(uniqueElements: [
             .init(id: UUID().uuidString, name: "健身"),
             .init(id: UUID().uuidString, name: "日常"),
@@ -204,10 +178,8 @@ struct TaskEditor_Common {
             TaskEditor_Common.TaskToolbar(
                 fontColor: .primary,
                 activeFontColor: .blue,
-                tags: tags,
                 checklists: checklists,
                 isValid: true,
-                selectedTags: $selectedTags,
                 selectedCheckList: $selectedCheckList
             ) {
                 print("confirm")

@@ -58,10 +58,8 @@ public struct TaskEditor: View {
             TaskEditor_Common.TaskToolbar(
                 fontColor: fontColor,
                 activeFontColor: activeFontColor,
-                tags: tags,
                 checklists: checklists,
                 isValid: isValid,
-                selectedTags: $selectedTags,
                 selectedCheckList: $selectedCheckList,
                 onSendButtonTapped: onSendButtonTapped
             )
