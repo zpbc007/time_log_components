@@ -133,13 +133,67 @@ struct TaskEditor_Common {
         }
     }
     
+    struct DeleteButton: View {
+        let deleteColor: Color
+        let action: () -> Void
+        
+        var body: some View {
+            Button(role: .destructive, action: action) {
+                Image(systemName: "trash.circle")
+                    .font(.title)
+                    .foregroundStyle(deleteColor)
+            }
+        }
+    }
+    
     struct TaskToolbar: View {
         let fontColor: Color
         let activeFontColor: Color
+        let deleteColor: Color
         let checklists: IdentifiedArrayOf<TimeLogSelectable>
         let isValid: Bool
         @Binding var selectedCheckList: String?
         let onSendButtonTapped: () -> Void
+        let onDeleteButtonTapped: Optional<() -> Void>
+        
+        init(
+            fontColor: Color,
+            activeFontColor: Color,
+            deleteColor: Color,
+            checklists: IdentifiedArrayOf<TimeLogSelectable>,
+            isValid: Bool,
+            selectedCheckList: Binding<String?>,
+            onSendButtonTapped: @escaping () -> Void
+        ) {
+            self.fontColor = fontColor
+            self.activeFontColor = activeFontColor
+            self.deleteColor = deleteColor
+            self.checklists = checklists
+            self.isValid = isValid
+            self._selectedCheckList = selectedCheckList
+            self.onSendButtonTapped = onSendButtonTapped
+            self.onDeleteButtonTapped = nil
+        }
+        
+        init(
+            fontColor: Color,
+            activeFontColor: Color,
+            deleteColor: Color,
+            checklists: IdentifiedArrayOf<TimeLogSelectable>,
+            isValid: Bool,
+            selectedCheckList: Binding<String?>,
+            onSendButtonTapped: @escaping () -> Void,
+            onDeleteButtonTapped: @escaping () -> Void
+        ) {
+            self.fontColor = fontColor
+            self.activeFontColor = activeFontColor
+            self.deleteColor = deleteColor
+            self.checklists = checklists
+            self.isValid = isValid
+            self._selectedCheckList = selectedCheckList
+            self.onSendButtonTapped = onSendButtonTapped
+            self.onDeleteButtonTapped = onDeleteButtonTapped
+        }
         
         var body: some View {
             // 工具栏
@@ -151,6 +205,13 @@ struct TaskEditor_Common {
                 )
                 
                 Spacer()
+                
+                if let onDeleteButtonTapped {
+                    TaskEditor_Common.DeleteButton(
+                        deleteColor: deleteColor,
+                        action: onDeleteButtonTapped
+                    )
+                }
                 
                 TaskEditor_Common.ConfirmButton(
                     fontColor: fontColor,
@@ -173,16 +234,42 @@ struct TaskEditor_Common {
         ])
         @State private var selectedTags: [String] = []
         @State private var selectedCheckList: String? = nil
+        @State private var hasDelete: Bool = true
         
         var body: some View {
-            TaskEditor_Common.TaskToolbar(
-                fontColor: .primary,
-                activeFontColor: .blue,
-                checklists: checklists,
-                isValid: true,
-                selectedCheckList: $selectedCheckList
-            ) {
-                print("confirm")
+            VStack {
+                Button("toggle") {
+                    hasDelete.toggle()
+                }
+                
+                Spacer()
+                
+                if hasDelete {
+                    TaskEditor_Common.TaskToolbar(
+                        fontColor: .primary,
+                        activeFontColor: .blue,
+                        deleteColor: .red,
+                        checklists: checklists,
+                        isValid: true,
+                        selectedCheckList: $selectedCheckList,
+                        onSendButtonTapped: {
+                            print("confirm")
+                        }
+                    ) {
+                        print("delete")
+                    }.padding()
+                } else {
+                    TaskEditor_Common.TaskToolbar(
+                        fontColor: .primary,
+                        activeFontColor: .blue,
+                        deleteColor: .red,
+                        checklists: checklists,
+                        isValid: true,
+                        selectedCheckList: $selectedCheckList
+                    ) {
+                        print("confirm")
+                    }.padding()
+                }
             }.padding()
         }
     }

@@ -1,85 +1,149 @@
 //
-//  File.swift
+//  SwiftUIView.swift
 //  
 //
-//  Created by zhaopeng on 2024/7/11.
+//  Created by zhaopeng on 2024/5/28.
 //
 
 import SwiftUI
 import IdentifiedCollections
+import WrappingHStack
 
-public struct TaskEditor: View {
-    public typealias TagInfo = TimeLogSelectable
+public struct EventEditor {
     public typealias CheckListInfo = TimeLogSelectable
-    
-    let fontColor: Color
-    let activeFontColor: Color
-    let tags: IdentifiedArrayOf<TagInfo>
-    let checklists: IdentifiedArrayOf<CheckListInfo>
-    let onSendButtonTapped: () -> Void
-    @Binding var title: String
-    @Binding var selectedTags: [String]
-    @Binding var selectedCheckList: String?
-    
-    @FocusState private var titleFocused: Bool
-    
-    public init(
-        fontColor: Color,
-        activeFontColor: Color,
-        tags: IdentifiedArrayOf<TagInfo>,
-        checklists: IdentifiedArrayOf<CheckListInfo>,
-        title: Binding<String>,
-        selectedTags: Binding<[String]>,
-        selectedCheckList: Binding<String?>,
-        onSendButtonTapped: @escaping () -> Void
-    ) {
-        self.fontColor = fontColor
-        self.activeFontColor = activeFontColor
-        self.tags = tags
-        self.checklists = checklists
-        self._title = title
-        self._selectedTags = selectedTags
-        self._selectedCheckList = selectedCheckList
-        self.onSendButtonTapped = onSendButtonTapped
-    }
-    
-    private var isValid: Bool {
-        !title.isEmpty
-    }
-    
-    public var body: some View {
-        VStack {
-            TextField("任务名称", text: $title)
-                .font(.title)
-                .focused($titleFocused)
-            
-            RichTextEditor(placeholder: "备注")
-            
-            TaskEditor_Common.TaskToolbar(
-                fontColor: fontColor,
-                activeFontColor: activeFontColor,
-                checklists: checklists,
-                isValid: isValid,
-                selectedCheckList: $selectedCheckList,
-                onSendButtonTapped: onSendButtonTapped
-            )
+}
+
+extension EventEditor {
+    public struct MainView<Content: View>: View {
+        let bgColor: Color
+        let fontColor: Color
+        let activeFontColor: Color
+        let deleteColor: Color
+        let checklists: IdentifiedArrayOf<CheckListInfo>
+        @Binding var title: String
+        @Binding var selectedCheckList: String?
+        let content: () -> Content
+        let onSendButtonTapped: () -> Void
+        let dismiss: () -> Void
+        let onDeleteButtonTapped: Optional<() -> Void>
+        
+        @FocusState private var focusedField: Bool
+        
+        // Add
+        public init(
+            bgColor: Color,
+            fontColor: Color,
+            activeFontColor: Color,
+            deleteColor: Color,
+            checklists: IdentifiedArrayOf<CheckListInfo>,
+            title: Binding<String>,
+            selectedCheckList: Binding<String?>,
+            @ViewBuilder
+            content: @escaping () -> Content,
+            onSendButtonTapped: @escaping () -> Void,
+            dismiss: @escaping () -> Void
+        ) {
+            self.bgColor = bgColor
+            self.fontColor = fontColor
+            self.activeFontColor = activeFontColor
+            self.deleteColor = deleteColor
+            self.checklists = checklists
+            self._title = title
+            self._selectedCheckList = selectedCheckList
+            self.content = content
+            self.onSendButtonTapped = onSendButtonTapped
+            self.dismiss = dismiss
+            self.onDeleteButtonTapped = nil
         }
-        .padding()
-        .task {
-            titleFocused = true
+        
+        // Edit
+        public init(
+            bgColor: Color,
+            fontColor: Color,
+            activeFontColor: Color,
+            deleteColor: Color,
+            checklists: IdentifiedArrayOf<CheckListInfo>,
+            title: Binding<String>,
+            selectedCheckList: Binding<String?>,
+            @ViewBuilder
+            content: @escaping () -> Content,
+            onSendButtonTapped: @escaping () -> Void,
+            dismiss: @escaping () -> Void,
+            onDeleteButtonTapped: @escaping () -> Void
+        ) {
+            self.bgColor = bgColor
+            self.fontColor = fontColor
+            self.activeFontColor = activeFontColor
+            self.deleteColor = deleteColor
+            self.checklists = checklists
+            self._title = title
+            self._selectedCheckList = selectedCheckList
+            self.content = content
+            self.onSendButtonTapped = onSendButtonTapped
+            self.dismiss = dismiss
+            self.onDeleteButtonTapped = onDeleteButtonTapped
+        }
+        
+        private var isValid: Bool {
+            !title.isEmpty
+        }
+        
+        public var body: some View {
+            KeyboardEditor(
+                bgColor: bgColor,
+                dismiss: dismiss
+            ) { size in
+                VStack {
+                    TextField("事件名称", text: $title)
+                        .focused($focusedField)
+                        .font(.title3)
+                    
+                    content()
+     
+                    if let onDeleteButtonTapped {
+                        TaskEditor_Common.TaskToolbar(
+                            fontColor: fontColor,
+                            activeFontColor: activeFontColor,
+                            deleteColor: deleteColor,
+                            checklists: checklists,
+                            isValid: isValid,
+                            selectedCheckList: $selectedCheckList,
+                            onSendButtonTapped: onSendButtonTapped,
+                            onDeleteButtonTapped: onDeleteButtonTapped
+                        )
+                    } else {
+                        TaskEditor_Common.TaskToolbar(
+                            fontColor: fontColor,
+                            activeFontColor: activeFontColor,
+                            deleteColor: deleteColor,
+                            checklists: checklists,
+                            isValid: isValid,
+                            selectedCheckList: $selectedCheckList,
+                            onSendButtonTapped: onSendButtonTapped
+                        )
+                    }
+                }
+                .padding()
+                .onAppear {
+                    focusedField = true
+                }
+            }
+        }
+        
+        @ViewBuilder
+        private var confirmButtonView: some View {
+            Button(action: onSendButtonTapped) {
+                Image(systemName: "arrow.up.circle")
+                    .font(.title)
+                    .foregroundStyle(isValid ? activeFontColor : fontColor)
+            }.disabled(!isValid)
         }
     }
 }
 
-#Preview {
-    struct Playground: View {
-        let tags: [TaskEditor.TagInfo] = [
-            .init(id: UUID().uuidString, name: "时间投资/01消费"),
-            .init(id: UUID().uuidString, name: "时间投资/02投资"),
-            .init(id: UUID().uuidString, name: "时间投资/03浪费"),
-            .init(id: UUID().uuidString, name: "时间投资/04消耗")
-        ]
-        let checklists: [EventAddEditor.CheckListInfo] = [
+#Preview("Add") {
+    struct PlaygroundView: View {
+        let checklists: [EventEditor.CheckListInfo] = [
             .init(id: UUID().uuidString, name: "健身"),
             .init(id: UUID().uuidString, name: "日常"),
             .init(id: UUID().uuidString, name: "工作"),
@@ -87,35 +151,86 @@ public struct TaskEditor: View {
         ]
         
         @State private var title: String = ""
-        @State private var selectedTags: [String] = []
         @State private var selectedCheckList: String? = nil
-        @StateObject private var editorVM = RichTextEditor.ViewModel("")
+        @State private var visible = true
         
         var body: some View {
-            NavigationStack {
-                TaskEditor(
-                    fontColor: .black,
-                    activeFontColor: .blue,
-                    tags: .init(uniqueElements: tags),
-                    checklists: .init(uniqueElements: checklists),
-                    title: $title,
-                    selectedTags: $selectedTags,
-                    selectedCheckList: $selectedCheckList
-                ) {
-                    print("send")
-                }
-                .environmentObject(editorVM)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("保存") {
-                            
+            ZStack {
+                Color.gray
+                
+                if visible {
+                    EventEditor.MainView(
+                        bgColor: .white,
+                        fontColor: .black,
+                        activeFontColor: .blue,
+                        deleteColor: .red,
+                        checklists: .init(uniqueElements: checklists),
+                        title: $title,
+                        selectedCheckList: $selectedCheckList,
+                        content: {
+                            Text("Tag Picker")
                         }
+                    ) {
+                        visible = false
+                    } dismiss: {
+                        visible = false
+                    }
+                } else {
+                    Button("click me") {
+                        visible = true
                     }
                 }
-                .dismissBtn()
             }
         }
     }
     
-    return Playground()
+    return PlaygroundView()
+}
+
+#Preview("Edit") {
+    struct PlaygroundView: View {
+        let checklists: [EventEditor.CheckListInfo] = [
+            .init(id: UUID().uuidString, name: "健身"),
+            .init(id: UUID().uuidString, name: "日常"),
+            .init(id: UUID().uuidString, name: "工作"),
+            .init(id: UUID().uuidString, name: "玩乐")
+        ]
+        
+        @State private var title: String = "123"
+        @State private var selectedCheckList: String? = nil
+        @State private var visible = true
+        
+        var body: some View {
+            ZStack {
+                Color.gray
+                
+                if visible {
+                    EventEditor.MainView(
+                        bgColor: .white,
+                        fontColor: .black,
+                        activeFontColor: .blue,
+                        deleteColor: .red,
+                        checklists: .init(uniqueElements: checklists),
+                        title: $title,
+                        selectedCheckList: $selectedCheckList,
+                        content: {
+                            Text("Tag Picker")
+                        }
+                    ) {
+                        visible = false
+                    } dismiss: {
+                        visible = false
+                    } onDeleteButtonTapped: {
+                        print("delete")
+                    }
+                } else {
+                    Button("click me") {
+                        visible = true
+                    }
+                }
+            }
+        }
+    }
+    
+    return PlaygroundView()
 }
