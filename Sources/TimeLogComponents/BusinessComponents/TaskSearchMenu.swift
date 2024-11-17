@@ -99,7 +99,7 @@ extension TaskSearchMenu {
             ]))
         ])
         @State private var selection: MenuSidebar.SidebarMenuValue? = nil
-        @State private var showMenu = false
+        @State private var showMenu = true
         
         var body: some View {
             NavigationStack {
