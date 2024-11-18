@@ -36,17 +36,38 @@ public struct EventSelector: View {
         events: IdentifiedArrayOf<EventTreeValue>,
         selectedEvent: Binding<EventItem?>,
         selectedCategory: Binding<CategoryList.Item?>,
+        addEventAction: @escaping () -> Void,
+        addCategoryAction: @escaping () -> Void
+    ) {
+        self.init(
+            categories: categories,
+            events: events,
+            selectedEvent: selectedEvent,
+            selectedCategory: selectedCategory,
+            addEventAction: addEventAction,
+            addCategoryAction: addCategoryAction,
+            startAction: nil
+        )
+    }
+    
+    public init(
+        categories: [CategoryList.Item],
+        events: IdentifiedArrayOf<EventTreeValue>,
+        selectedEvent: Binding<EventItem?>,
+        selectedCategory: Binding<CategoryList.Item?>,
         startAction: @escaping () -> Void,
         addEventAction: @escaping () -> Void,
         addCategoryAction: @escaping () -> Void
     ) {
-        self.categories = categories
-        self.events = events
-        self._selectedEvent = selectedEvent
-        self._selectedCategory = selectedCategory
-        self.startAction = startAction
-        self.addEventAction = addEventAction
-        self.addCategoryAction = addCategoryAction
+        self.init(
+            categories: categories,
+            events: events,
+            selectedEvent: selectedEvent,
+            selectedCategory: selectedCategory,
+            addEventAction: addEventAction,
+            addCategoryAction: addCategoryAction,
+            startAction: startAction
+        )
     }
     
     public init(
@@ -55,15 +76,16 @@ public struct EventSelector: View {
         selectedEvent: Binding<EventItem?>,
         selectedCategory: Binding<CategoryList.Item?>,
         addEventAction: @escaping () -> Void,
-        addCategoryAction: @escaping () -> Void
+        addCategoryAction: @escaping () -> Void,
+        startAction: Optional<() -> Void>
     ) {
         self.categories = categories
         self.events = events
         self._selectedEvent = selectedEvent
         self._selectedCategory = selectedCategory
+        self.startAction = startAction
         self.addEventAction = addEventAction
         self.addCategoryAction = addCategoryAction
-        self.startAction = nil
     }
     
     public var body: some View {
