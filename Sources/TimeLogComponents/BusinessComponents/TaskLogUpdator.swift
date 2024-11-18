@@ -75,7 +75,13 @@ public struct TaskLogUpdator: View {
                             events: tasks,
                             selectedEvent: $selectedEvent,
                             selectedCategory: $selectedCategory
-                        )
+                        ) {
+                            print("start")
+                        } addEventAction: {
+                            print("add event")
+                        } addCategoryAction: {
+                            print("should add category")
+                        }
                     } label: {
                         HStack {
                             Text("任务")

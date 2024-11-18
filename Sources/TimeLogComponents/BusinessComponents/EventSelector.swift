@@ -11,6 +11,9 @@ import IdentifiedCollections
 public struct EventSelector: View {
     let categories: [CategoryList.Item]
     let events: IdentifiedArrayOf<EventTreeValue>
+    let startAction: () -> Void
+    let addEventAction: () -> Void
+    let addCategoryAction: () -> Void
     
     @Binding private var selectedEvent: EventItem?
     @Binding var selectedCategory: CategoryList.Item?
@@ -32,12 +35,18 @@ public struct EventSelector: View {
         categories: [CategoryList.Item],
         events: IdentifiedArrayOf<EventTreeValue>,
         selectedEvent: Binding<EventItem?>,
-        selectedCategory: Binding<CategoryList.Item?>
+        selectedCategory: Binding<CategoryList.Item?>,
+        startAction: @escaping () -> Void,
+        addEventAction: @escaping () -> Void,
+        addCategoryAction: @escaping () -> Void
     ) {
         self.categories = categories
         self.events = events
         self._selectedEvent = selectedEvent
         self._selectedCategory = selectedCategory
+        self.startAction = startAction
+        self.addEventAction = addEventAction
+        self.addCategoryAction = addCategoryAction
     }
     
     public var body: some View {
@@ -81,7 +90,28 @@ public struct EventSelector: View {
                         selectedCategory = item
                         showCategoryMenu = false
                     }
-                }.navigationTitle("事件分类")
+                }
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: addCategoryAction) {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+                .dismissBtn()
+                .navigationTitle("事件分类")
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    Button(action: addEventAction) {
+                        Image(systemName: "plus")
+                    }
+                    Button(action: startAction) {
+                        Image(systemName: "restart")
+                    }.disabled(selectedEvent == nil)
+                }
             }
         }
         .onChange(of: selectedCategory) { _, _ in
@@ -182,7 +212,16 @@ extension EventSelector {
                         categories: categories,
                         events: tasks,
                         selectedEvent: $selectedEvent,
-                        selectedCategory: $selectedCategory
+                        selectedCategory: $selectedCategory,
+                        startAction: {
+                            print("start: \(selectedEvent?.name ?? "")")
+                        },
+                        addEventAction: {
+                            print("add event")
+                        },
+                        addCategoryAction: {
+                            print("should add category")
+                        }
                     ).navigationTitle("测试 Title")
                 } label: {
                     Text("go to select, current is: \(selectedEvent?.name ?? "null")")
