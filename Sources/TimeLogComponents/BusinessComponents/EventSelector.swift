@@ -9,11 +9,11 @@ import SwiftUI
 import IdentifiedCollections
 
 public struct EventSelector: View {
-    let categories: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>
+    let categories: [CategoryList.Item]
     let events: IdentifiedArrayOf<EventTreeValue>
     
     @Binding private var selectedEvent: EventItem?
-    @Binding var selectedCategory: MenuSidebar.SidebarMenuValue?
+    @Binding var selectedCategory: CategoryList.Item?
     
     @State private var searchText: String = ""
     @State private var showCategoryMenu = false
@@ -29,10 +29,10 @@ public struct EventSelector: View {
     }
     
     public init(
-        categories: IdentifiedArrayOf<MenuSidebar.TreeMenuValue>,
+        categories: [CategoryList.Item],
         events: IdentifiedArrayOf<EventTreeValue>,
         selectedEvent: Binding<EventItem?>,
-        selectedCategory: Binding<MenuSidebar.SidebarMenuValue?>
+        selectedCategory: Binding<CategoryList.Item?>
     ) {
         self.categories = categories
         self.events = events
@@ -76,7 +76,12 @@ public struct EventSelector: View {
         }
         .sheet(isPresented: $showCategoryMenu) {
             NavigationStack {
-                TaskSearchMenu.Sheet(menus: categories, selection: $selectedCategory)
+                CategoryList(categories: categories) { item in
+                    withAnimation {
+                        selectedCategory = item
+                        showCategoryMenu = false
+                    }
+                }.navigationTitle("事件分类")
             }
         }
         .onChange(of: selectedCategory) { _, _ in
@@ -91,7 +96,12 @@ public struct EventSelector: View {
         } label: {
             HStack {
                 if let selectedCategory {
-                    MenuSidebar.MenuCellContent(selectedCategory, addSpacer: false)
+                    selectedCategory.color
+                        .clipShape(Circle())
+                        .frame(width: 10, height: 10)
+                        
+                    Text(selectedCategory.name)
+                        .lineLimit(2)
                 } else {
                     Text("所有分类")
                 }
@@ -130,35 +140,16 @@ extension EventSelector {
 
 #Preview {
     struct Playground:View {
-        let menus: IdentifiedArrayOf<MenuSidebar.TreeMenuValue> = .init(uniqueElements: [
-            .init(value: .init(
-                id: UUID().uuidString,
-                text: "menu1",
-                mode: .selectable,
-                icon: .init(name: "airpod.right")
-            )),
-            .init(value: .init(
-                id: UUID().uuidString,
-                text: "menu2",
-                mode: .selectable
-            )),
-            .init(value: .init(
-                id: UUID().uuidString,
-                text: "tags",
-                mode: .readonly
-            ), children: .init(uniqueElements: [
-                .init(value: .init(
-                    id: UUID().uuidString,
-                    text: "menu3-1",
-                    mode: .selectable
-                )),
-                .init(value: .init(
-                    id: UUID().uuidString,
-                    text: "menu3-2",
-                    mode: .selectable
-                )),
-            ]))
-        ])
+        let categories: [CategoryList.Item] = [
+            .init(id: UUID().uuidString, name: "学习投入投入", color: .red, count: 5),
+            .init(id: UUID().uuidString, name: "兴趣投入", color: .green, count: 3),
+            .init(id: UUID().uuidString, name: "语言学习", color: .blue, count: 5),
+            .init(id: UUID().uuidString, name: "工作投入", color: .cyan, count: 5),
+            .init(id: UUID().uuidString, name: "健康投入超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长", color: .red, count: 5),
+            .init(id: UUID().uuidString, name: "运动投入", color: .green, count: 5),
+            .init(id: UUID().uuidString, name: "感情投入", color: .brown, count: 5),
+            .init(id: UUID().uuidString, name: "感情投入", color: .black, count: 5)
+        ]
         let tasks: IdentifiedArrayOf<EventSelector.EventTreeValue> = .init(uniqueElements: [
             .init(value: .init(
                 id: UUID().uuidString,
@@ -181,20 +172,20 @@ extension EventSelector {
             .init(value: .init(id: UUID().uuidString, name: "任务17")),
         ])
         
-        @State private var selectedMenu: MenuSidebar.SidebarMenuValue? = nil
-        @State private var selectedTask: EventSelector.EventItem? = nil
+        @State private var selectedCategory: CategoryList.Item? = nil
+        @State private var selectedEvent: EventSelector.EventItem? = nil
         
         var body: some View {
             NavigationStack {
                 NavigationLink {
                     EventSelector(
-                        categories: menus,
+                        categories: categories,
                         events: tasks,
-                        selectedEvent: $selectedTask,
-                        selectedCategory: $selectedMenu
+                        selectedEvent: $selectedEvent,
+                        selectedCategory: $selectedCategory
                     ).navigationTitle("测试 Title")
                 } label: {
-                    Text("go to select, current is: \(selectedTask?.name ?? "null")")
+                    Text("go to select, current is: \(selectedEvent?.name ?? "null")")
                 }
                 
             }

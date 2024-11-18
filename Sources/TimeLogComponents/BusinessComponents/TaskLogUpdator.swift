@@ -38,35 +38,16 @@ public struct TaskLogUpdator: View {
 
 #Preview {
     struct Playground: View {
-        let menus: IdentifiedArrayOf<MenuSidebar.TreeMenuValue> = .init(uniqueElements: [
-            .init(value: .init(
-                id: UUID().uuidString,
-                text: "menu1",
-                mode: .selectable,
-                icon: .init(name: "airpod.right")
-            )),
-            .init(value: .init(
-                id: UUID().uuidString,
-                text: "menu2",
-                mode: .selectable
-            )),
-            .init(value: .init(
-                id: UUID().uuidString,
-                text: "tags",
-                mode: .readonly
-            ), children: .init(uniqueElements: [
-                .init(value: .init(
-                    id: UUID().uuidString,
-                    text: "menu3-1",
-                    mode: .selectable
-                )),
-                .init(value: .init(
-                    id: UUID().uuidString,
-                    text: "menu3-2",
-                    mode: .selectable
-                )),
-            ]))
-        ])
+        let categories: [CategoryList.Item] = [
+            .init(id: UUID().uuidString, name: "学习投入投入", color: .red, count: 5),
+            .init(id: UUID().uuidString, name: "兴趣投入", color: .green, count: 3),
+            .init(id: UUID().uuidString, name: "语言学习", color: .blue, count: 5),
+            .init(id: UUID().uuidString, name: "工作投入", color: .cyan, count: 5),
+            .init(id: UUID().uuidString, name: "健康投入超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长超长", color: .red, count: 5),
+            .init(id: UUID().uuidString, name: "运动投入", color: .green, count: 5),
+            .init(id: UUID().uuidString, name: "感情投入", color: .brown, count: 5),
+            .init(id: UUID().uuidString, name: "感情投入", color: .black, count: 5)
+        ]
         let tasks: IdentifiedArrayOf<EventSelector.EventTreeValue> = .init(uniqueElements: [
             .init(
                 value: .init(id: UUID().uuidString, name: "任务1"),
@@ -82,25 +63,25 @@ public struct TaskLogUpdator: View {
         @State private var endTime: Date = .now
         @StateObject private var editorVM = RichTextEditor.ViewModel()
         
-        @State private var selectedMenu: MenuSidebar.SidebarMenuValue? = nil
-        @State private var selectedTask: EventSelector.EventItem? = nil
+        @State private var selectedCategory: CategoryList.Item? = nil
+        @State private var selectedEvent: EventSelector.EventItem? = nil
         
         var body: some View {
             NavigationStack {
                 VStack {
                     NavigationLink {
                         EventSelector(
-                            categories: menus,
+                            categories: categories,
                             events: tasks,
-                            selectedEvent: $selectedTask,
-                            selectedCategory: $selectedMenu
+                            selectedEvent: $selectedEvent,
+                            selectedCategory: $selectedCategory
                         )
                     } label: {
                         HStack {
                             Text("任务")
                                 .foregroundStyle(.primary)
                             Spacer()
-                            Text("task: \(selectedTask?.name ?? "empty")")
+                            Text("task: \(selectedEvent?.name ?? "empty")")
                         }
                     }
                     
