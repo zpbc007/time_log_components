@@ -11,7 +11,7 @@ import IdentifiedCollections
 public struct EventSelector: View {
     let categories: [CategoryList.Item]
     let events: IdentifiedArrayOf<EventTreeValue>
-    let startAction: () -> Void
+    let startAction: Optional<() -> Void>
     let addEventAction: () -> Void
     let addCategoryAction: () -> Void
     
@@ -47,6 +47,23 @@ public struct EventSelector: View {
         self.startAction = startAction
         self.addEventAction = addEventAction
         self.addCategoryAction = addCategoryAction
+    }
+    
+    public init(
+        categories: [CategoryList.Item],
+        events: IdentifiedArrayOf<EventTreeValue>,
+        selectedEvent: Binding<EventItem?>,
+        selectedCategory: Binding<CategoryList.Item?>,
+        addEventAction: @escaping () -> Void,
+        addCategoryAction: @escaping () -> Void
+    ) {
+        self.categories = categories
+        self.events = events
+        self._selectedEvent = selectedEvent
+        self._selectedCategory = selectedCategory
+        self.addEventAction = addEventAction
+        self.addCategoryAction = addCategoryAction
+        self.startAction = nil
     }
     
     public var body: some View {
@@ -108,9 +125,12 @@ public struct EventSelector: View {
                     Button(action: addEventAction) {
                         Image(systemName: "plus")
                     }
-                    Button(action: startAction) {
-                        Image(systemName: "restart")
-                    }.disabled(selectedEvent == nil)
+                    
+                    if let startAction {
+                        Button(action: startAction) {
+                            Image(systemName: "restart")
+                        }.disabled(selectedEvent == nil)
+                    }
                 }
             }
         }
@@ -204,29 +224,53 @@ extension EventSelector {
         
         @State private var selectedCategory: CategoryList.Item? = nil
         @State private var selectedEvent: EventSelector.EventItem? = nil
+        @State private var hasStart = false
         
         var body: some View {
             NavigationStack {
-                NavigationLink {
-                    EventSelector(
-                        categories: categories,
-                        events: tasks,
-                        selectedEvent: $selectedEvent,
-                        selectedCategory: $selectedCategory,
-                        startAction: {
-                            print("start: \(selectedEvent?.name ?? "")")
-                        },
-                        addEventAction: {
-                            print("add event")
-                        },
-                        addCategoryAction: {
-                            print("should add category")
+                VStack {
+                    Button("\(hasStart ? "hasStart" : "no start")") {
+                        hasStart.toggle()
+                    }
+                    if hasStart {
+                        NavigationLink {
+                            EventSelector(
+                                categories: categories,
+                                events: tasks,
+                                selectedEvent: $selectedEvent,
+                                selectedCategory: $selectedCategory,
+                                startAction: {
+                                    print("start: \(selectedEvent?.name ?? "")")
+                                },
+                                addEventAction: {
+                                    print("add event")
+                                },
+                                addCategoryAction: {
+                                    print("should add category")
+                                }
+                            ).navigationTitle("测试 Title")
+                        } label: {
+                            Text("go to select, current is: \(selectedEvent?.name ?? "null")")
                         }
-                    ).navigationTitle("测试 Title")
-                } label: {
-                    Text("go to select, current is: \(selectedEvent?.name ?? "null")")
+                    } else {
+                        NavigationLink {
+                            EventSelector(
+                                categories: categories,
+                                events: tasks,
+                                selectedEvent: $selectedEvent,
+                                selectedCategory: $selectedCategory,
+                                addEventAction: {
+                                    print("add event")
+                                },
+                                addCategoryAction: {
+                                    print("should add category")
+                                }
+                            ).navigationTitle("测试 Title")
+                        } label: {
+                            Text("go to select, current is: \(selectedEvent?.name ?? "null")")
+                        }
+                    }
                 }
-                
             }
         }
     }
