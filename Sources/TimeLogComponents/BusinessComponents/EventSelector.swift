@@ -9,7 +9,7 @@ import SwiftUI
 import IdentifiedCollections
 
 public struct EventSelector {
-    struct MainView<CategoryEditor: View>: View {
+    public struct MainView<CategoryEditor: View>: View {
         let categories: [CategoryList.Item]
         let events: IdentifiedArrayOf<EventSelector.EventTreeValue>
         let startAction: Optional<() -> Void>
