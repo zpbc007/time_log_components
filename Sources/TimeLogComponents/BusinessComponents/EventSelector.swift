@@ -12,6 +12,7 @@ public struct EventSelector: View {
     let categories: [CategoryList.Item]
     let events: IdentifiedArrayOf<EventTreeValue>
     let startAction: Optional<() -> Void>
+    let editCategoryAction: Optional<(CategoryList.Item) -> Void>
     let addEventAction: () -> Void
     let addCategoryAction: () -> Void
     
@@ -46,7 +47,8 @@ public struct EventSelector: View {
             selectedCategory: selectedCategory,
             addEventAction: addEventAction,
             addCategoryAction: addCategoryAction,
-            startAction: nil
+            startAction: nil,
+            editCategoryAction: nil
         )
     }
     
@@ -66,7 +68,8 @@ public struct EventSelector: View {
             selectedCategory: selectedCategory,
             addEventAction: addEventAction,
             addCategoryAction: addCategoryAction,
-            startAction: startAction
+            startAction: startAction,
+            editCategoryAction: nil
         )
     }
     
@@ -77,7 +80,8 @@ public struct EventSelector: View {
         selectedCategory: Binding<CategoryList.Item?>,
         addEventAction: @escaping () -> Void,
         addCategoryAction: @escaping () -> Void,
-        startAction: Optional<() -> Void>
+        startAction: Optional<() -> Void>,
+        editCategoryAction: Optional<(CategoryList.Item) -> Void>
     ) {
         self.categories = categories
         self.events = events
@@ -86,6 +90,7 @@ public struct EventSelector: View {
         self.startAction = startAction
         self.addEventAction = addEventAction
         self.addCategoryAction = addCategoryAction
+        self.editCategoryAction = editCategoryAction
     }
     
     public var body: some View {
@@ -124,12 +129,16 @@ public struct EventSelector: View {
         }
         .sheet(isPresented: $showCategoryMenu) {
             NavigationStack {
-                CategoryList(categories: categories) { item in
-                    withAnimation {
-                        selectedCategory = item
-                        showCategoryMenu = false
-                    }
-                }
+                CategoryList(
+                    categories: categories,
+                    tapAction: { item in
+                        withAnimation {
+                            selectedCategory = item
+                            showCategoryMenu = false
+                        }
+                    }, 
+                    editAction: self.editCategoryAction
+                )
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: addCategoryAction) {
@@ -247,50 +256,56 @@ extension EventSelector {
         @State private var selectedCategory: CategoryList.Item? = nil
         @State private var selectedEvent: EventSelector.EventItem? = nil
         @State private var hasStart = false
+        @State private var hasCategoryEdit = false
+        
+        private var startAction: Optional<() -> Void> {
+            guard hasStart else {
+                return nil
+            }
+            
+            return {
+                print("start: \(selectedEvent?.name ?? "")")
+            }
+        }
+        
+        private var editCategoryAction: Optional<(CategoryList.Item) -> Void> {
+            guard hasCategoryEdit else {
+                return nil
+            }
+            
+            return { item in
+                print("edit: \(item.name)")
+            }
+        }
         
         var body: some View {
             NavigationStack {
                 VStack {
-                    Button("\(hasStart ? "hasStart" : "no start")") {
+                    Button("hasStart: \(hasStart ? "yes" : "no")") {
                         hasStart.toggle()
                     }
-                    if hasStart {
-                        NavigationLink {
-                            EventSelector(
-                                categories: categories,
-                                events: tasks,
-                                selectedEvent: $selectedEvent,
-                                selectedCategory: $selectedCategory,
-                                startAction: {
-                                    print("start: \(selectedEvent?.name ?? "")")
-                                },
-                                addEventAction: {
-                                    print("add event")
-                                },
-                                addCategoryAction: {
-                                    print("should add category")
-                                }
-                            ).navigationTitle("测试 Title")
-                        } label: {
-                            Text("go to select, current is: \(selectedEvent?.name ?? "null")")
-                        }
-                    } else {
-                        NavigationLink {
-                            EventSelector(
-                                categories: categories,
-                                events: tasks,
-                                selectedEvent: $selectedEvent,
-                                selectedCategory: $selectedCategory,
-                                addEventAction: {
-                                    print("add event")
-                                },
-                                addCategoryAction: {
-                                    print("should add category")
-                                }
-                            ).navigationTitle("测试 Title")
-                        } label: {
-                            Text("go to select, current is: \(selectedEvent?.name ?? "null")")
-                        }
+                    
+                    Button("hasEdit: \(hasCategoryEdit ? "yes" : "no")") {
+                        hasCategoryEdit.toggle()
+                    }
+                    
+                    NavigationLink {
+                        EventSelector(
+                            categories: categories,
+                            events: tasks,
+                            selectedEvent: $selectedEvent,
+                            selectedCategory: $selectedCategory,
+                            addEventAction: {
+                                print("add event")
+                            },
+                            addCategoryAction: {
+                                print("should add category")
+                            },
+                            startAction: self.startAction,
+                            editCategoryAction: self.editCategoryAction
+                        ).navigationTitle("测试 Title")
+                    } label: {
+                        Text("go to select, current is: \(selectedEvent?.name ?? "null")")
                     }
                 }
             }

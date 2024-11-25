@@ -10,13 +10,16 @@ import SwiftUI
 public struct CategoryList: View {
     let categories: [Item]
     let tapAction: (Item) -> Void
+    let editAction: Optional<(Item) -> Void>
     
     public init(
         categories: [Item],
-        tapAction: @escaping (Item) -> Void
+        tapAction: @escaping (Item) -> Void,
+        editAction: Optional<(Item) -> Void>
     ) {
         self.categories = categories
         self.tapAction = tapAction
+        self.editAction = editAction
     }
     
     public var body: some View {
@@ -26,26 +29,13 @@ public struct CategoryList: View {
             ], spacing: 20) {
                 ForEach(categories) { item in
                     VStack(spacing: 5) {
-                        Spacer()
+                        self.buildHeader(item)
                         
-                        Text(item.name)
-                            .lineLimit(2)
-                            .font(.title3)
-                            .bold()
-                            .padding(.top)
+                        self.buildText(item)
                         
                         Spacer()
                         
-                        HStack {
-                            HStack {}
-                                .frame(width: 15, height: 15)
-                                .background(item.color, in: Circle())
-                            
-                            Spacer()
-                            
-                            Text("\(item.count)")
-                                .font(.callout)
-                        }.padding(.bottom)
+                        self.buildFooter(item)
                     }
                     .frame(width: 140, height: 135)
                     .padding(.horizontal)
@@ -56,6 +46,46 @@ public struct CategoryList: View {
                 }
             }
         }.padding(.horizontal)
+    }
+    
+    @ViewBuilder
+    private func buildHeader(_ item: Item) -> some View {
+        if let editAction {
+            HStack {
+                Spacer()
+                
+                Image(systemName: "square.and.pencil")
+                    .onTapGesture(perform: {
+                        editAction(item)
+                    })
+                    .padding(.vertical)
+                    .clipShape(.rect)
+            }
+        } else {
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    private func buildText(_ item: Item) -> some View {
+        Text(item.name)
+            .lineLimit(2)
+            .font(.title3)
+            .bold()
+    }
+    
+    @ViewBuilder
+    private func buildFooter(_ item: Item) -> some View {
+        HStack {
+            HStack {}
+                .frame(width: 15, height: 15)
+                .background(item.color, in: Circle())
+            
+            Spacer()
+            
+            Text("\(item.count)")
+                .font(.callout)
+        }.padding(.bottom)
     }
 }
 
@@ -92,11 +122,32 @@ extension CategoryList {
             .init(id: UUID().uuidString, name: "感情投入", color: .brown, count: 5),
             .init(id: UUID().uuidString, name: "感情投入", color: .black, count: 5)
         ]
+        @State private var canEdit = false
+        
+        private var editAction: Optional<(CategoryList.Item) -> Void> {
+            guard canEdit else {
+                return nil
+            }
+            
+            return { item in
+                print("edit \(item.name)")
+            }
+        }
         
         var body: some View {
             NavigationStack {
-                CategoryList(categories: categories) { item in
-                    print("tap: \(item.name)")
+                VStack {
+                    Button("canEdit: \(canEdit ? "yes" : "no")") {
+                        canEdit.toggle()
+                    }
+                    
+                    CategoryList(
+                        categories: categories,
+                        tapAction: { item in
+                            print("tap: \(item.name)")
+                        },
+                        editAction: editAction
+                    )
                 }
             }
         }
