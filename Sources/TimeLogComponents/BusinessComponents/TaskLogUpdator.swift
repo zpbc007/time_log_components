@@ -65,23 +65,29 @@ public struct TaskLogUpdator: View {
         
         @State private var selectedCategory: CategoryList.Item? = nil
         @State private var selectedEvent: EventSelector.EventItem? = nil
-        
+        @State private var showCategoryEditor = false
+
         var body: some View {
             NavigationStack {
                 VStack {
                     NavigationLink {
-                        EventSelector(
+                        EventSelector.MainView(
                             categories: categories,
                             events: tasks,
                             selectedEvent: $selectedEvent,
-                            selectedCategory: $selectedCategory
-                        ) {
-                            print("start")
-                        } addEventAction: {
-                            print("add event")
-                        } addCategoryAction: {
-                            print("should add category")
-                        }
+                            selectedCategory: $selectedCategory,
+                            showCategoryEditor: $showCategoryEditor,
+                            addEventAction: {
+                               print("add event")
+                            },
+                            startAction: {
+                                print("start")
+                            },
+                            editCategoryAction: nil,
+                            buildCategoryEditor: {
+                               Text("editor")
+                           }
+                        )
                     } label: {
                         HStack {
                             Text("任务")

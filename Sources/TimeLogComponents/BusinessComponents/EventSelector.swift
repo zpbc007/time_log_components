@@ -8,199 +8,172 @@
 import SwiftUI
 import IdentifiedCollections
 
-public struct EventSelector: View {
-    let categories: [CategoryList.Item]
-    let events: IdentifiedArrayOf<EventTreeValue>
-    let startAction: Optional<() -> Void>
-    let editCategoryAction: Optional<(CategoryList.Item) -> Void>
-    let addEventAction: () -> Void
-    let addCategoryAction: () -> Void
-    
-    @Binding private var selectedEvent: EventItem?
-    @Binding var selectedCategory: CategoryList.Item?
-    
-    @State private var searchText: String = ""
-    @State private var showCategoryMenu = false
-    
-    private var filteredEvents: IdentifiedArrayOf<EventTreeValue> {
-        if (searchText.isEmpty) {
-            return events
+public struct EventSelector {
+    struct MainView<CategoryEditor: View>: View {
+        let categories: [CategoryList.Item]
+        let events: IdentifiedArrayOf<EventSelector.EventTreeValue>
+        let startAction: Optional<() -> Void>
+        let editCategoryAction: Optional<(CategoryList.Item) -> Void>
+        let addEventAction: () -> Void
+        let buildCategoryEditor: () -> CategoryEditor
+        
+        @Binding var selectedEvent: EventItem?
+        @Binding var selectedCategory: CategoryList.Item?
+        @Binding var showCategoryEditor: Bool
+        
+        @State private var searchText: String = ""
+        @State private var showCategoryMenu = false
+        
+        private var filteredEvents: IdentifiedArrayOf<EventSelector.EventTreeValue> {
+            if (searchText.isEmpty) {
+                return events
+            }
+            
+            return CommonTreeNode.filter(tree: events) { node in
+                node.name.contains(searchText)
+            }
         }
         
-        return CommonTreeNode.filter(tree: events) { node in
-            node.name.contains(searchText)
+        public init(
+            categories: [CategoryList.Item],
+            events: IdentifiedArrayOf<EventSelector.EventTreeValue>,
+            selectedEvent: Binding<EventItem?>,
+            selectedCategory: Binding<CategoryList.Item?>,
+            showCategoryEditor: Binding<Bool>,
+            addEventAction: @escaping () -> Void,
+            startAction: Optional<() -> Void>,
+            editCategoryAction: Optional<(CategoryList.Item) -> Void>,
+            @ViewBuilder
+            buildCategoryEditor: @escaping () -> CategoryEditor
+        ) {
+            self.categories = categories
+            self.events = events
+            self._selectedEvent = selectedEvent
+            self._selectedCategory = selectedCategory
+            self._showCategoryEditor = showCategoryEditor
+            self.startAction = startAction
+            self.addEventAction = addEventAction
+            self.editCategoryAction = editCategoryAction
+            self.buildCategoryEditor = buildCategoryEditor
         }
-    }
-    
-    public init(
-        categories: [CategoryList.Item],
-        events: IdentifiedArrayOf<EventTreeValue>,
-        selectedEvent: Binding<EventItem?>,
-        selectedCategory: Binding<CategoryList.Item?>,
-        addEventAction: @escaping () -> Void,
-        addCategoryAction: @escaping () -> Void
-    ) {
-        self.init(
-            categories: categories,
-            events: events,
-            selectedEvent: selectedEvent,
-            selectedCategory: selectedCategory,
-            addEventAction: addEventAction,
-            addCategoryAction: addCategoryAction,
-            startAction: nil,
-            editCategoryAction: nil
-        )
-    }
-    
-    public init(
-        categories: [CategoryList.Item],
-        events: IdentifiedArrayOf<EventTreeValue>,
-        selectedEvent: Binding<EventItem?>,
-        selectedCategory: Binding<CategoryList.Item?>,
-        startAction: @escaping () -> Void,
-        addEventAction: @escaping () -> Void,
-        addCategoryAction: @escaping () -> Void
-    ) {
-        self.init(
-            categories: categories,
-            events: events,
-            selectedEvent: selectedEvent,
-            selectedCategory: selectedCategory,
-            addEventAction: addEventAction,
-            addCategoryAction: addCategoryAction,
-            startAction: startAction,
-            editCategoryAction: nil
-        )
-    }
-    
-    public init(
-        categories: [CategoryList.Item],
-        events: IdentifiedArrayOf<EventTreeValue>,
-        selectedEvent: Binding<EventItem?>,
-        selectedCategory: Binding<CategoryList.Item?>,
-        addEventAction: @escaping () -> Void,
-        addCategoryAction: @escaping () -> Void,
-        startAction: Optional<() -> Void>,
-        editCategoryAction: Optional<(CategoryList.Item) -> Void>
-    ) {
-        self.categories = categories
-        self.events = events
-        self._selectedEvent = selectedEvent
-        self._selectedCategory = selectedCategory
-        self.startAction = startAction
-        self.addEventAction = addEventAction
-        self.addCategoryAction = addCategoryAction
-        self.editCategoryAction = editCategoryAction
-    }
-    
-    public var body: some View {
-        Form {
-            TextField("搜索", text: $searchText)
-            
-            Section(header: self.EventsHeader) {
-                if filteredEvents.isEmpty {
-                    self.EmptyEventView
-                } else {
-                    List {
-                        OutlineGroup(filteredEvents, children: \.children) { item in
-                            Group {
-                                HStack {
-                                    if item.id == selectedEvent?.id {
-                                        Text(item.value.name)
-                                            .lineLimit(1)
-                                            .foregroundStyle(.selection)
-                                    } else {
-                                        Text(item.value.name)
-                                            .lineLimit(1)
-                                            .foregroundStyle(.primary)
+        
+        public var body: some View {
+            Form {
+                TextField("搜索", text: $searchText)
+                
+                Section(header: self.EventsHeader) {
+                    if filteredEvents.isEmpty {
+                        self.EmptyEventView
+                    } else {
+                        List {
+                            OutlineGroup(filteredEvents, children: \.children) { item in
+                                Group {
+                                    HStack {
+                                        if item.id == selectedEvent?.id {
+                                            Text(item.value.name)
+                                                .lineLimit(1)
+                                                .foregroundStyle(.selection)
+                                        } else {
+                                            Text(item.value.name)
+                                                .lineLimit(1)
+                                                .foregroundStyle(.primary)
+                                        }
+                                        
+                                        Spacer()
                                     }
-                                    
-                                    Spacer()
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selectedEvent = item.value
                                 }
                             }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedEvent = item.value
+                        }
+                    }
+                }
+            }
+            .sheet(isPresented: $showCategoryMenu) {
+                NavigationStack {
+                    ZStack {
+                        CategoryList(
+                            categories: categories,
+                            tapAction: { item in
+                                withAnimation {
+                                    selectedCategory = item
+                                    showCategoryMenu = false
+                                }
+                            },
+                            editAction: self.editCategoryAction
+                        )
+                        
+                        if showCategoryEditor {
+                            buildCategoryEditor()
+                        }
+                    }
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button(action: {
+                                showCategoryEditor = true
+                            }) {
+                                Image(systemName: "plus")
                             }
                         }
                     }
+                    .dismissBtn()
+                    .navigationTitle("事件分类")
                 }
             }
-        }
-        .sheet(isPresented: $showCategoryMenu) {
-            NavigationStack {
-                CategoryList(
-                    categories: categories,
-                    tapAction: { item in
-                        withAnimation {
-                            selectedCategory = item
-                            showCategoryMenu = false
-                        }
-                    }, 
-                    editAction: self.editCategoryAction
-                )
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: addCategoryAction) {
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack {
+                        Button(action: addEventAction) {
                             Image(systemName: "plus")
                         }
+                        
+                        if let startAction {
+                            Button(action: startAction) {
+                                Image(systemName: "restart")
+                            }.disabled(selectedEvent == nil)
+                        }
                     }
                 }
-                .dismissBtn()
-                .navigationTitle("事件分类")
+            }
+            .onChange(of: selectedCategory) { _, _ in
+                searchText = ""
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+        
+        @ViewBuilder
+        private var EventsHeader: some View {
+            Button {
+                showCategoryMenu = true
+            } label: {
                 HStack {
-                    Button(action: addEventAction) {
-                        Image(systemName: "plus")
+                    if let selectedCategory {
+                        selectedCategory.color
+                            .clipShape(Circle())
+                            .frame(width: 10, height: 10)
+                            
+                        Text(selectedCategory.name)
+                            .lineLimit(2)
+                    } else {
+                        Text("所有分类")
                     }
                     
-                    if let startAction {
-                        Button(action: startAction) {
-                            Image(systemName: "restart")
-                        }.disabled(selectedEvent == nil)
-                    }
+                    Image(systemName: "chevron.right")
+                    
+                    Spacer()
                 }
+                .font(.caption)
             }
         }
-        .onChange(of: selectedCategory) { _, _ in
-            searchText = ""
-        }
-    }
-    
-    @ViewBuilder
-    private var EventsHeader: some View {
-        Button {
-            showCategoryMenu = true
-        } label: {
+        
+        @ViewBuilder
+        private var EmptyEventView: some View {
             HStack {
-                if let selectedCategory {
-                    selectedCategory.color
-                        .clipShape(Circle())
-                        .frame(width: 10, height: 10)
-                        
-                    Text(selectedCategory.name)
-                        .lineLimit(2)
-                } else {
-                    Text("所有分类")
-                }
-                
-                Image(systemName: "chevron.right")
-                
+                Spacer()
+                Text("无事件")
                 Spacer()
             }
-            .font(.caption)
-        }
-    }
-    
-    @ViewBuilder
-    private var EmptyEventView: some View {
-        HStack {
-            Spacer()
-            Text("无事件")
-            Spacer()
         }
     }
 }
@@ -257,6 +230,7 @@ extension EventSelector {
         @State private var selectedEvent: EventSelector.EventItem? = nil
         @State private var hasStart = false
         @State private var hasCategoryEdit = false
+        @State private var showCategoryEditor = false
         
         private var startAction: Optional<() -> Void> {
             guard hasStart else {
@@ -290,19 +264,20 @@ extension EventSelector {
                     }
                     
                     NavigationLink {
-                        EventSelector(
+                        EventSelector.MainView(
                             categories: categories,
                             events: tasks,
                             selectedEvent: $selectedEvent,
                             selectedCategory: $selectedCategory,
+                            showCategoryEditor: $showCategoryEditor,
                             addEventAction: {
                                 print("add event")
                             },
-                            addCategoryAction: {
-                                print("should add category")
-                            },
                             startAction: self.startAction,
-                            editCategoryAction: self.editCategoryAction
+                            editCategoryAction: self.editCategoryAction,
+                            buildCategoryEditor: {
+                                Text("editor")
+                            }
                         ).navigationTitle("测试 Title")
                     } label: {
                         Text("go to select, current is: \(selectedEvent?.name ?? "null")")
