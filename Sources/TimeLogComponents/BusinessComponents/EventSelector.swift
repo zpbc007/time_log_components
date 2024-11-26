@@ -9,17 +9,22 @@ import SwiftUI
 import IdentifiedCollections
 
 public struct EventSelector {
+    public enum CategoryEditorStatus: Equatable {
+        case hidden
+        case addVisible
+        case editVisible(CategoryList.Item)
+    }
+    
     public struct MainView<CategoryEditor: View>: View {
         let categories: [CategoryList.Item]
         let events: IdentifiedArrayOf<EventSelector.EventTreeValue>
         let startAction: Optional<() -> Void>
-        let editCategoryAction: Optional<(CategoryList.Item) -> Void>
         let addEventAction: () -> Void
         let buildCategoryEditor: () -> CategoryEditor
         
         @Binding var selectedEvent: EventItem?
         @Binding var selectedCategory: CategoryList.Item?
-        @Binding var showCategoryEditor: Bool
+        @Binding var categoryEditorStatus: EventSelector.CategoryEditorStatus
         
         @State private var searchText: String = ""
         @State private var showCategoryMenu = false
@@ -39,10 +44,9 @@ public struct EventSelector {
             events: IdentifiedArrayOf<EventSelector.EventTreeValue>,
             selectedEvent: Binding<EventItem?>,
             selectedCategory: Binding<CategoryList.Item?>,
-            showCategoryEditor: Binding<Bool>,
+            categoryEditorStatus: Binding<EventSelector.CategoryEditorStatus>,
             addEventAction: @escaping () -> Void,
             startAction: Optional<() -> Void>,
-            editCategoryAction: Optional<(CategoryList.Item) -> Void>,
             @ViewBuilder
             buildCategoryEditor: @escaping () -> CategoryEditor
         ) {
@@ -50,10 +54,9 @@ public struct EventSelector {
             self.events = events
             self._selectedEvent = selectedEvent
             self._selectedCategory = selectedCategory
-            self._showCategoryEditor = showCategoryEditor
+            self._categoryEditorStatus = categoryEditorStatus
             self.startAction = startAction
             self.addEventAction = addEventAction
-            self.editCategoryAction = editCategoryAction
             self.buildCategoryEditor = buildCategoryEditor
         }
         
@@ -102,17 +105,19 @@ public struct EventSelector {
                                     showCategoryMenu = false
                                 }
                             },
-                            editAction: self.editCategoryAction
+                            editAction: { item in
+                                categoryEditorStatus = .editVisible(item)
+                            }
                         )
                         
-                        if showCategoryEditor {
+                        if categoryEditorStatus != .hidden {
                             buildCategoryEditor()
                         }
                     }
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button(action: {
-                                showCategoryEditor = true
+                                categoryEditorStatus = .addVisible
                             }) {
                                 Image(systemName: "plus")
                             }
@@ -230,7 +235,7 @@ extension EventSelector {
         @State private var selectedEvent: EventSelector.EventItem? = nil
         @State private var hasStart = false
         @State private var hasCategoryEdit = false
-        @State private var showCategoryEditor = false
+        @State private var categoryEditorStatus: EventSelector.CategoryEditorStatus = .hidden
         
         private var startAction: Optional<() -> Void> {
             guard hasStart else {
@@ -239,16 +244,6 @@ extension EventSelector {
             
             return {
                 print("start: \(selectedEvent?.name ?? "")")
-            }
-        }
-        
-        private var editCategoryAction: Optional<(CategoryList.Item) -> Void> {
-            guard hasCategoryEdit else {
-                return nil
-            }
-            
-            return { item in
-                print("edit: \(item.name)")
             }
         }
         
@@ -269,12 +264,11 @@ extension EventSelector {
                             events: tasks,
                             selectedEvent: $selectedEvent,
                             selectedCategory: $selectedCategory,
-                            showCategoryEditor: $showCategoryEditor,
+                            categoryEditorStatus: $categoryEditorStatus,
                             addEventAction: {
                                 print("add event")
                             },
                             startAction: self.startAction,
-                            editCategoryAction: self.editCategoryAction,
                             buildCategoryEditor: {
                                 Text("editor")
                             }
