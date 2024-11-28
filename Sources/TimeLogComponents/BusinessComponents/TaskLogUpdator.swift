@@ -66,6 +66,7 @@ public struct TaskLogUpdator: View {
         @State private var selectedCategory: CategoryList.Item? = nil
         @State private var selectedEvent: EventSelector.EventItem? = nil
         @State private var categoryEditorStatus: EventSelector.CategoryEditorStatus = .hidden
+        @State private var showCategoryMenu: Bool = false
 
         var body: some View {
             NavigationStack {
@@ -77,6 +78,7 @@ public struct TaskLogUpdator: View {
                             selectedEvent: $selectedEvent,
                             selectedCategory: $selectedCategory,
                             categoryEditorStatus: $categoryEditorStatus,
+                            showCategoryMenu: $showCategoryMenu,
                             addEventAction: {
                                print("add event")
                             },

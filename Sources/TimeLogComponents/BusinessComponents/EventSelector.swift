@@ -25,9 +25,9 @@ public struct EventSelector {
         @Binding var selectedEvent: EventItem?
         @Binding var selectedCategory: CategoryList.Item?
         @Binding var categoryEditorStatus: EventSelector.CategoryEditorStatus
+        @Binding var showCategoryMenu: Bool
         
         @State private var searchText: String = ""
-        @State private var showCategoryMenu = false
         
         private var filteredEvents: IdentifiedArrayOf<EventSelector.EventTreeValue> {
             if (searchText.isEmpty) {
@@ -45,6 +45,7 @@ public struct EventSelector {
             selectedEvent: Binding<EventItem?>,
             selectedCategory: Binding<CategoryList.Item?>,
             categoryEditorStatus: Binding<EventSelector.CategoryEditorStatus>,
+            showCategoryMenu: Binding<Bool>,
             addEventAction: @escaping () -> Void,
             startAction: Optional<() -> Void>,
             @ViewBuilder
@@ -55,6 +56,7 @@ public struct EventSelector {
             self._selectedEvent = selectedEvent
             self._selectedCategory = selectedCategory
             self._categoryEditorStatus = categoryEditorStatus
+            self._showCategoryMenu = showCategoryMenu
             self.startAction = startAction
             self.addEventAction = addEventAction
             self.buildCategoryEditor = buildCategoryEditor
@@ -236,6 +238,7 @@ extension EventSelector {
         @State private var hasStart = false
         @State private var hasCategoryEdit = false
         @State private var categoryEditorStatus: EventSelector.CategoryEditorStatus = .hidden
+        @State private var showCategoryMenu = false
         
         private var startAction: Optional<() -> Void> {
             guard hasStart else {
@@ -265,6 +268,7 @@ extension EventSelector {
                             selectedEvent: $selectedEvent,
                             selectedCategory: $selectedCategory,
                             categoryEditorStatus: $categoryEditorStatus,
+                            showCategoryMenu: $showCategoryMenu,
                             addEventAction: {
                                 print("add event")
                             },
