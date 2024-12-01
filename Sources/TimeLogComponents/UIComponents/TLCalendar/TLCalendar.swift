@@ -92,16 +92,25 @@ public struct TLCalendar: View {
             .clipped()
         }
         .onChange(of: page) { oldValue, newValue in
+            let today = Date.now.todayStartPoint
+            var result = today
+            
             if open {
-                selected = self.calculatePageFirstDateForMonth(
+                result = self.calculatePageFirstDateForMonth(
                     newValue, target: (selected, oldValue)
                 )
             } else {
-                selected = self.calculatePageFirstDateForWeek(
+                result = self.calculatePageFirstDateForWeek(
                     newValue,
                     target: (selected, oldValue)
                 )
             }
+            
+            if result > today {
+                result = today
+            }
+            
+            selected = result
         }
     }
     
@@ -146,7 +155,6 @@ public struct TLCalendar: View {
     private func calculatePageFirstDateForWeek(_ page: Int, target: (Date?, Int)? = nil) -> Date {
         let targetDate = target?.0 ?? selected
         let targetPage = target?.1 ?? self.page
-        
         return calendar.date(
             byAdding: .day,
             value: (page - targetPage) * 7,
