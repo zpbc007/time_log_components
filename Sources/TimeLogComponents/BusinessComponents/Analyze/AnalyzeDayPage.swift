@@ -54,8 +54,10 @@ public struct AnalyzeDayPage: View {
                         Spacer()
                     }
                 }
-                
-                if let lineChartValues {
+            }
+            
+            if let lineChartValues {
+                Section("明细") {
                     LineChart(values: lineChartValues)
                 }
             }
