@@ -53,7 +53,7 @@ public struct OverviewDescription: View {
             HStack {
                 Text("\(type.rawValue)共记录")
                 Text(totalTime, format: .number)
-                    .font(.largeTitle)
+                    .font(.title2)
                 Text("次")
             }
             
@@ -61,7 +61,7 @@ public struct OverviewDescription: View {
                 HStack {
                     Text("记录时长")
                     Text(recordDurationString)
-                        .font(.largeTitle)
+                        .font(.title2)
                     Spacer()
                     Text(
                         recordPercent,

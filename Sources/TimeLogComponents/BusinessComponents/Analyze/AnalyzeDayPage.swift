@@ -11,23 +11,23 @@ import IdentifiedCollections
 public struct AnalyzeDayPage: View {
     let type: OverviewDescription.DurationType
     let totalTime: Int
-    let maxTime: Int?
-    let maxTimeName: String?
+    let recordDuration: TimeInterval
+    let blackHoleDuration: TimeInterval
     let pipeChartValues: PipeChart.Values?
     let lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     
     public init(
         type: OverviewDescription.DurationType,
         totalTime: Int,
-        maxTime: Int?,
-        maxTimeName: String?,
+        recordDuration: TimeInterval,
+        blackHoleDuration: TimeInterval,
         pipeChartValues: PipeChart.Values?,
         lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     ) {
         self.type = type
         self.totalTime = totalTime
-        self.maxTime = maxTime
-        self.maxTimeName = maxTimeName
+        self.recordDuration = recordDuration
+        self.blackHoleDuration = blackHoleDuration
         self.pipeChartValues = pipeChartValues
         self.lineChartValues = lineChartValues
     }
@@ -35,12 +35,12 @@ public struct AnalyzeDayPage: View {
     public var body: some View {
         List {
             Section {
-//                OverviewDescription(
-//                    type: type,
-//                    totalTime: totalTime,
-//                    maxTime: maxTime,
-//                    maxTimeName: maxTimeName
-//                )
+                OverviewDescription(
+                    type: type,
+                    totalTime: totalTime,
+                    recordDuration: recordDuration,
+                    blackHoleDuration: blackHoleDuration
+                )
             }
             
             Section("人生时间") {
@@ -67,8 +67,8 @@ public struct AnalyzeDayPage: View {
     AnalyzeDayPage(
         type: .day,
         totalTime: 10,
-        maxTime: 20,
-        maxTimeName: "yyy任务",
+        recordDuration: 2680200,
+        blackHoleDuration: 2680200,
         pipeChartValues: .init(.init(uniqueElements: [
             .init(duration: 36000 , label: "生存", color: .init(hexString: "#FDE7BBFF")),
             .init(duration: 28800, label: "工作", color: .init(hexString: "#81BFDAFF")),
@@ -88,8 +88,8 @@ public struct AnalyzeDayPage: View {
     AnalyzeDayPage(
         type: .day,
         totalTime: 10,
-        maxTime: nil,
-        maxTimeName: nil,
+        recordDuration: 2680200,
+        blackHoleDuration: 2680200,
         pipeChartValues: nil,
         lineChartValues: nil
     )
