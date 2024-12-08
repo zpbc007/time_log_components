@@ -13,10 +13,40 @@ public struct OverviewDescription: View {
         case week = "本周"
         case month = "本月"
     }
+    
     let type: DurationType
+    // 总记录次数
     let totalTime: Int
-    let maxTime: Int?
-    let maxTimeName: String?
+    // 总记录时长
+    let recordDuration: TimeInterval
+    // 黑洞时长
+    let blackHoleDuration: TimeInterval
+    
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var recordPercent: Double {
+        return recordDuration + blackHoleDuration == 0
+            ? 0
+            : recordDuration / (recordDuration + blackHoleDuration)
+    }
+    
+    private var recordDurationString: String {
+        return self.formatInterval(self.recordDuration)
+    }
+    
+    private var blackHoleDurationString: String {
+        return self.formatInterval(self.blackHoleDuration)
+            
+    }
+    
+    private func formatInterval(_ interval: TimeInterval) -> String {
+        Duration.seconds(interval)
+            .formatted(.units(
+                allowed: .init([.days, .hours, .minutes]),
+                width: .narrow,
+                maximumUnitCount: 3
+            ))
+    }
     
     public var body: some View {
         VStack(alignment: .leading, spacing: 15) {
@@ -27,17 +57,19 @@ public struct OverviewDescription: View {
                 Text("次")
             }
             
-            if let maxTime, let maxTimeName {
+            VStack(spacing: 5) {
                 HStack {
-                    Text(maxTimeName)
-                        .bold()
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    Text("记录了")
-                    Text(maxTime, format: .number)
+                    Text("记录时长")
+                    Text(recordDurationString)
                         .font(.largeTitle)
-                    Text("次")
+                    Spacer()
+                    Text(
+                        recordPercent,
+                        format: .percent.precision(.fractionLength(2))
+                    )
                 }
+                
+                ProgressView(value: recordPercent)
             }
         }
     }
@@ -47,8 +79,8 @@ public struct OverviewDescription: View {
     OverviewDescription(
         type: .day,
         totalTime: 10,
-        maxTime: 20,
-        maxTimeName: "yyy任务"
+        recordDuration: 2680200,
+        blackHoleDuration: 2680200
     )
 }
 
@@ -56,7 +88,7 @@ public struct OverviewDescription: View {
     OverviewDescription(
         type: .day,
         totalTime: 10,
-        maxTime: nil,
-        maxTimeName: nil
+        recordDuration: 0,
+        blackHoleDuration: 0
     )
 }

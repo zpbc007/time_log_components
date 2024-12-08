@@ -35,37 +35,28 @@ public struct AnalyzeDayPage: View {
     public var body: some View {
         List {
             Section {
-                OverviewDescription(
-                    type: type,
-                    totalTime: totalTime,
-                    maxTime: maxTime,
-                    maxTimeName: maxTimeName
-                )
+//                OverviewDescription(
+//                    type: type,
+//                    totalTime: totalTime,
+//                    maxTime: maxTime,
+//                    maxTimeName: maxTimeName
+//                )
             }
             
-            Section("四象限") {
+            Section("人生时间") {
                 if let pipeChartValues {
                     PipeChart(values: pipeChartValues)
                 } else {
                     HStack {
                         Spacer()
-                        Text("添加标签为 \"四象限\" 的任务")
+                        Text("暂无数据，快去记录吧")
                             .font(.caption)
                         Spacer()
                     }
                 }
-            }
-            
-            Section("明细") {
+                
                 if let lineChartValues {
                     LineChart(values: lineChartValues)
-                } else {
-                    HStack {
-                        Spacer()
-                        Text("无数据")
-                            .font(.caption)
-                        Spacer()
-                    }
                 }
             }
         }
@@ -79,17 +70,15 @@ public struct AnalyzeDayPage: View {
         maxTime: 20,
         maxTimeName: "yyy任务",
         pipeChartValues: .init(.init(uniqueElements: [
-            .init(duration: 3600, label: "重要紧急", color: .red),
-            .init(duration: 1800, label: "重要不紧急", color: .blue),
-            .init(duration: 3000, label: "不重要不紧急", color: .black),
-            .init(duration: 3000, label: "不重要紧急", color: .green)
+            .init(duration: 36000 , label: "生存", color: .init(hexString: "#FDE7BBFF")),
+            .init(duration: 28800, label: "工作", color: .init(hexString: "#81BFDAFF")),
+            .init(duration: 14400, label: "自由", color: .init(hexString: "#9EDF9CFF"))
         ])),
         lineChartValues: .init(
             uniqueElements: [
-                .init(label: "重要紧急", count: 1, duration: 50, color: .red),
-                .init(label: "重要不紧急", count: 1, duration: 100, color: .blue),
-                .init(label: "不重要不紧急", count: 1, duration: 500, color: .green),
-                .init(label: "不重要紧急", count: 1, duration: 500, color: .green)
+                .init(label: "自由", count: 1, duration: 500, color: .init(hexString: "#9EDF9CFF")),
+                .init(label: "工作", count: 1, duration: 100, color: .init(hexString: "#81BFDAFF")),
+                .init(label: "生存", count: 1, duration: 50, color: .init(hexString: "#FDE7BBFF"))
             ]
         )
     )
