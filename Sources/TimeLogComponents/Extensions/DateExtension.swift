@@ -140,6 +140,16 @@ extension Date {
     public var minute: Int {
         Calendar.current.component(.minute, from: self)
     }
+    
+    public func daysBetween(from: Date, to: Date) -> Int {
+        let components = Calendar.current.dateComponents([.day], from: from, to: to)
+        return components.day ?? 0
+    }
+    
+    public func minutesBetween(to: Date) -> Int {
+        let components = Calendar.current.dateComponents([.minute], from: self, to: to)
+        return components.minute ?? 0
+    }
 }
 
 // MARK: - 内部使用
@@ -178,15 +188,5 @@ extension Date {
         }
         
         return result - 1
-    }
-    
-    func daysBetween(from: Date, to: Date) -> Int {
-        let components = Calendar.current.dateComponents([.day], from: from, to: to)
-        return components.day ?? 0
-    }
-    
-    func minutesBetween(to: Date) -> Int {
-        let components = Calendar.current.dateComponents([.minute], from: self, to: to)
-        return components.minute ?? 0
     }
 }
