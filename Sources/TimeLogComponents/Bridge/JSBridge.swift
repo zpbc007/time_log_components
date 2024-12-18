@@ -160,7 +160,12 @@ public class JSBridge {
     private func evaluateJavaScript(_ jsCommand: String) async -> Any? {
         await withCheckedContinuation { continuation in
             DispatchQueue.main.async { [weak self] in
-                self?.webview?.evaluateJavaScript(jsCommand, completionHandler: { result, _ in
+                guard let webview = self?.webview else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                
+                webview.evaluateJavaScript(jsCommand, completionHandler: { result, _ in
                     continuation.resume(returning: result)
                 })
             }
