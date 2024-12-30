@@ -8,6 +8,8 @@
 import SwiftUI
 
 public struct CommentEditor: View {
+    let placeholder: String
+    let tips: [String]
     let fontColor: Color
     let activeFontColor: Color
     let bgColor: Color
@@ -17,12 +19,16 @@ public struct CommentEditor: View {
     @State private var bottomSize: CGSize = .zero
     
     public init(
+        placeholder: String,
+        tips: [String],
         fontColor: Color,
         activeFontColor: Color,
         bgColor: Color,
         onSendButtonTapped: @escaping () -> Void,
         dismiss: @escaping () -> Void
     ) {
+        self.placeholder = placeholder
+        self.tips = tips
         self.fontColor = fontColor
         self.activeFontColor = activeFontColor
         self.bgColor = bgColor
@@ -33,15 +39,19 @@ public struct CommentEditor: View {
     public var body: some View {
         KeyboardEditor(bgColor: bgColor, dismiss: dismiss) { size in
             VStack(spacing: 0) {
-                RichTextEditor(placeholder: "今日的目标是：", maxHeight: size.height - bottomSize.height)
-                    .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 10))
+                RichTextEditor(
+                    placeholder: placeholder,
+                    maxHeight: size.height - bottomSize.height
+                ).background(
+                    .ultraThickMaterial,
+                    in: RoundedRectangle(cornerRadius: 10)
+                )
                
                 HStack {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("- 今天最重要的事情是什么？")
-                        Text("- 准备做什么让自己更健康？")
-                        Text("- 准备做什么让自己开心？")
-                        Text("- 今天有要学习或者探索的新事物吗？")
+                        ForEach(tips, id: \.self) { tip in
+                            Text(tip)
+                        }
                     }.font(.footnote)
                     .fontWeight(.light)
                     
@@ -83,6 +93,13 @@ public struct CommentEditor: View {
                 
                 if showEditor {
                     CommentEditor(
+                        placeholder: "今日的目标是：",
+                        tips: [
+                            "- 今天最重要的事情是什么？",
+                            "- 准备做什么让自己更健康？",
+                            "- 准备做什么让自己开心？",
+                            "- 今天有要学习或者探索的新事物吗？"
+                        ],
                         fontColor: .primary,
                         activeFontColor: .blue,
                         bgColor: .white
