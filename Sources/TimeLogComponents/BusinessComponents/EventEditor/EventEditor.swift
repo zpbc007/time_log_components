@@ -134,6 +134,8 @@ extension EventEditor {
                     alignment: .topTrailing,
                     content: {
                         Image(imageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
                             .frame(width: 120, height: 120)
                             .offset(y: -120)
                     }
