@@ -5,6 +5,7 @@ import Combine
 
 public struct KeyboardEditor<ContentView: View>: View {
     let bgColor: Color
+    let radiusConfig: RadiusConfig
     let content: (_ size: CGSize) -> ContentView
     let dismiss: () -> Void
     @State private var contentSize: CGSize = .zero
@@ -12,10 +13,12 @@ public struct KeyboardEditor<ContentView: View>: View {
     
     public init(
         bgColor: Color,
+        radiusConfig: RadiusConfig = .init(leading: 10, trailing: 10),
         dismiss: @escaping () -> Void,
         content: @escaping (_ size: CGSize) -> ContentView
     ) {
         self.bgColor = bgColor
+        self.radiusConfig = radiusConfig
         self.dismiss = dismiss
         self.content = content
     }
@@ -46,7 +49,10 @@ public struct KeyboardEditor<ContentView: View>: View {
                 height: contentSize.height - keyboardHeight
             )).background(
                 bgColor,
-                in: .rect(topLeadingRadius: 10, topTrailingRadius: 10)
+                in: .rect(
+                    topLeadingRadius: radiusConfig.leading,
+                    topTrailingRadius: radiusConfig.trailing
+                )
             ).transition(.move(edge: .bottom))
         }.onReceive(
             keyboardHeightPublisher,
@@ -63,6 +69,18 @@ public struct KeyboardEditor<ContentView: View>: View {
             }
             .merge(with: NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification).map { _ in 0 })
             .eraseToAnyPublisher()
+    }
+}
+
+extension KeyboardEditor {
+    public struct RadiusConfig {
+        let leading: CGFloat
+        let trailing: CGFloat
+        
+        public init(leading: CGFloat, trailing: CGFloat) {
+            self.leading = leading
+            self.trailing = trailing
+        }
     }
 }
 

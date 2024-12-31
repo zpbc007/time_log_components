@@ -19,6 +19,7 @@ extension EventEditor {
         let fontColor: Color
         let activeFontColor: Color
         let deleteColor: Color
+        let imageName: String
         let checklists: IdentifiedArrayOf<CheckListInfo>
         @Binding var title: String
         @Binding var selectedCheckList: String?
@@ -35,6 +36,7 @@ extension EventEditor {
             fontColor: Color,
             activeFontColor: Color,
             deleteColor: Color,
+            imageName: String,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
             selectedCheckList: Binding<String?>,
@@ -47,6 +49,7 @@ extension EventEditor {
             self.fontColor = fontColor
             self.activeFontColor = activeFontColor
             self.deleteColor = deleteColor
+            self.imageName = imageName
             self.checklists = checklists
             self._title = title
             self._selectedCheckList = selectedCheckList
@@ -62,6 +65,7 @@ extension EventEditor {
             fontColor: Color,
             activeFontColor: Color,
             deleteColor: Color,
+            imageName: String,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
             selectedCheckList: Binding<String?>,
@@ -75,6 +79,7 @@ extension EventEditor {
             self.fontColor = fontColor
             self.activeFontColor = activeFontColor
             self.deleteColor = deleteColor
+            self.imageName = imageName
             self.checklists = checklists
             self._title = title
             self._selectedCheckList = selectedCheckList
@@ -91,6 +96,7 @@ extension EventEditor {
         public var body: some View {
             KeyboardEditor(
                 bgColor: bgColor,
+                radiusConfig: .init(leading: 10, trailing: 0),
                 dismiss: dismiss
             ) { size in
                 VStack {
@@ -124,6 +130,14 @@ extension EventEditor {
                     }
                 }
                 .padding()
+                .overlay(
+                    alignment: .topTrailing,
+                    content: {
+                        Image(imageName)
+                            .frame(width: 120, height: 120)
+                            .offset(y: -120)
+                    }
+                )
                 .onAppear {
                     focusedField = true
                 }
@@ -164,6 +178,7 @@ extension EventEditor {
                         fontColor: .black,
                         activeFontColor: .blue,
                         deleteColor: .red,
+                        imageName: "",
                         checklists: .init(uniqueElements: checklists),
                         title: $title,
                         selectedCheckList: $selectedCheckList,
@@ -210,6 +225,7 @@ extension EventEditor {
                         fontColor: .black,
                         activeFontColor: .blue,
                         deleteColor: .red,
+                        imageName: "",
                         checklists: .init(uniqueElements: checklists),
                         title: $title,
                         selectedCheckList: $selectedCheckList,
