@@ -136,7 +136,7 @@ extension EventEditor {
                         if let imageName {
                             Image(imageName)
                                 .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .aspectRatio(contentMode: .fill)
                                 .frame(width: 120, height: 120)
                                 .offset(y: -120)
                         }
