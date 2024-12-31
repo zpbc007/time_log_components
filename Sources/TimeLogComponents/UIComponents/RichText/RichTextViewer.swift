@@ -23,12 +23,18 @@ public struct RichTextViewer: View {
     }
         
     public var body: some View {
-        WebView(placeholder: placeholder, height: $height)
-            .frame(height: height)
-            .onChange(of: content, { oldValue, newValue in
-                viewModel.updateContent(newValue)
-            })
-            .environmentObject(viewModel)
+        VStack {
+            Text(placeholder)
+                .bold()
+                .padding(.top)
+            
+            WebView(placeholder: placeholder, height: $height)
+                .frame(height: height)
+                .onChange(of: content, { oldValue, newValue in
+                    viewModel.updateContent(newValue)
+                })
+                .environmentObject(viewModel)
+        }
     }
 }
 
@@ -80,7 +86,7 @@ extension RichTextViewer {
         
         var body: some View {
             VStack {
-                RichTextViewer(content: content, placeholder: "xxx")
+                RichTextViewer(content: content, placeholder: "Placeholder")
                     .border(.black)
                 
                 Button("update") {

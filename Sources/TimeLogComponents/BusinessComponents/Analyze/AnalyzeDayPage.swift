@@ -86,7 +86,7 @@ public struct AnalyzeDayPage: View {
                     }
                     
                 } else {
-                    RichTextViewer(content: reviewComment, placeholder: "今日目标：")
+                    RichTextViewer(content: reviewComment, placeholder: "今日美好瞬间")
                 }
             }.onTapGesture(perform: onReviewCommentTapped)
             
