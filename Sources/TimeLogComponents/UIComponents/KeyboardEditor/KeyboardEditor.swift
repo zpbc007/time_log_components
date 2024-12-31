@@ -41,15 +41,19 @@ public struct KeyboardEditor<ContentView: View>: View {
                 .ignoresSafeArea()
                 .transition(.opacity)
             
-            content(.init(width: contentSize.width, height: contentSize.height - keyboardHeight))
-                .background(
-                    bgColor,
-                    in: .rect(topLeadingRadius: 10, topTrailingRadius: 10)
-                )
-                .transition(.move(edge: .bottom))
-        }.onReceive(keyboardHeightPublisher, perform: { height in
-            keyboardHeight = height
-        })
+            content(.init(
+                width: contentSize.width,
+                height: contentSize.height - keyboardHeight
+            )).background(
+                bgColor,
+                in: .rect(topLeadingRadius: 10, topTrailingRadius: 10)
+            ).transition(.move(edge: .bottom))
+        }.onReceive(
+            keyboardHeightPublisher,
+            perform: { height in
+                keyboardHeight = height
+            }
+        )
     }
     
     private var keyboardHeightPublisher: AnyPublisher<CGFloat, Never> {
@@ -66,7 +70,7 @@ public struct KeyboardEditor<ContentView: View>: View {
     struct TestView: View {
         @State private var title = ""
         @State private var desc = ""
-        @State private var showAdd: Bool = false
+        @State private var showAdd: Bool = true
         
         var body: some View {
             ZStack {

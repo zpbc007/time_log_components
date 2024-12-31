@@ -14,6 +14,7 @@ public struct TaskLogEditor: View {
     let fontColor: Color
     let activeFontColor: Color
     let bgColor: Color
+    let deleteColor: Color
     let selectedTaskName: String?
     @Binding var startTime: Date
     @Binding var endTime: Date
@@ -28,6 +29,7 @@ public struct TaskLogEditor: View {
         fontColor: Color,
         activeFontColor: Color,
         bgColor: Color,
+        deleteColor: Color,
         selectedTaskName: String?,
         startTime: Binding<Date>,
         endTime: Binding<Date>,
@@ -39,6 +41,7 @@ public struct TaskLogEditor: View {
         self.fontColor = fontColor
         self.activeFontColor = activeFontColor
         self.bgColor = bgColor
+        self.deleteColor = deleteColor
         self.selectedTaskName = selectedTaskName
         self._startTime = startTime
         self._endTime = endTime
@@ -79,18 +82,10 @@ public struct TaskLogEditor: View {
             dismiss: dismiss
         ) { size in
             VStack {
-                if let onDeleteButtonTapped {
-                    HStack {
-                        Spacer()
-                        
-                        Button(role: .destructive, action: onDeleteButtonTapped) {
-                            Image(systemName: "trash.circle")
-                        }.font(.title2)
-                    }
-                }
-                
-                RichTextEditor(placeholder: "备注", maxHeight: size.height - bottomSize.height)
-                    .border(.black)
+                RichTextEditor(
+                    placeholder: "备注",
+                    maxHeight: size.height - bottomSize.height
+                ).border(.black)
                 
                 VStack {
                     self.timeSelector
@@ -107,6 +102,13 @@ public struct TaskLogEditor: View {
                         ).tint(selectedTaskName == nil ? fontColor : activeFontColor)
                         
                         Spacer()
+                        
+                        if let onDeleteButtonTapped {
+                            TaskEditor_Common.DeleteButton(
+                                deleteColor: deleteColor,
+                                action: onDeleteButtonTapped
+                            )
+                        }
                         
                         TaskEditor_Common.ConfirmButton(
                             fontColor: fontColor,
@@ -197,6 +199,7 @@ public struct TaskLogEditor: View {
                     fontColor: .primary,
                     activeFontColor: .blue,
                     bgColor: .white,
+                    deleteColor: .red,
                     selectedTaskName: nil,
                     startTime: $startTime,
                     endTime: $endTime
