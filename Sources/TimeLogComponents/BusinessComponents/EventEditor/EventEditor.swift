@@ -139,7 +139,6 @@ extension EventEditor {
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 120, height: 120)
                                 .offset(y: -120)
-                                .transition(.opacity)
                                 .animation(.easeInOut, value: imageName)
                         }
                     }
