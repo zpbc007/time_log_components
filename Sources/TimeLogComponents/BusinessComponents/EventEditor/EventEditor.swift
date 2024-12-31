@@ -19,7 +19,7 @@ extension EventEditor {
         let fontColor: Color
         let activeFontColor: Color
         let deleteColor: Color
-        let imageName: String
+        let imageName: String?
         let checklists: IdentifiedArrayOf<CheckListInfo>
         @Binding var title: String
         @Binding var selectedCheckList: String?
@@ -36,7 +36,7 @@ extension EventEditor {
             fontColor: Color,
             activeFontColor: Color,
             deleteColor: Color,
-            imageName: String,
+            imageName: String? = nil,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
             selectedCheckList: Binding<String?>,
@@ -65,7 +65,7 @@ extension EventEditor {
             fontColor: Color,
             activeFontColor: Color,
             deleteColor: Color,
-            imageName: String,
+            imageName: String? = nil,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
             selectedCheckList: Binding<String?>,
@@ -133,11 +133,13 @@ extension EventEditor {
                 .overlay(
                     alignment: .topTrailing,
                     content: {
-                        Image(imageName)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 120, height: 120)
-                            .offset(y: -120)
+                        if let imageName {
+                            Image(imageName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 120, height: 120)
+                                .offset(y: -120)
+                        }
                     }
                 )
                 .onAppear {
@@ -180,7 +182,6 @@ extension EventEditor {
                         fontColor: .black,
                         activeFontColor: .blue,
                         deleteColor: .red,
-                        imageName: "",
                         checklists: .init(uniqueElements: checklists),
                         title: $title,
                         selectedCheckList: $selectedCheckList,
