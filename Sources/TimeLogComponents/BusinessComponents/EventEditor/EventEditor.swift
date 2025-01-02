@@ -19,7 +19,6 @@ extension EventEditor {
         let fontColor: Color
         let activeFontColor: Color
         let deleteColor: Color
-        let imageName: String?
         let checklists: IdentifiedArrayOf<CheckListInfo>
         @Binding var title: String
         @Binding var selectedCheckList: String?
@@ -37,7 +36,6 @@ extension EventEditor {
             fontColor: Color,
             activeFontColor: Color,
             deleteColor: Color,
-            imageName: String? = nil,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
             selectedCheckList: Binding<String?>,
@@ -52,7 +50,6 @@ extension EventEditor {
             self.fontColor = fontColor
             self.activeFontColor = activeFontColor
             self.deleteColor = deleteColor
-            self.imageName = imageName
             self.checklists = checklists
             self._title = title
             self._selectedCheckList = selectedCheckList
@@ -69,7 +66,6 @@ extension EventEditor {
             fontColor: Color,
             activeFontColor: Color,
             deleteColor: Color,
-            imageName: String? = nil,
             checklists: IdentifiedArrayOf<CheckListInfo>,
             title: Binding<String>,
             selectedCheckList: Binding<String?>,
@@ -85,7 +81,6 @@ extension EventEditor {
             self.fontColor = fontColor
             self.activeFontColor = activeFontColor
             self.deleteColor = deleteColor
-            self.imageName = imageName
             self.checklists = checklists
             self._title = title
             self._selectedCheckList = selectedCheckList
@@ -232,7 +227,6 @@ extension EventEditor {
                         fontColor: .black,
                         activeFontColor: .blue,
                         deleteColor: .red,
-                        imageName: "",
                         checklists: .init(uniqueElements: checklists),
                         title: $title,
                         selectedCheckList: $selectedCheckList,
