@@ -14,7 +14,7 @@ public struct EventEditor {
 }
 
 extension EventEditor {
-    public struct MainView<Content: View>: View {
+    public struct MainView<Content: View, Header: View>: View {
         let bgColor: Color
         let fontColor: Color
         let activeFontColor: Color
@@ -24,6 +24,7 @@ extension EventEditor {
         @Binding var title: String
         @Binding var selectedCheckList: String?
         let content: () -> Content
+        let header: () -> Header
         let onSendButtonTapped: () -> Void
         let dismiss: () -> Void
         let onDeleteButtonTapped: Optional<() -> Void>
@@ -42,6 +43,8 @@ extension EventEditor {
             selectedCheckList: Binding<String?>,
             @ViewBuilder
             content: @escaping () -> Content,
+            @ViewBuilder
+            header: @escaping () -> Header,
             onSendButtonTapped: @escaping () -> Void,
             dismiss: @escaping () -> Void
         ) {
@@ -54,6 +57,7 @@ extension EventEditor {
             self._title = title
             self._selectedCheckList = selectedCheckList
             self.content = content
+            self.header = header
             self.onSendButtonTapped = onSendButtonTapped
             self.dismiss = dismiss
             self.onDeleteButtonTapped = nil
@@ -71,6 +75,8 @@ extension EventEditor {
             selectedCheckList: Binding<String?>,
             @ViewBuilder
             content: @escaping () -> Content,
+            @ViewBuilder
+            header: @escaping () -> Header,
             onSendButtonTapped: @escaping () -> Void,
             dismiss: @escaping () -> Void,
             onDeleteButtonTapped: @escaping () -> Void
@@ -84,6 +90,7 @@ extension EventEditor {
             self._title = title
             self._selectedCheckList = selectedCheckList
             self.content = content
+            self.header = header
             self.onSendButtonTapped = onSendButtonTapped
             self.dismiss = dismiss
             self.onDeleteButtonTapped = onDeleteButtonTapped
@@ -131,16 +138,9 @@ extension EventEditor {
                 }
                 .padding()
                 .overlay(
-                    alignment: .topTrailing,
+                    alignment: .top,
                     content: {
-                        if let imageName {
-                            Image(imageName)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 120, height: 120)
-                                .offset(y: -120)
-                                .animation(.easeInOut, value: imageName)
-                        }
+                        header()
                     }
                 )
                 .onAppear {
@@ -188,6 +188,9 @@ extension EventEditor {
                         selectedCheckList: $selectedCheckList,
                         content: {
                             Text("Tag Picker")
+                        },
+                        header: {
+                            Text("header")
                         }
                     ) {
                         visible = false
@@ -235,6 +238,9 @@ extension EventEditor {
                         selectedCheckList: $selectedCheckList,
                         content: {
                             Text("Tag Picker")
+                        },
+                        header: {
+                            Text("header")
                         }
                     ) {
                         visible = false
