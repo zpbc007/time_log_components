@@ -189,10 +189,12 @@ extension EventSelector {
     public struct EventItem: Equatable, Identifiable {
         public let id: String
         public let name: String
+        public let lifetimeTagId: String?
         
-        public init(id: String, name: String) {
+        public init(id: String, name: String, lifetimeTagId: String? = nil) {
             self.id = id
             self.name = name
+            self.lifetimeTagId = lifetimeTagId
         }
     }
     
