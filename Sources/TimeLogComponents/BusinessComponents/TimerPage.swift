@@ -8,50 +8,56 @@
 import SwiftUI
 import AlertToast
 
-public struct TimerPage: View {
-    public enum Status: Equatable {
-        case idle
-        // 计时中
-        case counting(_ startDate: Date)
-        
-        public var startDate: Date? {
-            switch self {
-            case .counting(let startDate):
-                return startDate
-            default:
-                return nil
-            }
-        }
-        
-        public var inCounting: Bool {
-            switch self {
-            case .counting:
-                return true
-            default:
-                return false
-            }
+fileprivate let radius: CGFloat = 130
+
+public enum TimerPageStatus: Equatable {
+    case idle
+    // 计时中
+    case counting(_ startDate: Date)
+    
+    public var startDate: Date? {
+        switch self {
+        case .counting(let startDate):
+            return startDate
+        default:
+            return nil
         }
     }
-    static let radius: CGFloat = 130
     
-    let status: Status
+    public var inCounting: Bool {
+        switch self {
+        case .counting:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+public struct TimerPage<FlagView: View>: View {
+    let status: TimerPageStatus
     let editAction: () -> Void
     let stopAction: () -> Void
+    let flagView: () -> FlagView
     @State private var elapsedTime = 0.0
     @State private var timer: Timer? = nil
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     
     let fontColor: Color
     let buttonBgColor: Color
     let taskName: String
     
     public init(
-        status: Status,
+        status: TimerPageStatus,
         fontColor: Color,
         buttonBgColor: Color,
         taskName: String,
         editAction: @escaping () -> Void,
-        stopAction: @escaping () -> Void
+        stopAction: @escaping () -> Void,
+        @ViewBuilder
+        flagView: @escaping () -> FlagView
     ) {
         self.status = status
         self.fontColor = fontColor
@@ -59,49 +65,17 @@ public struct TimerPage: View {
         self.taskName = taskName
         self.editAction = editAction
         self.stopAction = stopAction
+        self.flagView = flagView
     }
     
     public var body: some View {
-        VStack {
-            ZStack {
-                Circle()
-                    .stroke(buttonBgColor, style: .init(lineWidth: 5))
-                    .frame(width: Self.radius * 2)
-                
-                TimerText(seconds: elapsedTime)
-                    .font(.largeTitle)
-                
-                HStack {
-                    Button(
-                        action: editAction,
-                        label: {
-                            Image(systemName: "pencil.circle")
-                                .font(.largeTitle)
-                        }
-                    )
-                    
-                    Button(
-                        action: stopAction,
-                        label: {
-                            Image(systemName: "stop.circle.fill")
-                                .font(.largeTitle)
-                        }
-                    )
-                }
-                .offset(CGSize(width: 0, height: Self.radius / 2))
+        Group {
+            if verticalSizeClass == .compact {
+                self.compactContent
+            } else {
+                self.regularContent
             }
-            
-            VStack {
-                Text("进行中的任务")
-                    .font(.caption)
-                Text(taskName)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-                    .font(.title2)
-            }
-            .padding()
-        }
-        .onChange(of: status, initial: true) { oldValue, newValue in
+        }.onChange(of: status, initial: true) { oldValue, newValue in
             // reset
             timer?.invalidate()
             timer = nil
@@ -125,6 +99,75 @@ public struct TimerPage: View {
         }
     }
     
+    @ViewBuilder
+    private var compactContent: some View {
+        HStack {
+            VStack {
+                self.flagView()
+                
+                self.taskNameView
+                    .padding(.vertical)
+            }
+            
+            self.clockView
+        }.padding()
+    }
+    
+    @ViewBuilder
+    private var regularContent: some View {
+        VStack {
+            self.flagView()
+                        
+            self.clockView
+                .padding(.vertical)
+                        
+            self.taskNameView
+        }.padding()
+    }
+    
+    @ViewBuilder
+    private var clockView: some View {
+        ZStack {
+            Circle()
+                .stroke(buttonBgColor, style: .init(lineWidth: 5))
+                .frame(width: radius * 2)
+            
+            TimerText(seconds: elapsedTime)
+                .font(.largeTitle)
+            
+            HStack {
+                Button(
+                    action: editAction,
+                    label: {
+                        Image(systemName: "pencil.circle")
+                            .font(.largeTitle)
+                    }
+                )
+                
+                Button(
+                    action: stopAction,
+                    label: {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.largeTitle)
+                    }
+                )
+            }
+            .offset(CGSize(width: 0, height: radius / 2))
+        }
+    }
+    
+    @ViewBuilder
+    private var taskNameView: some View {
+        VStack {
+            Text("进行中的任务")
+                .font(.caption)
+            Text(taskName)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .font(.title2)
+        }
+    }
+    
     private func tryRecoveryElapsedTime() {
         if let startDate = status.startDate {
             elapsedTime = Date.now.timeIntervalSince(startDate)
@@ -134,7 +177,7 @@ public struct TimerPage: View {
 
 #Preview {
     struct TimerPagePlayground: View {
-        @State private var status: TimerPage.Status = .counting(.now)
+        @State private var status: TimerPageStatus = .counting(.now)
         
         var body: some View {
             TimerPage(
@@ -146,6 +189,11 @@ public struct TimerPage: View {
                 self.status = .counting(.now)
             } stopAction: {
                 self.status = .idle
+            } flagView: {
+                Image(systemName: "clock")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 150)
             }
             .onChange(of: status) { oldValue, newValue in
                 if let startDate = oldValue.startDate, newValue == .idle {
@@ -164,7 +212,7 @@ public struct TimerPage: View {
 
 #Preview("restore state") {
     struct TimerPagePlayground: View {
-        @State private var status: TimerPage.Status = .counting(.now.addingTimeInterval(-60))
+        @State private var status: TimerPageStatus = .counting(.now.addingTimeInterval(-60))
         
         var body: some View {
             TimerPage(
@@ -176,6 +224,11 @@ public struct TimerPage: View {
                 self.status = .counting(.now)
             } stopAction: {
                 self.status = .idle
+            } flagView: {
+                Image(systemName: "clock")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 150)
             }.onChange(of: status) { oldValue, newValue in
                 if let startDate = oldValue.startDate, newValue == .idle {
                     print("finish record, startDate: \(startDate)")
