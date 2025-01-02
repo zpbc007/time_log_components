@@ -136,6 +136,7 @@ extension EventEditor {
                     alignment: .top,
                     content: {
                         header()
+                            .onTapGesture(perform: dismiss)
                     }
                 )
                 .onAppear {
