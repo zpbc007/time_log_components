@@ -102,57 +102,36 @@ public struct TimerPage<FlagView: View>: View {
     @ViewBuilder
     private var compactContent: some View {
         HStack {
+            self.flagView()
+                .padding(.trailing)
+            
             VStack {
-                self.flagView()
-                
                 self.taskNameView
+                
+                TimerText(seconds: elapsedTime)
+                    .font(.system(size: 60))
+                                
+                self.actionList
                     .padding(.vertical)
             }
-            
-            self.clockView
         }.padding()
     }
     
     @ViewBuilder
     private var regularContent: some View {
-        VStack {
-            self.flagView()
-                        
-            self.clockView
-                .padding(.vertical)
-                        
-            self.taskNameView
-        }.padding()
-    }
-    
-    @ViewBuilder
-    private var clockView: some View {
         ZStack {
-            Circle()
-                .stroke(buttonBgColor, style: .init(lineWidth: 5))
-                .frame(width: radius * 2)
+            self.flagView()
             
-            TimerText(seconds: elapsedTime)
-                .font(.largeTitle)
-            
-            HStack {
-                Button(
-                    action: editAction,
-                    label: {
-                        Image(systemName: "pencil.circle")
-                            .font(.largeTitle)
-                    }
-                )
+            VStack {
+                self.taskNameView
+                TimerText(seconds: elapsedTime)
+                    .font(.system(size: 60))
                 
-                Button(
-                    action: stopAction,
-                    label: {
-                        Image(systemName: "stop.circle.fill")
-                            .font(.largeTitle)
-                    }
-                )
-            }
-            .offset(CGSize(width: 0, height: radius / 2))
+                Spacer()
+                
+                self.actionList
+                    .padding(.vertical)
+            }.padding()
         }
     }
     
@@ -161,10 +140,36 @@ public struct TimerPage<FlagView: View>: View {
         VStack {
             Text("进行中的任务")
                 .font(.caption)
+            
             Text(taskName)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .font(.title2)
+        }
+    }
+    
+    @ViewBuilder
+    private var actionList: some View {
+        HStack {
+            Button(
+                action: editAction,
+                label: {
+                    Image(systemName: "pencil.circle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 50)
+                }
+            ).padding(.trailing, 50)
+            
+            Button(
+                action: stopAction,
+                label: {
+                    Image(systemName: "stop.circle.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 50)
+                }
+            )
         }
     }
     
