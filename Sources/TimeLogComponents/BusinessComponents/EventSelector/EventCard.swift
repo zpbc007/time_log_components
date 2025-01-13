@@ -9,10 +9,16 @@ import SwiftUI
 
 public struct EventCard: View {
     let title: String
+    let active: Bool
     let lifetimeTagConf: LifetimeTagConf?
     
-    public init(title: String, lifetimeTagConf: LifetimeTagConf? = nil) {
+    public init(
+        title: String,
+        active: Bool,
+        lifetimeTagConf: LifetimeTagConf? = nil
+    ) {
         self.title = title
+        self.active = active
         self.lifetimeTagConf = lifetimeTagConf
     }
     
@@ -26,8 +32,9 @@ public struct EventCard: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .stroke(.gray, lineWidth: 1)
-                .shadow(color: .gray, radius: 2, x: 3, y: 3)
+                .stroke(active == true ? .blue : .gray, lineWidth: 1)
+                .shadow(color: active == true ? .blue : .gray, radius: 2, x: 3, y: 3)
+                .animation(.easeInOut, value: active)
         )
     }
     
@@ -83,9 +90,10 @@ extension EventCard {
 
 #Preview {
     VStack(spacing: 25) {
-        EventCard(title: "费曼学习法")
+        EventCard(title: "费曼学习法", active: false)
         EventCard(
             title: "费曼学习法",
+            active: true,
             lifetimeTagConf: .init(
                 name: "自由",
                 sfName: "steeringwheel.circle",
@@ -94,6 +102,7 @@ extension EventCard {
         )
         EventCard(
             title: "费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法",
+            active: false,
             lifetimeTagConf: .init(
                 name: "生存",
                 sfName: "flame.circle",
@@ -102,6 +111,7 @@ extension EventCard {
         )
         EventCard(
             title: "费曼学习法费曼学习法",
+            active: false,
             lifetimeTagConf: .init(
                 name: "工作",
                 sfName: "building.2.crop.circle",

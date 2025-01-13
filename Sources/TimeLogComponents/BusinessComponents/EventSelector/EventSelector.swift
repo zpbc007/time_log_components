@@ -71,29 +71,6 @@ public struct EventSelector {
                         self.EmptyEventView
                     } else {
                         self.EventListView
-//                        List {
-//                            OutlineGroup(filteredEvents, children: \.children) { item in
-//                                Group {
-//                                    HStack {
-//                                        if item.id == selectedEvent?.id {
-//                                            Text(item.value.name)
-//                                                .lineLimit(1)
-//                                                .foregroundStyle(.selection)
-//                                        } else {
-//                                            Text(item.value.name)
-//                                                .lineLimit(1)
-//                                                .foregroundStyle(.primary)
-//                                        }
-//                                        
-//                                        Spacer()
-//                                    }
-//                                }
-//                                .contentShape(Rectangle())
-//                                .onTapGesture {
-//                                    selectedEvent = item.value
-//                                }
-//                            }
-//                        }
                     }
                 }
             }
@@ -190,6 +167,7 @@ public struct EventSelector {
                 ForEach(filteredEvents) { event in
                     EventCard(
                         title: event.value.name,
+                        active: selectedEvent == event.value,
                         lifetimeTagConf: event.value.lifetimeTagConf
                     )
                     .contentShape(Rectangle())
