@@ -191,7 +191,9 @@ public struct EventSelector {
                     EventCard(
                         title: event.value.name,
                         lifetimeTagConf: event.value.lifetimeTagConf
-                    ).onTapGesture {
+                    )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
                         selectedEvent = event.value
                     }
                 }
