@@ -9,18 +9,38 @@ import SwiftUI
 
 public struct EventCard: View {
     let title: String
-    let tagSFName: String
-    let tagName: String
-    let tagColor: Color
+    let lifetimeTagConf: LifetimeTagConf?
     
-    public init(title: String, tagSFName: String, tagName: String, tagColor: Color) {
+    public init(title: String, lifetimeTagConf: LifetimeTagConf? = nil) {
         self.title = title
-        self.tagSFName = tagSFName
-        self.tagName = tagName
-        self.tagColor = tagColor
+        self.lifetimeTagConf = lifetimeTagConf
     }
     
     public var body: some View {
+        Group {
+            if let lifetimeTagConf {
+                buildWithTagView(conf: lifetimeTagConf)
+            } else {
+                withoutTagView
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 15)
+                .stroke(.gray, lineWidth: 1)
+                .shadow(color: .gray, radius: 2, x: 3, y: 3)
+        )
+    }
+    
+    @ViewBuilder
+    var withoutTagView: some View {
+        VStack {
+            Text(title)
+                .padding()
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    @ViewBuilder
+    func buildWithTagView(conf: LifetimeTagConf) -> some View {
         VStack(alignment: .leading) {
             Text(title)
                 .padding(.horizontal)
@@ -30,45 +50,63 @@ public struct EventCard: View {
                 Spacer()
                 
                 HStack {
-                    Image(systemName: tagSFName)
-                    Text(tagName)
+                    Image(systemName: conf.sfName)
+                    Text(conf.name)
                 }
                 .font(.callout)
                 .padding(6)
-                .background(tagColor, in: RoundedRectangle(cornerRadius: 10))
+                .background(
+                    conf.color,
+                    in: RoundedRectangle(cornerRadius: 10)
+                )
                 
             }
             .padding(.horizontal)
             .padding(.bottom)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(.gray, lineWidth: 1)
-                .shadow(color: .gray, radius: 2, x: 3, y: 3)
-        )
-        
+    }
+}
+
+extension EventCard {
+    public struct LifetimeTagConf: Equatable {
+        public let name: String
+        public let sfName: String
+        public let color: Color
+    
+        public init(name: String, sfName: String, color: Color) {
+            self.name = name
+            self.sfName = sfName
+            self.color = color
+        }
     }
 }
 
 #Preview {
     VStack(spacing: 25) {
+        EventCard(title: "费曼学习法")
         EventCard(
             title: "费曼学习法",
-            tagSFName: "steeringwheel.circle",
-            tagName: "自由",
-            tagColor: .green.opacity(0.3)
+            lifetimeTagConf: .init(
+                name: "自由",
+                sfName: "steeringwheel.circle",
+                color: .green.opacity(0.3)
+            )
         )
         EventCard(
             title: "费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法",
-            tagSFName: "flame.circle",
-            tagName: "生存",
-            tagColor: .red.opacity(0.3)
+            lifetimeTagConf: .init(
+                name: "生存",
+                sfName: "flame.circle",
+                color: .red.opacity(0.3)
+            )
         )
         EventCard(
             title: "费曼学习法费曼学习法",
-            tagSFName: "building.2.crop.circle",
-            tagName: "工作",
-            tagColor: .blue.opacity(0.3)
+            lifetimeTagConf: .init(
+                name: "工作",
+                sfName: "building.2.crop.circle",
+                color: .blue.opacity(0.3)
+            )
         )
     }.padding()
 }

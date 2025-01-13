@@ -70,29 +70,30 @@ public struct EventSelector {
                     if filteredEvents.isEmpty {
                         self.EmptyEventView
                     } else {
-                        List {
-                            OutlineGroup(filteredEvents, children: \.children) { item in
-                                Group {
-                                    HStack {
-                                        if item.id == selectedEvent?.id {
-                                            Text(item.value.name)
-                                                .lineLimit(1)
-                                                .foregroundStyle(.selection)
-                                        } else {
-                                            Text(item.value.name)
-                                                .lineLimit(1)
-                                                .foregroundStyle(.primary)
-                                        }
-                                        
-                                        Spacer()
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedEvent = item.value
-                                }
-                            }
-                        }
+                        self.EventListView
+//                        List {
+//                            OutlineGroup(filteredEvents, children: \.children) { item in
+//                                Group {
+//                                    HStack {
+//                                        if item.id == selectedEvent?.id {
+//                                            Text(item.value.name)
+//                                                .lineLimit(1)
+//                                                .foregroundStyle(.selection)
+//                                        } else {
+//                                            Text(item.value.name)
+//                                                .lineLimit(1)
+//                                                .foregroundStyle(.primary)
+//                                        }
+//                                        
+//                                        Spacer()
+//                                    }
+//                                }
+//                                .contentShape(Rectangle())
+//                                .onTapGesture {
+//                                    selectedEvent = item.value
+//                                }
+//                            }
+//                        }
                     }
                 }
             }
@@ -182,6 +183,20 @@ public struct EventSelector {
                 Spacer()
             }
         }
+        
+        @ViewBuilder
+        private var EventListView: some View {
+            VStack(spacing: 20) {
+                ForEach(filteredEvents) { event in
+                    EventCard(
+                        title: event.value.name,
+                        lifetimeTagConf: event.value.lifetimeTagConf
+                    ).onTapGesture {
+                        selectedEvent = event.value
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -189,10 +204,16 @@ extension EventSelector {
     public struct EventItem: Equatable, Identifiable {
         public let id: String
         public let name: String
-        
-        public init(id: String, name: String) {
+        public let lifetimeTagConf: EventCard.LifetimeTagConf?
+                
+        public init(
+            id: String,
+            name: String,
+            lifetimeTagConf: EventCard.LifetimeTagConf? = nil
+        ) {
             self.id = id
             self.name = name
+            self.lifetimeTagConf = lifetimeTagConf
         }
     }
     
@@ -201,6 +222,22 @@ extension EventSelector {
 
 #Preview {
     struct Playground:View {
+        static let workTag: EventCard.LifetimeTagConf = .init(
+            name: "工作",
+            sfName: "building.2.crop.circle",
+            color: .blue.opacity(0.3)
+        )
+        static let surviveTag: EventCard.LifetimeTagConf = .init(
+            name: "生存",
+            sfName: "flame.circle",
+            color: .red.opacity(0.3)
+        )
+        static let freedomTag: EventCard.LifetimeTagConf = .init(
+            name: "自由",
+            sfName: "steeringwheel.circle",
+            color: .green.opacity(0.3)
+        )
+        
         let categories: [CategoryList.Item] = [
             .init(id: UUID().uuidString, name: "学习投入投入", color: .red, count: 5),
             .init(id: UUID().uuidString, name: "兴趣投入", color: .green, count: 3),
@@ -214,10 +251,19 @@ extension EventSelector {
         let tasks: IdentifiedArrayOf<EventSelector.EventTreeValue> = .init(uniqueElements: [
             .init(value: .init(
                 id: UUID().uuidString,
-                name: "长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2"
+                name: "长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2长 title 任务2",
+                lifetimeTagConf: Self.workTag
             )),
-            .init(value: .init(id: UUID().uuidString, name: "任务3")),
-            .init(value: .init(id: UUID().uuidString, name: "任务4")),
+            .init(value: .init(
+                id: UUID().uuidString,
+                name: "任务3",
+                lifetimeTagConf: Self.surviveTag
+            )),
+            .init(value: .init(
+                id: UUID().uuidString,
+                name: "任务4",
+                lifetimeTagConf: Self.freedomTag
+            )),
             .init(value: .init(id: UUID().uuidString, name: "任务5")),
             .init(value: .init(id: UUID().uuidString, name: "任务6")),
             .init(value: .init(id: UUID().uuidString, name: "任务7")),
