@@ -13,7 +13,7 @@ public struct EventList: View {
     let selected: EventSelector.EventItem.ID?
     let onEventTapped: (EventSelector.EventItem) -> Void
     
-    init(
+    public init(
         events: [EventSelector.EventItem],
         selected: EventSelector.EventItem.ID?,
         onEventTapped: @escaping (EventSelector.EventItem) -> Void
