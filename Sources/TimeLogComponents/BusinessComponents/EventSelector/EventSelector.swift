@@ -20,6 +20,7 @@ public struct EventSelector {
         let events: IdentifiedArrayOf<EventSelector.EventTreeValue>
         let startAction: Optional<() -> Void>
         let addEventAction: () -> Void
+        let pickEventAction: () -> Void
         let buildCategoryEditor: () -> CategoryEditor
         
         @Binding var selectedEvent: EventItem?
@@ -47,6 +48,7 @@ public struct EventSelector {
             categoryEditorStatus: Binding<EventSelector.CategoryEditorStatus>,
             showCategoryMenu: Binding<Bool>,
             addEventAction: @escaping () -> Void,
+            pickEventAction: @escaping () -> Void,
             startAction: Optional<() -> Void>,
             @ViewBuilder
             buildCategoryEditor: @escaping () -> CategoryEditor
@@ -59,6 +61,7 @@ public struct EventSelector {
             self._showCategoryMenu = showCategoryMenu
             self.startAction = startAction
             self.addEventAction = addEventAction
+            self.pickEventAction = pickEventAction
             self.buildCategoryEditor = buildCategoryEditor
         }
         
@@ -117,7 +120,14 @@ public struct EventSelector {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack {
-                        Button(action: addEventAction) {
+                        Menu {
+                            Button(action: addEventAction) {
+                                Label("创建自定义事件", systemImage: "plus")
+                            }
+                            Button(action: addEventAction) {
+                                Label("从事件库挑选", systemImage: "checklist")
+                            }
+                        } label: {
                             Image(systemName: "plus")
                         }
                         
@@ -287,6 +297,9 @@ extension EventSelector {
                             showCategoryMenu: $showCategoryMenu,
                             addEventAction: {
                                 print("add event")
+                            },
+                            pickEventAction: {
+                                print("pick event")
                             },
                             startAction: self.startAction,
                             buildCategoryEditor: {

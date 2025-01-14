@@ -82,6 +82,9 @@ public struct TaskLogUpdator: View {
                             addEventAction: {
                                print("add event")
                             },
+                            pickEventAction: {
+                                print("pick event")
+                            },
                             startAction: {
                                 print("start")
                             },
