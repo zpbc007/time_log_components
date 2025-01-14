@@ -124,7 +124,7 @@ public struct EventSelector {
                             Button(action: addEventAction) {
                                 Label("创建自定义事件", systemImage: "plus")
                             }
-                            Button(action: addEventAction) {
+                            Button(action: pickEventAction) {
                                 Label("从事件库挑选", systemImage: "checklist")
                             }
                         } label: {
