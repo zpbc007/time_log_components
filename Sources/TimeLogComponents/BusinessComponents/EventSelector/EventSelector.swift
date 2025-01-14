@@ -70,7 +70,14 @@ public struct EventSelector {
                     if filteredEvents.isEmpty {
                         self.EmptyEventView
                     } else {
-                        self.EventListView
+                        EventList(
+                            events: filteredEvents.elements.map({item in
+                                item.value
+                            }),
+                            selected: selectedEvent?.id
+                        ) { item in
+                            selectedEvent = item
+                        }
                     }
                 }
             }
@@ -158,23 +165,6 @@ public struct EventSelector {
                 Spacer()
                 Text("无事件")
                 Spacer()
-            }
-        }
-        
-        @ViewBuilder
-        private var EventListView: some View {
-            VStack(spacing: 20) {
-                ForEach(filteredEvents) { event in
-                    EventCard(
-                        title: event.value.name,
-                        active: selectedEvent == event.value,
-                        lifetimeTagConf: event.value.lifetimeTagConf
-                    )
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedEvent = event.value
-                    }
-                }
             }
         }
     }
