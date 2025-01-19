@@ -47,6 +47,7 @@ public struct WelcomePage: View {
                 }.padding(.vertical)
             }
         }
+        .safeAreaPadding(.top, 40)
     }
     
     @ViewBuilder
@@ -55,12 +56,10 @@ public struct WelcomePage: View {
             Image(pageConfigs[index].img)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: .infinity)
+                .frame(maxWidth: .infinity)
                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
                 .padding()
-            
-            Spacer()
-            
+                        
             Text(pageConfigs[index].title)
                 .font(.title2)
                 .bold()
@@ -70,7 +69,6 @@ public struct WelcomePage: View {
             }
             
             if index == maxPage {
-                Spacer()
                 Button(action: startAction) {
                     Text("开始使用")
                         .bold()
@@ -78,12 +76,12 @@ public struct WelcomePage: View {
                         .background(
                             .ultraThinMaterial,
                             in: RoundedRectangle(cornerRadius: 10)
-                        )
+                        ).padding(.top, 30)
                 }
             }
             
             Spacer()
-        }.padding()
+        }
     }
     
     @ViewBuilder
@@ -144,5 +142,5 @@ extension WelcomePage {
         )
     ]) {
         print("start")
-    }
+    }.ignoresSafeArea()
 }
