@@ -77,8 +77,11 @@ public struct PickerWithImage<T: Identifiable & Equatable, C: RandomAccessCollec
         var body: some View {
             PickerWithImage(items: Self.items, selection: $selection) { item in
                 HStack {
+                    Spacer()
                     Image(systemName: item.sfName)
+                    Spacer()
                     Text(item.name)
+                    Spacer()
                 }.font(.callout)
             }
         }
