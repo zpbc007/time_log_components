@@ -57,7 +57,7 @@ public struct WelcomePage: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(maxWidth: .infinity)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                .clipShape(.rect(cornerRadius: 10))
                 .padding()
                         
             Text(pageConfigs[index].title)
