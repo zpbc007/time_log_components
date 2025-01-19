@@ -53,6 +53,8 @@ public struct WelcomePage: View {
     @ViewBuilder
     private func buildPage(index: Int) -> some View {
         VStack {
+            Spacer()
+            
             Image(pageConfigs[index].img)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
