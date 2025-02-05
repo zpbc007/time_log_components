@@ -139,7 +139,7 @@ public struct AnalyzeDayPage: View {
         onTapAction: @escaping () -> Void
     ) -> some View {
         Section(title) {
-            if text.isEmpty {
+            if text.isEmpty || text == RichTextViewer.emptyOps {
                 HStack {
                     Spacer()
                     Image(systemName: "square.and.pencil")

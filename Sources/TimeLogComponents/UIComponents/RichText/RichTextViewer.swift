@@ -48,6 +48,10 @@ extension RichTextViewer {
 }
 
 extension RichTextViewer {
+    static let emptyOps = "{\"ops\":[{\"insert\":\"\\n\"}]}"
+}
+
+extension RichTextViewer {
     struct WebView: UIViewRepresentable, RichTextWebView {
         @EnvironmentObject var viewModel: RichTextViewer.ViewModel
         let placeholder: String
