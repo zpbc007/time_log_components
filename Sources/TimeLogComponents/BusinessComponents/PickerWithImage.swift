@@ -36,7 +36,6 @@ public struct PickerWithImage<T: Identifiable & Equatable, C: RandomAccessCollec
                     selection = source
                 } label: {
                     itemBuilder(source)
-                        .padding(.horizontal, 15)
                         .padding(.vertical, 8)
                         .background(
                             selection == source

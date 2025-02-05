@@ -9,6 +9,13 @@ import SwiftUI
 import IdentifiedCollections
 
 public struct EventSelector {
+    static let AllTag: EventCard.LifetimeTagConf = .init(
+        id: UUID().uuidString,
+        name: "全部",
+        sfName: "books.vertical.circle", 
+        color: .white
+    )
+    
     public enum CategoryEditorStatus: Equatable {
         case hidden
         case addVisible
@@ -18,6 +25,7 @@ public struct EventSelector {
     public struct MainView<CategoryEditor: View>: View {
         let categories: [CategoryList.Item]
         let events: IdentifiedArrayOf<EventSelector.EventTreeValue>
+        let tags: [EventCard.LifetimeTagConf]
         let startAction: Optional<() -> Void>
         let addEventAction: () -> Void
         let pickEventAction: () -> Void
@@ -29,20 +37,28 @@ public struct EventSelector {
         @Binding var showCategoryMenu: Bool
         
         @State private var searchText: String = ""
+        @State private var selectedTag: EventCard.LifetimeTagConf = EventSelector.AllTag
         
         private var filteredEvents: IdentifiedArrayOf<EventSelector.EventTreeValue> {
-            if (searchText.isEmpty) {
+            if (searchText.isEmpty && selectedTag.id == EventSelector.AllTag.id) {
                 return events
             }
             
             return CommonTreeNode.filter(tree: events) { node in
-                node.name.contains(searchText)
+                let nameResult = searchText.isEmpty || node.name.contains(searchText)
+                
+                if selectedTag.id == EventSelector.AllTag.id {
+                    return nameResult
+                } else {
+                    return nameResult && node.lifetimeTagConf?.id == selectedTag.id
+                }
             }
         }
         
         public init(
             categories: [CategoryList.Item],
             events: IdentifiedArrayOf<EventSelector.EventTreeValue>,
+            tags: [EventCard.LifetimeTagConf],
             selectedEvent: Binding<EventItem?>,
             selectedCategory: Binding<CategoryList.Item?>,
             categoryEditorStatus: Binding<EventSelector.CategoryEditorStatus>,
@@ -55,10 +71,13 @@ public struct EventSelector {
         ) {
             self.categories = categories
             self.events = events
+            self.tags = [EventSelector.AllTag] + tags
+            
             self._selectedEvent = selectedEvent
             self._selectedCategory = selectedCategory
             self._categoryEditorStatus = categoryEditorStatus
             self._showCategoryMenu = showCategoryMenu
+            
             self.startAction = startAction
             self.addEventAction = addEventAction
             self.pickEventAction = pickEventAction
@@ -146,27 +165,32 @@ public struct EventSelector {
         
         @ViewBuilder
         private var EventsHeader: some View {
-            Button {
-                showCategoryMenu = true
-            } label: {
-                HStack {
-                    if let selectedCategory {
-                        selectedCategory.color
-                            .clipShape(Circle())
-                            .frame(width: 10, height: 10)
-                            
-                        Text(selectedCategory.name)
-                            .lineLimit(2)
-                    } else {
-                        Text("所有分类")
+            VStack {
+                Button {
+                    showCategoryMenu = true
+                } label: {
+                    HStack {
+                        if let selectedCategory {
+                            selectedCategory.color
+                                .clipShape(Circle())
+                                .frame(width: 10, height: 10)
+                                
+                            Text(selectedCategory.name)
+                                .lineLimit(1)
+                        } else {
+                            Text("所有分类")
+                        }
+                        
+                        Image(systemName: "chevron.right")
+                        
+                        Spacer()
                     }
-                    
-                    Image(systemName: "chevron.right")
-                    
-                    Spacer()
+                    .font(.caption)
                 }
-                .font(.caption)
-            }
+                
+                EventSelector.TagPicker(tags: tags, selected: $selectedTag)
+                    .padding(.bottom)
+            }.listRowInsets(.none)
         }
         
         @ViewBuilder
@@ -175,6 +199,36 @@ public struct EventSelector {
                 Spacer()
                 Text("无事件")
                 Spacer()
+            }
+        }
+    }
+}
+
+extension EventSelector {
+    public struct TagPicker: View {
+        let tags: [EventCard.LifetimeTagConf]
+        @Binding var selected: EventCard.LifetimeTagConf
+        
+        public init(
+            tags: [EventCard.LifetimeTagConf],
+            selected: Binding<EventCard.LifetimeTagConf>
+        ) {
+            self.tags = tags
+            self._selected = selected
+        }
+        
+        public var body: some View {
+            PickerWithImage(
+                items: tags,
+                selection: $selected
+            ) { tag in
+                HStack(spacing: 0) {
+                    Spacer()
+                    Image(systemName: tag.sfName)
+                    Spacer()
+                    Text(tag.name)
+                    Spacer()
+                }.font(.callout)
             }
         }
     }
@@ -203,16 +257,19 @@ extension EventSelector {
 #Preview {
     struct Playground:View {
         static let workTag: EventCard.LifetimeTagConf = .init(
+            id: UUID().uuidString,
             name: "工作",
             sfName: "building.2.crop.circle",
             color: .blue.opacity(0.3)
         )
         static let surviveTag: EventCard.LifetimeTagConf = .init(
+            id: UUID().uuidString,
             name: "生存",
             sfName: "flame.circle",
             color: .red.opacity(0.3)
         )
         static let freedomTag: EventCard.LifetimeTagConf = .init(
+            id: UUID().uuidString,
             name: "自由",
             sfName: "steeringwheel.circle",
             color: .green.opacity(0.3)
@@ -291,6 +348,11 @@ extension EventSelector {
                         EventSelector.MainView(
                             categories: categories,
                             events: tasks,
+                            tags: [
+                                Self.workTag,
+                                Self.freedomTag,
+                                Self.surviveTag
+                            ],
                             selectedEvent: $selectedEvent,
                             selectedCategory: $selectedCategory,
                             categoryEditorStatus: $categoryEditorStatus,

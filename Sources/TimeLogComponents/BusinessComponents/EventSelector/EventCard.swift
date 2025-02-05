@@ -75,12 +75,14 @@ public struct EventCard: View {
 }
 
 extension EventCard {
-    public struct LifetimeTagConf: Equatable {
+    public struct LifetimeTagConf: Equatable, Identifiable {
+        public let id: String
         public let name: String
         public let sfName: String
         public let color: Color
     
-        public init(name: String, sfName: String, color: Color) {
+        public init(id: String, name: String, sfName: String, color: Color) {
+            self.id = id
             self.name = name
             self.sfName = sfName
             self.color = color
@@ -95,6 +97,7 @@ extension EventCard {
             title: "费曼学习法",
             active: true,
             lifetimeTagConf: .init(
+                id: UUID().uuidString,
                 name: "自由",
                 sfName: "steeringwheel.circle",
                 color: .green.opacity(0.3)
@@ -104,6 +107,7 @@ extension EventCard {
             title: "费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法费曼学习法",
             active: false,
             lifetimeTagConf: .init(
+                id: UUID().uuidString,
                 name: "生存",
                 sfName: "flame.circle",
                 color: .red.opacity(0.3)
@@ -113,6 +117,7 @@ extension EventCard {
             title: "费曼学习法费曼学习法",
             active: false,
             lifetimeTagConf: .init(
+                id: UUID().uuidString,
                 name: "工作",
                 sfName: "building.2.crop.circle",
                 color: .blue.opacity(0.3)

@@ -75,6 +75,7 @@ public struct TaskLogUpdator: View {
                         EventSelector.MainView(
                             categories: categories,
                             events: tasks,
+                            tags: [],
                             selectedEvent: $selectedEvent,
                             selectedCategory: $selectedCategory,
                             categoryEditorStatus: $categoryEditorStatus,
