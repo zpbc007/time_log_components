@@ -11,6 +11,8 @@ import IdentifiedCollections
 public struct AnalyzeDayPage: View {
     let type: OverviewDescription.DurationType
     let reviewComment: String
+    let todayTargetComment: String
+    let tomorrowTargetComment: String
     let emojiActiveColor: Color
     let totalTime: Int
     let recordDuration: TimeInterval
@@ -19,10 +21,14 @@ public struct AnalyzeDayPage: View {
     let lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     @Binding var dayStatus: DayStatus?
     let onReviewCommentTapped: () -> Void
+    let onTodayTargetTapped: () -> Void
+    let onTomorrowTargetTapped: () -> Void
     
     public init(
         type: OverviewDescription.DurationType,
         reviewComment: String,
+        todayTargetComment: String,
+        tomorrowTargetComment: String,
         emojiActiveColor: Color,
         totalTime: Int,
         recordDuration: TimeInterval,
@@ -30,10 +36,14 @@ public struct AnalyzeDayPage: View {
         pipeChartValues: PipeChart.Values?,
         lineChartValues: IdentifiedArrayOf<LineChart.Value>?,
         dayStatus: Binding<DayStatus?>,
-        onReviewCommentTapped: @escaping () -> Void
+        onReviewCommentTapped: @escaping () -> Void,
+        onTodayTargetTapped: @escaping () -> Void,
+        onTomorrowTargetTapped: @escaping () -> Void
     ) {
         self.type = type
         self.reviewComment = reviewComment
+        self.todayTargetComment = todayTargetComment
+        self.tomorrowTargetComment = tomorrowTargetComment
         self.emojiActiveColor = emojiActiveColor
         self.totalTime = totalTime
         self.recordDuration = recordDuration
@@ -41,7 +51,10 @@ public struct AnalyzeDayPage: View {
         self.pipeChartValues = pipeChartValues
         self.lineChartValues = lineChartValues
         self._dayStatus = dayStatus
+        
         self.onReviewCommentTapped = onReviewCommentTapped
+        self.onTodayTargetTapped = onTodayTargetTapped
+        self.onTomorrowTargetTapped = onTomorrowTargetTapped
     }
     
     public var body: some View {
@@ -76,19 +89,26 @@ public struct AnalyzeDayPage: View {
                 )
             }
             
-            Section("每日回顾") {
-                if reviewComment.isEmpty {
-                    HStack {
-                        Spacer()
-                        Image(systemName: "square.and.pencil")
-                        Text("回顾今日美好瞬间")
-                        Spacer()
-                    }
-                    
-                } else {
-                    RichTextViewer(content: reviewComment, placeholder: "今日美好瞬间")
-                }
-            }.onTapGesture(perform: onReviewCommentTapped)
+            self.buildTextViewer(
+                title: "今日目标",
+                text: todayTargetComment,
+                placeholder: "设定今日目标",
+                onTapAction: onTodayTargetTapped
+            )
+            
+            self.buildTextViewer(
+                title: "每日回顾",
+                text: reviewComment,
+                placeholder: "回顾今日美好瞬间",
+                onTapAction: onReviewCommentTapped
+            )
+            
+            self.buildTextViewer(
+                title: "明日目标",
+                text: tomorrowTargetComment,
+                placeholder: "设定明日目标",
+                onTapAction: onTomorrowTargetTapped
+            )
             
             Section("人生时间") {
                 if let pipeChartValues {
@@ -109,6 +129,27 @@ public struct AnalyzeDayPage: View {
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private func buildTextViewer(
+        title: String,
+        text: String,
+        placeholder: String,
+        onTapAction: @escaping () -> Void
+    ) -> some View {
+        Section(title) {
+            if text.isEmpty {
+                HStack {
+                    Spacer()
+                    Image(systemName: "square.and.pencil")
+                    Text(placeholder)
+                    Spacer()
+                }
+            } else {
+                RichTextViewer(content: text, placeholder: placeholder)
+            }
+        }.onTapGesture(perform: onTapAction)
     }
 }
 
@@ -146,6 +187,8 @@ extension AnalyzeDayPage {
             AnalyzeDayPage(
                 type: .day,
                 reviewComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
+                todayTargetComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
+                tomorrowTargetComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
                 emojiActiveColor: .red,
                 totalTime: 10,
                 recordDuration: 2680200,
@@ -165,6 +208,10 @@ extension AnalyzeDayPage {
                 dayStatus: $dayStatus
             ) {
                 print("tap review comment")
+            } onTodayTargetTapped: {
+                print("tap today target")
+            } onTomorrowTargetTapped: {
+                print("tap tomorrow target")
             }
         }
     }
@@ -176,6 +223,8 @@ extension AnalyzeDayPage {
     AnalyzeDayPage(
         type: .day,
         reviewComment: "",
+        todayTargetComment: "",
+        tomorrowTargetComment: "",
         emojiActiveColor: .blue,
         totalTime: 10,
         recordDuration: 2680200,
@@ -185,5 +234,9 @@ extension AnalyzeDayPage {
         dayStatus: .constant(.meaningless)
     ) {
         print("tap review comment")
+    } onTodayTargetTapped: {
+        print("tap today target")
+    } onTomorrowTargetTapped: {
+        print("tap tomorrow target")
     }
 }
