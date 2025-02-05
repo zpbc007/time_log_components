@@ -9,14 +9,17 @@ import SwiftUI
 import WebKit
 
 public struct RichTextViewer: View {
+    let title: String?
     let content: String
     let placeholder: String
+    
     @StateObject
     private var viewModel: ViewModel
     @State
     private var height: CGFloat = 10
     
-    public init(content: String, placeholder: String) {
+    public init(title: String? = nil, content: String, placeholder: String) {
+        self.title = title
         self.content = content
         self.placeholder = placeholder
         self._viewModel = StateObject(wrappedValue: .init(content))
@@ -24,9 +27,11 @@ public struct RichTextViewer: View {
         
     public var body: some View {
         VStack {
-            Text(placeholder)
-                .bold()
-                .padding(.top)
+            if let title, !title.isEmpty {
+                Text(title)
+                    .bold()
+                    .padding(.top)
+            }
             
             WebView(placeholder: placeholder, height: $height)
                 .frame(height: height)
@@ -82,12 +87,15 @@ extension RichTextViewer {
 
 #Preview {
     struct Playground: View {
-        @State private var content: String = "{\"ops\":[{\"insert\":\"init content\",\"attributes\":{\"bold\":true}}]}"
+        @State private var content: String = ""
         
         var body: some View {
             VStack {
-                RichTextViewer(content: content, placeholder: "Placeholder")
-                    .border(.black)
+                RichTextViewer(
+                    title: "title",
+                    content: content,
+                    placeholder: "Placeholder"
+                ).border(.black)
                 
                 Button("update") {
                     content = "{\"ops\":[{\"insert\":\"new contentnew contentnew contentnew contentnew contentnew contentnew content\",\"attributes\":{\"bold\":true}}]}"
