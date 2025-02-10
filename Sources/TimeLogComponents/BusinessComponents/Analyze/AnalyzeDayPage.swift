@@ -12,7 +12,9 @@ public struct AnalyzeDayPage: View {
     let type: OverviewDescription.DurationType
     let reviewComment: String
     let todayTargetComment: String
+    let todayTargets: [AnalyzeDayPage.Target]
     let tomorrowTargetComment: String
+    let tomorrowTargets: [AnalyzeDayPage.Target]
     let emojiActiveColor: Color
     let totalTime: Int
     let recordDuration: TimeInterval
@@ -20,15 +22,24 @@ public struct AnalyzeDayPage: View {
     let pipeChartValues: PipeChart.Values?
     let lineChartValues: IdentifiedArrayOf<LineChart.Value>?
     @Binding var dayStatus: DayStatus?
-    let onReviewCommentTapped: () -> Void
-    let onTodayTargetTapped: () -> Void
-    let onTomorrowTargetTapped: () -> Void
     
+    let tapReviewCommentAction: () -> Void
+    
+    let tapTodayCommentAction: () -> Void
+    let addTodayTargetAction: () -> Void
+    let todayTargetsDeleteAction: (IndexSet) -> Void
+
+    let tapTomorrowCommentAction: () -> Void
+    let addTomorrowTargetAction: () -> Void
+    let tomorrowTargetsDeleteAction: (IndexSet) -> Void
+        
     public init(
         type: OverviewDescription.DurationType,
         reviewComment: String,
         todayTargetComment: String,
+        todayTargets: [AnalyzeDayPage.Target],
         tomorrowTargetComment: String,
+        tomorrowTargets: [AnalyzeDayPage.Target],
         emojiActiveColor: Color,
         totalTime: Int,
         recordDuration: TimeInterval,
@@ -36,14 +47,20 @@ public struct AnalyzeDayPage: View {
         pipeChartValues: PipeChart.Values?,
         lineChartValues: IdentifiedArrayOf<LineChart.Value>?,
         dayStatus: Binding<DayStatus?>,
-        onReviewCommentTapped: @escaping () -> Void,
-        onTodayTargetTapped: @escaping () -> Void,
-        onTomorrowTargetTapped: @escaping () -> Void
+        tapReviewCommentAction: @escaping () -> Void,
+        tapTodayCommentAction: @escaping () -> Void,
+        addTodayTargetAction: @escaping () -> Void,
+        todayTargetsDeleteAction: @escaping (IndexSet) -> Void,
+        tapTomorrowCommentAction: @escaping () -> Void,
+        addTomorrowTargetAction: @escaping () -> Void,
+        tomorrowTargetsDeleteAction: @escaping (IndexSet) -> Void
     ) {
         self.type = type
         self.reviewComment = reviewComment
         self.todayTargetComment = todayTargetComment
+        self.todayTargets = todayTargets
         self.tomorrowTargetComment = tomorrowTargetComment
+        self.tomorrowTargets = tomorrowTargets
         self.emojiActiveColor = emojiActiveColor
         self.totalTime = totalTime
         self.recordDuration = recordDuration
@@ -52,9 +69,15 @@ public struct AnalyzeDayPage: View {
         self.lineChartValues = lineChartValues
         self._dayStatus = dayStatus
         
-        self.onReviewCommentTapped = onReviewCommentTapped
-        self.onTodayTargetTapped = onTodayTargetTapped
-        self.onTomorrowTargetTapped = onTomorrowTargetTapped
+        self.tapReviewCommentAction = tapReviewCommentAction
+        
+        self.tapTodayCommentAction = tapTodayCommentAction
+        self.addTodayTargetAction = addTodayTargetAction
+        self.todayTargetsDeleteAction = todayTargetsDeleteAction
+        
+        self.tapTomorrowCommentAction = tapTomorrowCommentAction
+        self.addTomorrowTargetAction = addTomorrowTargetAction
+        self.tomorrowTargetsDeleteAction = tomorrowTargetsDeleteAction
     }
     
     public var body: some View {
@@ -89,25 +112,29 @@ public struct AnalyzeDayPage: View {
                 )
             }
             
-            self.buildTextViewer(
+            self.buildTargetSection(
                 title: "今日目标",
-                text: todayTargetComment,
-                placeholder: "设定今日目标",
-                onTapAction: onTodayTargetTapped
+                comment: todayTargetComment,
+                targets: todayTargets,
+                tapCommentAction: tapTodayCommentAction,
+                addTargetAction: addTodayTargetAction,
+                deleteTargetAction: todayTargetsDeleteAction
             )
-            
+
             self.buildTextViewer(
                 title: "每日回顾",
                 text: reviewComment,
                 placeholder: "回顾今日美好瞬间",
-                onTapAction: onReviewCommentTapped
+                onTapAction: tapReviewCommentAction
             )
             
-            self.buildTextViewer(
+            self.buildTargetSection(
                 title: "明日目标",
-                text: tomorrowTargetComment,
-                placeholder: "设定明日目标",
-                onTapAction: onTomorrowTargetTapped
+                comment: tomorrowTargetComment,
+                targets: tomorrowTargets,
+                tapCommentAction: tapTomorrowCommentAction,
+                addTargetAction: addTomorrowTargetAction,
+                deleteTargetAction: tomorrowTargetsDeleteAction
             )
             
             Section("人生时间") {
@@ -151,6 +178,76 @@ public struct AnalyzeDayPage: View {
             }
         }.onTapGesture(perform: onTapAction)
     }
+    
+    @ViewBuilder
+    private func buildTarget(_ target: AnalyzeDayPage.Target) -> some View {
+        HStack {
+            Text(target.name)
+            Spacer()
+            Text("\(target.time)次 \(target.duration.formatInterval())")
+                .font(.caption)
+        }.padding(.horizontal)
+    }
+    
+    @ViewBuilder
+    private func buildTargetSection(
+        title: String,
+        comment: String,
+        targets: [AnalyzeDayPage.Target],
+        tapCommentAction: @escaping () -> Void,
+        addTargetAction: @escaping () -> Void,
+        deleteTargetAction: @escaping (IndexSet) -> Void
+    ) -> some View {
+        Section {
+            if (
+                comment.isEmpty
+                || comment == RichTextViewer.emptyOps
+            ) && targets.isEmpty
+            {
+                HStack {
+                    Spacer()
+                    Image(systemName: "plus")
+                    Text("设定今日目标")
+                    Spacer()
+                }.onTapGesture(perform: addTargetAction)
+            }
+            
+            if !targets.isEmpty {
+                ForEach(targets) { target in
+                    buildTarget(target)
+                }.onDelete(perform: deleteTargetAction)
+            }
+            
+            if !comment.isEmpty
+                && comment != RichTextViewer.emptyOps
+            {
+                RichTextViewer(
+                    content: comment,
+                    placeholder: title
+                ).onTapGesture(perform: tapCommentAction)
+            }
+        } header: {
+            HStack {
+                Text(title)
+                
+                Spacer()
+                
+                Button(
+                    action: tapCommentAction,
+                    label: {
+                        Image(systemName: "bubble")
+                    }
+                )
+                
+                Button(
+                    action: addTargetAction,
+                    label: {
+                        Image(systemName: "plus")
+                    }
+                )
+            }
+        }
+    }
 }
 
 extension AnalyzeDayPage {
@@ -179,16 +276,43 @@ extension AnalyzeDayPage {
     ]
 }
 
+extension AnalyzeDayPage {
+    public struct Target: Identifiable, Equatable {
+        public let id: String
+        public let name: String
+        public let time: Int
+        public let duration: Double
+        
+        public init(id: String, name: String, time: Int, duration: Double) {
+            self.id = id
+            self.name = name
+            self.time = time
+            self.duration = duration
+        }
+    }
+}
+
 #Preview {
     struct Playground: View {
         @State private var dayStatus: AnalyzeDayPage.DayStatus? = nil
+        @State private var todayTargets: [AnalyzeDayPage.Target] = [
+            .init(id: UUID().uuidString, name: "today-event1", time: 5, duration: 60 * 60 * 2.0),
+            .init(id: UUID().uuidString, name: "today-event2", time: 5, duration: 60 * 60 * 2.0),
+            .init(id: UUID().uuidString, name: "today-event3", time: 5, duration: 60 * 60 * 2.0)
+        ]
+        @State private var tomorrowTargets: [AnalyzeDayPage.Target] = [
+            .init(id: UUID().uuidString, name: "tomorrow-event1", time: 5, duration: 60 * 60 * 2.0),
+            .init(id: UUID().uuidString, name: "tomorrow-event2", time: 5, duration: 60 * 60 * 2.0)
+        ]
         
         var body: some View {
             AnalyzeDayPage(
                 type: .day,
                 reviewComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
                 todayTargetComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
+                todayTargets: todayTargets,
                 tomorrowTargetComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
+                tomorrowTargets: todayTargets,
                 emojiActiveColor: .red,
                 totalTime: 10,
                 recordDuration: 2680200,
@@ -207,11 +331,29 @@ extension AnalyzeDayPage {
                 ),
                 dayStatus: $dayStatus
             ) {
-                print("tap review comment")
-            } onTodayTargetTapped: {
-                print("tap today target")
-            } onTomorrowTargetTapped: {
-                print("tap tomorrow target")
+                print("tapReviewCommentAction")
+            } tapTodayCommentAction: {
+                print("tapTodayCommentAction")
+            } addTodayTargetAction: {
+                todayTargets.append(.init(
+                    id: UUID().uuidString,
+                    name: "today-event-\(todayTargets.count)",
+                    time: 5,
+                    duration: 1.5 * 60 * 60
+                ))
+            } todayTargetsDeleteAction: { offsets in
+                todayTargets.remove(atOffsets: offsets)
+            } tapTomorrowCommentAction: {
+                print("tapTomorrowCommentAction")
+            } addTomorrowTargetAction: {
+                tomorrowTargets.append(.init(
+                    id: UUID().uuidString,
+                    name: "tomorrow-event-\(todayTargets.count)",
+                    time: 5,
+                    duration: 1.5 * 60 * 60
+                ))
+            } tomorrowTargetsDeleteAction: { offsets in
+                tomorrowTargets.remove(atOffsets: offsets)
             }
         }
     }
@@ -224,7 +366,9 @@ extension AnalyzeDayPage {
         type: .day,
         reviewComment: "",
         todayTargetComment: "",
+        todayTargets: [],
         tomorrowTargetComment: "",
+        tomorrowTargets: [],
         emojiActiveColor: .blue,
         totalTime: 10,
         recordDuration: 2680200,
@@ -233,10 +377,18 @@ extension AnalyzeDayPage {
         lineChartValues: nil,
         dayStatus: .constant(.meaningless)
     ) {
-        print("tap review comment")
-    } onTodayTargetTapped: {
-        print("tap today target")
-    } onTomorrowTargetTapped: {
+        print("tapReviewCommentAction")
+    } tapTodayCommentAction: {
+        print("tapTodayCommentAction")
+    } addTodayTargetAction: {
+        print("addTodayTargetAction")
+    } todayTargetsDeleteAction: { _ in
+        print("todayTargetsDeleteAction")
+    } tapTomorrowCommentAction: {
         print("tap tomorrow target")
+    } addTomorrowTargetAction: {
+        print("addTomorrowTargetAction")
+    } tomorrowTargetsDeleteAction: { _ in
+        print("tomorrowTargetsDeleteAction")
     }
 }
