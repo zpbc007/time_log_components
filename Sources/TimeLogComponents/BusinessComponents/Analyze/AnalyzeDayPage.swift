@@ -181,12 +181,17 @@ public struct AnalyzeDayPage: View {
     
     @ViewBuilder
     private func buildTarget(_ target: AnalyzeDayPage.Target) -> some View {
-        HStack {
+        if let config = target.config {
+            HStack {
+                Text(target.name)
+                Spacer()
+                Text("\(config.time)次 \(config.duration.formatInterval())")
+                    .font(.caption)
+            }.padding(.horizontal)
+        } else {
             Text(target.name)
-            Spacer()
-            Text("\(target.time)次 \(target.duration.formatInterval())")
-                .font(.caption)
-        }.padding(.horizontal)
+                .padding(.horizontal)
+        }
     }
     
     @ViewBuilder
@@ -278,16 +283,28 @@ extension AnalyzeDayPage {
 
 extension AnalyzeDayPage {
     public struct Target: Identifiable, Equatable {
+        public struct Config: Equatable {
+            public let time: Int
+            public let duration: Double
+            
+            public init(time: Int, duration: Double) {
+                self.time = time
+                self.duration = duration
+            }
+        }
+        
         public let id: String
         public let name: String
-        public let time: Int
-        public let duration: Double
+        public let config: Config?
         
-        public init(id: String, name: String, time: Int, duration: Double) {
+        public init(
+            id: String,
+            name: String,
+            config: Config? = nil
+        ) {
             self.id = id
             self.name = name
-            self.time = time
-            self.duration = duration
+            self.config = config
         }
     }
 }
@@ -296,13 +313,38 @@ extension AnalyzeDayPage {
     struct Playground: View {
         @State private var dayStatus: AnalyzeDayPage.DayStatus? = nil
         @State private var todayTargets: [AnalyzeDayPage.Target] = [
-            .init(id: UUID().uuidString, name: "today-event1", time: 5, duration: 60 * 60 * 2.0),
-            .init(id: UUID().uuidString, name: "today-event2", time: 5, duration: 60 * 60 * 2.0),
-            .init(id: UUID().uuidString, name: "today-event3", time: 5, duration: 60 * 60 * 2.0)
+            .init(
+                id: UUID().uuidString,
+                name: "today-event1",
+                config: .init(time: 5, duration: 60 * 60 * 2.0)
+            ),
+            .init(
+                id: UUID().uuidString,
+                name: "today-event2",
+                config: .init(
+                    time: 5,
+                    duration: 60 * 60 * 2.0
+                )
+                
+            ),
+            .init(
+                id: UUID().uuidString,
+                name: "today-event3",
+                config: .init(
+                    time: 5,
+                    duration: 60 * 60 * 2.0
+                )
+            )
         ]
         @State private var tomorrowTargets: [AnalyzeDayPage.Target] = [
-            .init(id: UUID().uuidString, name: "tomorrow-event1", time: 5, duration: 60 * 60 * 2.0),
-            .init(id: UUID().uuidString, name: "tomorrow-event2", time: 5, duration: 60 * 60 * 2.0)
+            .init(
+                id: UUID().uuidString,
+                name: "tomorrow-event1"
+            ),
+            .init(
+                id: UUID().uuidString,
+                name: "tomorrow-event2"
+            )
         ]
         
         var body: some View {
@@ -312,7 +354,7 @@ extension AnalyzeDayPage {
                 todayTargetComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
                 todayTargets: todayTargets,
                 tomorrowTargetComment: "{\"ops\":[{\"insert\":\"完成今日目标的开发\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"给菲打个视频\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"},{\"insert\":\"保持开心\"},{\"attributes\":{\"list\":\"unchecked\"},\"insert\":\"\\n\"}]}",
-                tomorrowTargets: todayTargets,
+                tomorrowTargets: tomorrowTargets,
                 emojiActiveColor: .red,
                 totalTime: 10,
                 recordDuration: 2680200,
@@ -338,8 +380,10 @@ extension AnalyzeDayPage {
                 todayTargets.append(.init(
                     id: UUID().uuidString,
                     name: "today-event-\(todayTargets.count)",
-                    time: 5,
-                    duration: 1.5 * 60 * 60
+                    config: .init(
+                        time: 5,
+                        duration: 1.5 * 60 * 60
+                    )
                 ))
             } todayTargetsDeleteAction: { offsets in
                 todayTargets.remove(atOffsets: offsets)
@@ -348,9 +392,7 @@ extension AnalyzeDayPage {
             } addTomorrowTargetAction: {
                 tomorrowTargets.append(.init(
                     id: UUID().uuidString,
-                    name: "tomorrow-event-\(todayTargets.count)",
-                    time: 5,
-                    duration: 1.5 * 60 * 60
+                    name: "tomorrow-event-\(todayTargets.count)"
                 ))
             } tomorrowTargetsDeleteAction: { offsets in
                 tomorrowTargets.remove(atOffsets: offsets)
