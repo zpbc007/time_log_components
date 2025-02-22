@@ -27,10 +27,12 @@ public struct AnalyzeDayPage: View {
     
     let tapTodayCommentAction: () -> Void
     let addTodayTargetAction: () -> Void
+    let tapTodayTargetAction: (AnalyzeDayPage.Target) -> Void
     let todayTargetsDeleteAction: (IndexSet) -> Void
 
     let tapTomorrowCommentAction: () -> Void
     let addTomorrowTargetAction: () -> Void
+    let tapTomorrowTargetAction: (AnalyzeDayPage.Target) -> Void
     let tomorrowTargetsDeleteAction: (IndexSet) -> Void
         
     public init(
@@ -50,9 +52,11 @@ public struct AnalyzeDayPage: View {
         tapReviewCommentAction: @escaping () -> Void,
         tapTodayCommentAction: @escaping () -> Void,
         addTodayTargetAction: @escaping () -> Void,
+        tapTodayTargetAction: @escaping (AnalyzeDayPage.Target) -> Void,
         todayTargetsDeleteAction: @escaping (IndexSet) -> Void,
         tapTomorrowCommentAction: @escaping () -> Void,
         addTomorrowTargetAction: @escaping () -> Void,
+        tapTomorrowTargetAction: @escaping (AnalyzeDayPage.Target) -> Void,
         tomorrowTargetsDeleteAction: @escaping (IndexSet) -> Void
     ) {
         self.type = type
@@ -73,10 +77,12 @@ public struct AnalyzeDayPage: View {
         
         self.tapTodayCommentAction = tapTodayCommentAction
         self.addTodayTargetAction = addTodayTargetAction
+        self.tapTodayTargetAction = tapTodayTargetAction
         self.todayTargetsDeleteAction = todayTargetsDeleteAction
         
         self.tapTomorrowCommentAction = tapTomorrowCommentAction
         self.addTomorrowTargetAction = addTomorrowTargetAction
+        self.tapTomorrowTargetAction = tapTomorrowTargetAction
         self.tomorrowTargetsDeleteAction = tomorrowTargetsDeleteAction
     }
     
@@ -118,6 +124,7 @@ public struct AnalyzeDayPage: View {
                 targets: todayTargets,
                 tapCommentAction: tapTodayCommentAction,
                 addTargetAction: addTodayTargetAction,
+                tapTargetAction: tapTodayTargetAction,
                 deleteTargetAction: todayTargetsDeleteAction
             )
 
@@ -134,6 +141,7 @@ public struct AnalyzeDayPage: View {
                 targets: tomorrowTargets,
                 tapCommentAction: tapTomorrowCommentAction,
                 addTargetAction: addTomorrowTargetAction,
+                tapTargetAction: tapTomorrowTargetAction,
                 deleteTargetAction: tomorrowTargetsDeleteAction
             )
             
@@ -201,6 +209,7 @@ public struct AnalyzeDayPage: View {
         targets: [AnalyzeDayPage.Target],
         tapCommentAction: @escaping () -> Void,
         addTargetAction: @escaping () -> Void,
+        tapTargetAction: @escaping (AnalyzeDayPage.Target) -> Void,
         deleteTargetAction: @escaping (IndexSet) -> Void
     ) -> some View {
         Section {
@@ -220,6 +229,9 @@ public struct AnalyzeDayPage: View {
             if !targets.isEmpty {
                 ForEach(targets) { target in
                     buildTarget(target)
+                        .onTapGesture(perform: {
+                            tapTargetAction(target)
+                        })
                 }.onDelete(perform: deleteTargetAction)
             }
             
@@ -377,6 +389,7 @@ extension AnalyzeDayPage {
             } tapTodayCommentAction: {
                 print("tapTodayCommentAction")
             } addTodayTargetAction: {
+                print("addTodayTargetAction")
                 todayTargets.append(.init(
                     id: UUID().uuidString,
                     name: "today-event-\(todayTargets.count)",
@@ -385,16 +398,45 @@ extension AnalyzeDayPage {
                         duration: 1.5 * 60 * 60
                     )
                 ))
+            } tapTodayTargetAction: { target in
+                print("tapTodayTargetAction: \(target.name)")
+                todayTargets = todayTargets.map({ oldTarget in
+                    if oldTarget == target {
+                        return .init(
+                            id: oldTarget.id,
+                            name: "\(oldTarget.name)-new",
+                            config: oldTarget.config
+                        )
+                    } else {
+                        return oldTarget
+                    }
+                })
             } todayTargetsDeleteAction: { offsets in
+                print("todayTargetsDeleteAction")
                 todayTargets.remove(atOffsets: offsets)
             } tapTomorrowCommentAction: {
                 print("tapTomorrowCommentAction")
             } addTomorrowTargetAction: {
+                print("addTomorrowTargetAction")
                 tomorrowTargets.append(.init(
                     id: UUID().uuidString,
-                    name: "tomorrow-event-\(todayTargets.count)"
+                    name: "tomorrow-event-\(tomorrowTargets.count)"
                 ))
+            } tapTomorrowTargetAction: { target in
+                print("tapTomorrowTargetAction")
+                tomorrowTargets = tomorrowTargets.map({ oldTarget in
+                    if oldTarget == target {
+                        return .init(
+                            id: oldTarget.id,
+                            name: "\(oldTarget.name)-new",
+                            config: oldTarget.config
+                        )
+                    } else {
+                        return oldTarget
+                    }
+                })
             } tomorrowTargetsDeleteAction: { offsets in
+                print("tomorrowTargetsDeleteAction")
                 tomorrowTargets.remove(atOffsets: offsets)
             }
         }
@@ -424,12 +466,16 @@ extension AnalyzeDayPage {
         print("tapTodayCommentAction")
     } addTodayTargetAction: {
         print("addTodayTargetAction")
+    } tapTodayTargetAction: { target in
+        print("tapTodayTargetAction \(target.name)")
     } todayTargetsDeleteAction: { _ in
         print("todayTargetsDeleteAction")
     } tapTomorrowCommentAction: {
         print("tap tomorrow target")
     } addTomorrowTargetAction: {
         print("addTomorrowTargetAction")
+    } tapTomorrowTargetAction: { target in
+        print("tapTomorrowTargetAction \(target.name)")
     } tomorrowTargetsDeleteAction: { _ in
         print("tomorrowTargetsDeleteAction")
     }
