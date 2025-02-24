@@ -45,29 +45,7 @@ public struct CommonTreeNode<Value: Equatable & Identifiable>: Identifiable, Equ
     }
     
     public func get(_ id: Value.ID) -> CommonTreeNode<Value>? {
-        // 当前节点就是
-        if self.id == id {
-            return self
-        }
-        
-        // 没有子节点就不找了
-        guard let children else {
-            return nil
-        }
-        
-        // 子节点中存在
-        if let result = children[id: id] {
-            return result
-        }
-        
-        // 子节点继续向下
-        for item in children {
-            if let result = item.get(id) {
-                return result
-            }
-        }
-        
-        return nil
+        return Self.get(root: self, id)
     }
 }
 
@@ -125,6 +103,44 @@ extension CommonTreeNode {
             // 子任务被选中，父任务也被选中
             partialResult.append(.init(value: treeNode.value, children: newChildren))
         }
+    }
+    
+    public static func get(
+        root: CommonTreeNode,
+        _ id: Value.ID
+    ) -> CommonTreeNode? {
+        // 当前节点就是
+        if root.id == id {
+            return root
+        }
+        
+        // 没有子节点就不找了
+        guard let children = root.children else {
+            return nil
+        }
+        
+        // 子节点中存在
+        if let result = children[id: id] {
+            return result
+        }
+        
+        // 子节点继续向下
+        for item in children {
+            if let result = item.get(id) {
+                return result
+            }
+        }
+        
+        return nil
+    }
+    
+    public static func get(
+        tree: IdentifiedArrayOf<CommonTreeNode>,
+        _ id: Value.ID
+    ) -> CommonTreeNode? {
+        tree.compactMap { root in
+            Self.get(root: root, id)
+        }.first
     }
     
     static private func transform<TargetValue: Equatable & Identifiable>(
