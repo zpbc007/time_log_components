@@ -296,8 +296,8 @@ extension AnalyzeDayPage {
 extension AnalyzeDayPage {
     public struct Target: Identifiable, Equatable {
         public struct Config: Equatable {
-            public let time: Int
-            public let duration: Double
+            public var time: Int
+            public var duration: Double
             
             public init(time: Int, duration: Double) {
                 self.time = time
