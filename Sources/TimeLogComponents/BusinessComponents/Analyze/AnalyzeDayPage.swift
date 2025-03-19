@@ -307,7 +307,7 @@ extension AnalyzeDayPage {
         
         public let id: String
         public let name: String
-        public let config: Config?
+        public var config: Config?
         
         public init(
             id: String,
