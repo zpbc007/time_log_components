@@ -63,28 +63,27 @@ public struct LineChart: View {
 
 extension LineChart {
     public struct Value: Identifiable, Equatable {
-        let label: String
-        let count: Int
-        let duration: Double
-        let color: Color
+        public let label: String
+        public let count: Int
+        public let duration: Double
+        public let color: Color
+        public let id: String
         
         public init(
+            id: String,
             label: String,
             count: Int,
             duration: Double,
             color: Color
         ) {
+            self.id = id
             self.label = label
             self.count = count
             self.duration = duration
             self.color = color
         }
         
-        public var id: String {
-            label
-        }
-        
-        var description: String {
+        public var description: String {
             "\(count)次 \(duration.formatInterval())"
         }
     }
@@ -97,9 +96,27 @@ extension LineChart {
                 Section {
                     LineChart(
                         values: .init(uniqueElements: [
-                            .init(label: "未记录", count: 1, duration: 50, color: .red),
-                            .init(label: "剩余时间", count: 1, duration: 100, color: .blue),
-                            .init(label: "Task001", count: 1, duration: 500, color: .green)
+                            .init(
+                                id: UUID().uuidString,
+                                label: "未记录",
+                                count: 1,
+                                duration: 50,
+                                color: .red
+                            ),
+                            .init(
+                                id: UUID().uuidString,
+                                label: "剩余时间",
+                                count: 1,
+                                duration: 100,
+                                color: .blue
+                            ),
+                            .init(
+                                id: UUID().uuidString,
+                                label: "Task001",
+                                count: 1,
+                                duration: 500,
+                                color: .green
+                            )
                         ])
                     )
                 }

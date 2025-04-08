@@ -378,9 +378,27 @@ extension AnalyzeDayPage {
                 ])),
                 lineChartValues: .init(
                     uniqueElements: [
-                        .init(label: "自由", count: 1, duration: 500, color: .init(hexString: "#9EDF9CFF")),
-                        .init(label: "工作", count: 1, duration: 100, color: .init(hexString: "#81BFDAFF")),
-                        .init(label: "生存", count: 1, duration: 50, color: .init(hexString: "#FDE7BBFF"))
+                        .init(
+                            id: UUID().uuidString,
+                            label: "自由",
+                            count: 1,
+                            duration: 500,
+                            color: .init(hexString: "#9EDF9CFF")
+                        ),
+                        .init(
+                            id: UUID().uuidString,
+                            label: "工作",
+                            count: 1,
+                            duration: 100,
+                            color: .init(hexString: "#81BFDAFF")
+                        ),
+                        .init(
+                            id: UUID().uuidString,
+                            label: "生存",
+                            count: 1,
+                            duration: 50,
+                            color: .init(hexString: "#FDE7BBFF")
+                        )
                     ]
                 ),
                 dayStatus: $dayStatus
