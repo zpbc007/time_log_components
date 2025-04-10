@@ -146,9 +146,22 @@ extension TimeLine {
         }
         
         private var gesture: some Gesture {
-            LongPressGesture(minimumDuration: 0.3)
+            // iOS 18 中在 scrollview 中的 LongPressGesture 会阻止滚动
+            if #available(iOS 18, *) {
+                return DragGesture(
+                    // 必须设置，不然会阻止滚动
+                    minimumDistance: 30,
+                    coordinateSpace: .named(Self.FullHeightCoordinateSpaceName)
+                ).updating($dragState) { value, state, transaction in
+                    self.updateDragStateByDragValue(state: &state, value: value)
+                }.onEnded { value in
+                    self.handleDragEnd(value: value)
+                }
+            }
+            
+            return LongPressGesture(minimumDuration: 0.5)
                 .sequenced(before: DragGesture(
-                    minimumDistance: 0,
+                    minimumDistance: 30,
                     coordinateSpace: .named(Self.FullHeightCoordinateSpaceName)
                 ))
                 .updating($dragState) { value, state, transaction in
@@ -160,12 +173,7 @@ extension TimeLine {
                             state = .dragging(startY: nil, endY: nil)
                             return
                         }
-                        let (startY, endY) = getPosFromDragState(dragState: dragState)
-                        
-                        state = .dragging(
-                            startY: startY,
-                            endY: endY
-                        )
+                        self.updateDragStateByDragValue(state: &state, value: dragState)
                     }
                 }
                 .onEnded { value in
@@ -174,21 +182,8 @@ extension TimeLine {
                         guard let dragState else {
                             return
                         }
-                        let (startY, endY) = getPosFromDragState(dragState: dragState)
-                        let newState: DragState = .dragging(startY: startY, endY: endY)
                         
-                        let (offsetY, height) = newState.dragRectInfo
-                        if height == 0 {
-                            return
-                        }
-                        
-                        let startAllMinute = Int(floor(offsetY / oneMinuteHeight))
-                        let endAllMinute = Int(floor((offsetY + height) / oneMinuteHeight))
-                        
-                        selectAction(
-                            startAllMinute / 60, startAllMinute % 60,
-                            endAllMinute / 60, endAllMinute % 60
-                        )
+                        handleDragEnd(value: dragState)
                     default:
                         return
                     }
@@ -221,6 +216,32 @@ extension TimeLine {
             return (startY, endY)
         }
         
+        private func updateDragStateByDragValue(state: inout DragState, value: DragGesture.Value) {
+            let (startY, endY) = getPosFromDragState(dragState: value)
+            state = .dragging(
+                startY: startY,
+                endY: endY
+            )
+        }
+        
+        private func handleDragEnd(value: DragGesture.Value) {
+            let (startY, endY) = getPosFromDragState(dragState: value)
+            let newState: DragState = .dragging(startY: startY, endY: endY)
+            
+            let (offsetY, height) = newState.dragRectInfo
+            if height == 0 {
+                return
+            }
+            
+            let startAllMinute = Int(floor(offsetY / oneMinuteHeight))
+            let endAllMinute = Int(floor((offsetY + height) / oneMinuteHeight))
+            
+            selectAction(
+                startAllMinute / 60, startAllMinute % 60,
+                endAllMinute / 60, endAllMinute % 60
+            )
+        }
+        
         @ViewBuilder
         private func HourView(hour: Int) -> some View {
             HStack(alignment: .top, spacing: 0) {
@@ -237,8 +258,8 @@ extension TimeLine {
                 }
                 .padding(.leading)
                 .contentShape(Rectangle())
-                // fix: 避免 scrollView 无法滚动
-                .onTapGesture {}
+                // fix: ios17 上避免 scrollView 无法滚动
+                .onTapGesture { }
                 .gesture(gesture)
             }
             .frame(height: oneHourHeight)
