@@ -31,6 +31,10 @@ let package = Package(
         .package(
             url: "https://github.com/elai950/AlertToast",
             from: "1.3.9"
+        ),
+        .package(
+            url: "https://github.com/exyte/SVGView.git",
+            from: "1.0.6"
         )
     ],
     targets: [
@@ -43,12 +47,14 @@ let package = Package(
                 .product(name: "WrappingHStack", package: "WrappingHStack"),
                 .product(name: "CocoaLumberjack", package: "CocoaLumberjack"),
                 .product(name: "CocoaLumberjackSwift", package: "CocoaLumberjack"),
-                .product(name: "AlertToast", package: "AlertToast")
+                .product(name: "AlertToast", package: "AlertToast"),
+                .product(name: "SVGView", package: "SVGView")
             ],
             resources: [
                 .copy("Resources/quill.js"),
                 .copy("Resources/quill.snow.css"),
-                .copy("Resources/bundle.min.js")
+                .copy("Resources/bundle.min.js"),
+                .process("Resources/SVG")
             ]
         ),
         .testTarget(
