@@ -9,17 +9,20 @@ import SwiftUI
 import AlertToast
 
 public struct ToastState: Equatable {
-    let message: String
+    let title: String
+    let subTitle: String?
     let type: AlertToast.AlertType
     let mode: AlertToast.DisplayMode
     
     public init(
         mode: AlertToast.DisplayMode = .alert,
-        message: String,
+        title: String,
+        subTitle: String? = nil,
         type: AlertToast.AlertType
     ) {
         self.mode = mode
-        self.message = message
+        self.title = title
+        self.subTitle = subTitle
         self.type = type
     }
 }
@@ -71,7 +74,8 @@ extension View {
         AlertToast(
             displayMode: state?.mode ?? .alert,
             type: state?.type ?? .regular,
-            title: state?.message
+            title: state?.title,
+            subTitle: state?.subTitle
         )
     }
 }
@@ -79,7 +83,10 @@ extension View {
 #Preview {
     struct Playground: View {
         @State private var showToast = false
-        private let toastState: ToastState = .init(message: "测试内容", type: .error(.red))
+        private let toastState: ToastState = .init(
+            title: "测试内容",
+            type: .error(.red)
+        )
         
         var body: some View {
             ZStack {
@@ -106,7 +113,10 @@ extension View {
                 Color.gray
                 
                 Button("toggle") {
-                    toastState = .init(message: "测试内容 \(Date.now)", type: .error(.red))
+                    toastState = .init(
+                        title: "测试内容 \(Date.now)",
+                        type: .error(.red)
+                    )
                 }
             }
             .ignoresSafeArea()
@@ -129,8 +139,9 @@ extension View {
                     withAnimation {
                         toastState = .init(
                             mode: .banner(.pop),
-                            message: "测试内容 \(Date.now)",
-                            type: .error(.red)
+                            title: "警告",
+                            subTitle: "测试内容 \(Date.now)",
+                            type: .systemImage("exclamationmark.triangle", .red)
                         )
                     }
                 }
