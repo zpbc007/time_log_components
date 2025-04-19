@@ -21,26 +21,51 @@ public struct ToastState: Equatable {
 extension View {
     public func toast(_ isPresenting: Binding<Bool>, state: ToastState) -> some View {
         self.toast(isPresenting: isPresenting) {
-            AlertToast(
-                type: state.type,
-                title: state.message
-            )
+            self.getToastView(state)
         }
     }
     
     public func toast(_ state: Binding<ToastState?>) -> some View {
-        self.toast(isPresenting: .init(get: {
-            state.wrappedValue != nil
-        }, set: { visible in
-            if !visible {
-                state.wrappedValue = nil
-            }
-        })) {
-            AlertToast(
-                type: state.wrappedValue?.type ?? .regular,
-                title: state.wrappedValue?.message
-            )
+        self.toast(
+            isPresenting: self.getIsPresenting(state)
+        ) {
+            self.getToastView(state.wrappedValue)
         }
+    }
+    
+    public func toast(
+        _ state: Binding<ToastState?>,
+        onTap: @escaping () -> Void
+    ) -> some View {
+        self.toast(
+            isPresenting: self.getIsPresenting(state),
+            duration: 0,
+            tapToDismiss: false,
+            alert: {
+                self.getToastView(state.wrappedValue)
+            },
+            onTap: onTap
+        )
+    }
+    
+    private func getIsPresenting(_ state: Binding<ToastState?>) -> Binding<Bool> {
+        .init(
+            get: {
+                state.wrappedValue != nil
+            },
+            set: { visible in
+                if !visible {
+                    state.wrappedValue = nil
+                }
+            }
+        )
+    }
+    
+    private func getToastView(_ state: ToastState?) -> AlertToast {
+        AlertToast(
+            type: state?.type ?? .regular,
+            title: state?.message
+        )
     }
 }
 
@@ -79,6 +104,28 @@ extension View {
             }
             .ignoresSafeArea()
             .toast($toastState)
+        }
+    }
+    
+    return Playground()
+}
+
+#Preview("only tap to dismiss") {
+    struct Playground: View {
+        @State private var toastState: ToastState? = nil
+        
+        var body: some View {
+            ZStack {
+                Color.gray
+                
+                Button("toggle") {
+                    toastState = .init(message: "测试内容 \(Date.now)", type: .error(.red))
+                }
+            }
+            .ignoresSafeArea()
+            .toast($toastState) {
+                toastState = nil
+            }
         }
     }
     
