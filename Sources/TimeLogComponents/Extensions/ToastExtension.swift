@@ -11,8 +11,14 @@ import AlertToast
 public struct ToastState: Equatable {
     let message: String
     let type: AlertToast.AlertType
+    let mode: AlertToast.DisplayMode
     
-    public init(message: String, type: AlertToast.AlertType) {
+    public init(
+        mode: AlertToast.DisplayMode = .alert,
+        message: String,
+        type: AlertToast.AlertType
+    ) {
+        self.mode = mode
         self.message = message
         self.type = type
     }
@@ -63,6 +69,7 @@ extension View {
     
     private func getToastView(_ state: ToastState?) -> AlertToast {
         AlertToast(
+            displayMode: state?.mode ?? .alert,
             type: state?.type ?? .regular,
             title: state?.message
         )
@@ -119,7 +126,13 @@ extension View {
                 Color.gray
                 
                 Button("toggle") {
-                    toastState = .init(message: "测试内容 \(Date.now)", type: .error(.red))
+                    withAnimation {
+                        toastState = .init(
+                            mode: .banner(.pop),
+                            message: "测试内容 \(Date.now)",
+                            type: .error(.red)
+                        )
+                    }
                 }
             }
             .ignoresSafeArea()
