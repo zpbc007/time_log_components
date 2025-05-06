@@ -53,7 +53,7 @@ extension HourMinutePicker {
             let initHour = selection.wrappedValue.hour
             let initMinute = selection.wrappedValue.minute
             pickerView.selectRow(initHour, inComponent: 0, animated: false)
-            pickerView.selectRow(initMinute / 5, inComponent: 1, animated: false)
+            pickerView.selectRow(initMinute, inComponent: 1, animated: false)
             
             return pickerView
         }
@@ -72,7 +72,7 @@ extension HourMinutePicker {
             init(selection: Binding<Date>) {
                 self.selection = selection
                 self.hours = Array(stride(from: 0, through: 23, by: 1))
-                self.minutes = Array(stride(from: 0, through: 55, by: 5))
+                self.minutes = Array(stride(from: 0, through: 59, by: 1))
             }
             
             func numberOfComponents(in pickerView: UIPickerView) -> Int {
