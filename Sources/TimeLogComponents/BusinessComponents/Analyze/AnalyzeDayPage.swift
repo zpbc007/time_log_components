@@ -34,6 +34,7 @@ public struct AnalyzeDayPage: View {
     let addTomorrowTargetAction: () -> Void
     let tapTomorrowTargetAction: (AnalyzeDayPage.Target) -> Void
     let tomorrowTargetsDeleteAction: (IndexSet) -> Void
+    let lifetimeAISuggestionTapAction: () -> Void
         
     public init(
         type: OverviewDescription.DurationType,
@@ -57,7 +58,8 @@ public struct AnalyzeDayPage: View {
         tapTomorrowCommentAction: @escaping () -> Void,
         addTomorrowTargetAction: @escaping () -> Void,
         tapTomorrowTargetAction: @escaping (AnalyzeDayPage.Target) -> Void,
-        tomorrowTargetsDeleteAction: @escaping (IndexSet) -> Void
+        tomorrowTargetsDeleteAction: @escaping (IndexSet) -> Void,
+        lifetimeAISuggestionTapAction: @escaping () -> Void
     ) {
         self.type = type
         self.reviewComment = reviewComment
@@ -84,6 +86,7 @@ public struct AnalyzeDayPage: View {
         self.addTomorrowTargetAction = addTomorrowTargetAction
         self.tapTomorrowTargetAction = tapTomorrowTargetAction
         self.tomorrowTargetsDeleteAction = tomorrowTargetsDeleteAction
+        self.lifetimeAISuggestionTapAction = lifetimeAISuggestionTapAction
     }
     
     public var body: some View {
@@ -145,7 +148,7 @@ public struct AnalyzeDayPage: View {
                 deleteTargetAction: tomorrowTargetsDeleteAction
             )
             
-            Section("人生时间") {
+            Section {
                 if let pipeChartValues {
                     PipeChart(values: pipeChartValues)
                 } else {
@@ -154,6 +157,21 @@ public struct AnalyzeDayPage: View {
                         Text("暂无数据，快去记录吧")
                             .font(.caption)
                         Spacer()
+                    }
+                }
+            } header: {
+                HStack {
+                    Text("人生时间")
+                    
+                    Spacer()
+                    
+                    if pipeChartValues != nil {
+                        Button(action: lifetimeAISuggestionTapAction) {
+                            HStack {
+                                Image(systemName: "lightbulb.max")
+                                Text("AI 分析")
+                            }
+                        }
                     }
                 }
             }
@@ -456,6 +474,8 @@ extension AnalyzeDayPage {
             } tomorrowTargetsDeleteAction: { offsets in
                 print("tomorrowTargetsDeleteAction")
                 tomorrowTargets.remove(atOffsets: offsets)
+            } lifetimeAISuggestionTapAction: {
+                print("lifetimeAISuggestionTapAction")
             }
         }
     }
@@ -496,5 +516,7 @@ extension AnalyzeDayPage {
         print("tapTomorrowTargetAction \(target.name)")
     } tomorrowTargetsDeleteAction: { _ in
         print("tomorrowTargetsDeleteAction")
+    } lifetimeAISuggestionTapAction: {
+        print("lifetimeAISuggestionTapAction")
     }
 }
