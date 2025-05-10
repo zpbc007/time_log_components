@@ -116,10 +116,10 @@ extension PipeChart {
     }
     
     public struct Values: Equatable {
-        let items: IdentifiedArrayOf<Value>
-        let totalDuration: Double
-        let totalDurationString: String
-        let colorArray: [Color]
+        public let items: IdentifiedArrayOf<Value>
+        public let totalDuration: Double
+        public let totalDurationString: String
+        public let colorArray: [Color]
         
         public init(_ items: IdentifiedArrayOf<Value>) {
             self.items = items
