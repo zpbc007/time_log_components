@@ -8,7 +8,7 @@
 import Foundation
 
 extension Double {
-    func formatInterval() -> String {
+    public func formatInterval() -> String {
         var target = self
         if self.isNaN || self.isInfinite {
             target = 0.0
