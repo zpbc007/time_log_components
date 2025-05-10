@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-struct TypeEffectText: View {
+public struct TypeEffectText: View {
     private let finalText: String
     @State private var text: AttributedString = ""
     @State private var typingTask: Task<Void, Error>?
     
-    init(_ text: String) {
+    public init(_ text: String) {
         finalText = text
     }
     
-    var body: some View {
+    public var body: some View {
         Text(text)
             .font(.callout)
             .monospaced()
