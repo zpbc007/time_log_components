@@ -12,7 +12,7 @@ public struct TypeEffectText: View {
     @State private var text: AttributedString = ""
     @State private var typingTask: Task<Void, Error>?
     
-    init(_ text: String) {
+    public init(_ text: String) {
         self.finalText = text
     }
     
