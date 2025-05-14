@@ -141,6 +141,10 @@ extension Date {
         Calendar.current.component(.minute, from: self)
     }
     
+    public var hourWithPoint: Float {
+        Float(self.hour) + Float(self.minute) / 60
+    }
+    
     public func daysBetween(from: Date, to: Date) -> Int {
         let components = Calendar.current.dateComponents([.day], from: from, to: to)
         return components.day ?? 0
